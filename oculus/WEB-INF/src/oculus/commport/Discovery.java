@@ -16,7 +16,7 @@ public class Discovery {
 	private State state = State.getReference();
 
 	/* serial port configuration parameters */
-	public static final int BAUD_RATE = 115200;
+	public static final int BAUD_RATE = 9600;
 	public static final int TIMEOUT = 2000;
 	public static final int DATABITS = SerialPort.DATABITS_8;
 	public static final int STOPBITS = SerialPort.STOPBITS_1;
@@ -28,7 +28,7 @@ public class Discovery {
 	public static final String OCULUS_SONAR = "id:oculusSonar";
 	public static final String OCULUS_DC = "id:oculusDC";
 	public static final String LIGHTS = "id:oculusLights";
-	public static final long RESPONSE_DELAY = 300;
+	public static final long RESPONSE_DELAY = 1000;
 
 	/* reference to the underlying serial port */
 	private SerialPort serialPort = null;

@@ -51,10 +51,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public String stream = null;
 	public Speech speech = new Speech();
 	public String os;  //  "linux" or "windows"
-	
 
-
-	/** */
 	public Application() {
 		super();
 		
@@ -207,8 +204,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (os.equals("linux")) {
 			videosoundmode="low";
 		}
-		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-		sc.invoke("videoSoundMode", new Object[] { videosoundmode });
+		setGrabberVideoSoundMode(videosoundmode);
 
 		// do it differently if sonar on board
 		// if( different firmware ??) docker = new BradzAutoDock();
@@ -675,6 +671,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			else { openNIRead.stopDepthCam(); }			
 			messageplayer("openNI camera "+str, null, null);
 			break;
+		case videosoundmode:
+			setGrabberVideoSoundMode(str);
+			messageplayer("video/sound mode set to: "+str, null, null);
+			break;
 		}
 	}
 
@@ -801,6 +801,22 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}).start();
 	}
 
+	private void setGrabberVideoSoundMode(String str) {
+		if (state.getBoolean(State.autodocking)) {
+			messageplayer("command dropped, autodocking", null, null);
+			return;
+		}
+
+		if (stream == null) {
+			messageplayer("stream control unavailable, server may be in setup mode", null, null);
+			return;
+		}
+		
+		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+		sc.invoke("videoSoundMode", new Object[] { str });
+		Util.log("video sound mode = "+str, this);
+	}
+	
 	public void publish(String str) {
 		if (state.getBoolean(State.autodocking)) {
 			messageplayer("command dropped, autodocking", null, null);

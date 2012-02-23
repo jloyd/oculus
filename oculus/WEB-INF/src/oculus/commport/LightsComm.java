@@ -19,6 +19,7 @@ public class LightsComm implements SerialPortEventListener {
 	private State state = State.getReference();
 	
 	public static final int SETUP = 2000;
+	public static final int BAUD_RATE = 9600;
 	//public static final int WATCHDOG_DELAY = 1500;
 
 	public static final byte[] DIM = {'f'};
@@ -84,7 +85,7 @@ public class LightsComm implements SerialPortEventListener {
 
 			serialPort = (SerialPort)CommPortIdentifier.getPortIdentifier(
 					state.get(State.lightport)).open(LightsComm.class.getName(), SETUP);
-			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			serialPort.setSerialPortParams(BAUD_RATE, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
 			// open streams
 			out = serialPort.getOutputStream();
