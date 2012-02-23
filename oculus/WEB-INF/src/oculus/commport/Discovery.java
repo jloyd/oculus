@@ -16,7 +16,7 @@ public class Discovery {
 	private State state = State.getReference();
 
 	/* serial port configuration parameters */
-	public static final int BAUD_RATE = 9600;
+	public static final int[] BAUD_RATES = {115200, 57600};  
 	public static final int TIMEOUT = 2000;
 	public static final int DATABITS = SerialPort.DATABITS_8;
 	public static final int STOPBITS = SerialPort.STOPBITS_1;
@@ -56,14 +56,14 @@ public class Discovery {
 	}
 
 	/** connects on start up, return true is currently connected */
-	private boolean connect(String address) {
+	private boolean connect(final String address, final int rate) {
 		try {
 
 			/* construct the serial port */
 			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(address).open("Discovery", TIMEOUT);
 
 			/* configure the serial port */
-			serialPort.setSerialPortParams(BAUD_RATE, DATABITS, STOPBITS, PARITY);
+			serialPort.setSerialPortParams(rate, DATABITS, STOPBITS, PARITY);
 			serialPort.setFlowControlMode(FLOWCONTROL);
 
 			/* extract the input and output streams from the serial port */
@@ -111,41 +111,43 @@ public class Discovery {
 	 */
 	public void search() {
 		for (int i = ports.size() - 1; i >= 0; i--) {
-			if (connect(ports.get(i))) {
-				
-				Util.delay(TIMEOUT);
-				String id = getProduct();
-				System.out.println("OCULUS: Discovery, product :"+id);
-				
-				if (id.length() > 1) {
-				
-					// trim delimiters "<xxxxx>" first
-					id = id.substring(1, id.length()-1).trim(); 
+			for(int j = BAUD_RATES.length; j >= 0; j--){
+				if (connect(ports.get(i), BAUD_RATES[j])) {
 					
-					if (id.equalsIgnoreCase(LIGHTS)) {
-	
-						state.set(State.lightport, ports.get(i));
+					Util.delay(TIMEOUT);
+					String id = getProduct();	
+					Util.log("OCULUS: Discovery, product :"+id + " buad:" + BAUD_RATES[j], this);
+					
+					if (id.length() > 1) {
+					
+						// trim delimiters "<xxxxx>" first
+						// test for '>'??
+						id = id.substring(1, id.length()-1).trim(); 
 						
-					} else if (id.equalsIgnoreCase(OCULUS_DC)) {
-	
-						state.set(State.serialport, ports.get(i));
-						state.set(State.firmware, OCULUS_DC);
-	
-					} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
-	
-						state.set(State.serialport, ports.get(i));
-						state.set(State.firmware, OCULUS_SONAR);
-						
-					}  else if (id.equalsIgnoreCase(OCULUS_TILT)) {
-	
-						state.set(State.serialport, ports.get(i));
-						state.set(State.firmware, OCULUS_TILT);
-						
-					} 	
+						if (id.equalsIgnoreCase(LIGHTS)) {
+		
+							state.set(State.lightport, ports.get(i));
+							
+						} else if (id.equalsIgnoreCase(OCULUS_DC)) {
+		
+							state.set(State.serialport, ports.get(i));
+							state.set(State.firmware, OCULUS_DC);
+		
+						} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
+		
+							state.set(State.serialport, ports.get(i));
+							state.set(State.firmware, OCULUS_SONAR);
+							
+						}  else if (id.equalsIgnoreCase(OCULUS_TILT)) {
+		
+							state.set(State.serialport, ports.get(i));
+							state.set(State.firmware, OCULUS_TILT);
+							
+						} 	
+					}
+					
+					// other devices here if grows 
 				}
-				
-				// other devices here if grows 
-			
 			}
 			
 			// close on each loop
