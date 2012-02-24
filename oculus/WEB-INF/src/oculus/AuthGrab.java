@@ -19,7 +19,7 @@ public class AuthGrab extends HttpServlet {
 	public static void setApp(Application a) {
 		if(app != null) return;
 		app = a;
-		settings = new Settings(a);		
+		settings = new Settings();		
 	}
 	
 	public boolean login(String user, String pass){

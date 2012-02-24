@@ -26,7 +26,7 @@ public class SystemWatchdog {
     /** Constructor */
 	public SystemWatchdog(Application a) {
 		app = a;
-		settings = new Settings(app);
+		settings = new Settings();
 		reboot = settings.getBoolean(State.reboot);		
 		if (reboot){
 			Timer timer = new Timer();
@@ -45,7 +45,7 @@ public class SystemWatchdog {
 				System.out.println("OCULUS: SystemWatchDog, user logged in for: " + state.getLoginSince() + " ms");
 				
 				// reboot  
-				if (app.os.equals("windows")) {
+				if (Settings.os.equals("windows")) {
 					Util.systemCall("shutdown -r -f -t 01");	
 				}
 				else {

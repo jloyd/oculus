@@ -29,7 +29,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private AbstractArduinoComm comport = null;
 	private LightsComm light = null;
 	private BatteryLife battery = null;
-	private Settings settings;
+	private Settings settings = new Settings();
 	private String pendinguserconnected = null;
 	private String remember = null;
 	private IConnection pendingplayer = null;
@@ -50,21 +50,22 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public boolean muteROVonMove = false;
 	public String stream = null;
 	public Speech speech = new Speech();
-	public String os;  //  "linux" or "windows"
+	
+	//public String os = Settings.os;  //  "linux" or "windows"
 
 	public Application() {
 		super();
 		
-		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
-		else { os = "windows"; }
-		System.out.println("OCULUS: OS = "+os);
+		///if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
+		//else { os = "windows"; }
+		//System.out.println("OCULUS: OS = "+os);
 		
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		FrameGrabHTTP.setApp(this);
 		RtmpPortRequest.setApp(this);
 		AuthGrab.setApp(this);
-		settings = new Settings(this);
+		//settings = new Settings(this);
 		initialize();
 	}
 
@@ -201,7 +202,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		// set video, audio quality mode in grabber flash, depending on server/client OS
 		String videosoundmode="high"; // windows, default
-		if (os.equals("linux")) {
+		if (Settings.os.equals("linux")) {
 			videosoundmode="low";
 		}
 		setGrabberVideoSoundMode(videosoundmode);
@@ -298,7 +299,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				try {
 					// stream = null;
 					String address = "127.0.0.1:" + httpPort;
-					if (os.equals("linux")) {
+					if (Settings.os.equals("linux")) {
 						Runtime.getRuntime().exec("xdg-open http://" + address + "/oculus/initialize.html");
 					}
 					else { // win
@@ -318,7 +319,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 					// stream = "stop";
 					String address = "127.0.0.1:" + httpPort;
-					if (os.equals("linux")) {
+					if (Settings.os.equals("linux")) {
 						Runtime.getRuntime().exec("xdg-open http://" + address + "/oculus/server.html");
 					}
 					else { // win
@@ -614,7 +615,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			disconnectOtherConnections();
 			break;
 		case monitor:
-			if (os.equals("linux")) {
+			if (Settings.os.equals("linux")) {
 				messageplayer("unsupported in linux",null,null);
 			}
 			monitor(str);
@@ -642,7 +643,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		case setsystemvolume:
 			Util.setSystemVolume(Integer.parseInt(str), this);
-			if (os.equals("linux")) { messageplayer("unsupported in linux",null,null); }
+			if (Settings.os.equals("linux")) { messageplayer("unsupported in linux",null,null); }
 			else { messageplayer("ROV volume set to "+str+"%", null, null); }
 			break;
 		case muterovmiconmovetoggle:
@@ -971,7 +972,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void saySpeech(String str) {
-		if (os.equals("linux")) {
+		if (Settings.os.equals("linux")) {
 			messageplayer("unsupported in linux",null,null);
 			return;
 		}
@@ -1198,7 +1199,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void restart() {
-		if (os.equals("linux")) { 
+		if (Settings.os.equals("linux")) { 
 			messageplayer("unsupported in linux",null,null);
 			messageGrabber("unsupported in linux", null);
 			return;
@@ -1221,7 +1222,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	public void monitor(String str) {
 		// uses nircmd.exe from http://www.nirsoft.net/utils/nircmd.html
-		if (os.equals("linux")) {
+		if (Settings.os.equals("linux")) {
 			// messageplayer("unsupported in linux",null,null);
 			return;
 		}
@@ -1883,12 +1884,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// rtmp port
 		result += "rtmpport " + settings.readRed5Setting("rtmp.port") + " ";
 
-		new Settings(this).writeFile();
+		settings.writeFile();
 		messageGrabber(result, null);
 	}
 
 	public void softwareUpdate(String str) {
-		if (os.equals("linux")) {
+		if (Settings.os.equals("linux")) {
 			messageplayer("unsupported in linux",null,null);
 			return;
 		}

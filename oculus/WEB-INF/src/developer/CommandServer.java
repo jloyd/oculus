@@ -405,7 +405,7 @@ public class CommandServer implements Observer {
 		
 		app = a;
 		
-		settings = new Settings(app); 	
+		settings = new Settings(); 	
 
 		/** register for updates, share state with all threads */  
 		state.addObserver(this);

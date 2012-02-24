@@ -52,7 +52,7 @@ public class BatteryLife {
 			// only initialize once 
 			app = parent;	
 			
-			if(app.os.equals("windows")){
+			if(Settings.os.equals("windows")){
 				host = "localhost"; 
 				connectStr = String.format("winmgmts:\\\\%s\\root\\CIMV2", host);
 				query = "Select * from Win32_Battery"; 
@@ -175,7 +175,7 @@ public class BatteryLife {
 	
 		int result = 999;
 		
-		if (app.os.equals("windows")) {	
+		if (Settings.os.equals("windows")) {	
 			//Execute the query
 			Variant vCollection = axWMI.invoke("ExecQuery", new Variant(query));
 			
@@ -221,7 +221,7 @@ public class BatteryLife {
 		}
 	
 		int[] result = { 999, 999 };
-		if (app.os.equals("windows")) {
+		if (Settings.os.equals("windows")) {
 			
 			Variant vCollection = axWMI.invoke("ExecQuery", new Variant(query));
 			EnumVariant enumVariant = new EnumVariant(vCollection.toDispatch());

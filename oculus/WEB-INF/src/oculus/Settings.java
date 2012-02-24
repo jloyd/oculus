@@ -3,6 +3,8 @@ package oculus;
 import java.io.*;
 import java.util.Properties;
 
+import com.sun.org.apache.xml.internal.serializer.utils.Utils;
+
 public class Settings {
 
 	public static String framefile;
@@ -17,13 +19,21 @@ public class Settings {
 	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
 	public static final String developer = "developer";
-	public static final int ERROR = -1; 
-	private String sep;
+	public static final int ERROR = -1;
+	
+	public static String os = "windows" ;  //  "linux" or "windows" 
+	public final static String sep = System.getProperty("file.separator");
+
 	
 	/** create new file if missing */
-	public Settings(Application app){
-		sep = "\\"; // windows
-		if (app.os.equals("linux")) { sep = "/"; }
+	public Settings(){
+		
+		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
+		
+		Util.log("OS = "+os);
+		
+		//sep = "\\"; // windows
+		//if (app.os.equals("linux")) { sep = "/"; }
 		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
 		loginactivity = System.getenv("RED5_HOME") +sep+"log"+sep+"loginactivity.txt";
 		settingsfile = System.getenv("RED5_HOME") +sep+"conf"+sep+"oculus_settings.txt";

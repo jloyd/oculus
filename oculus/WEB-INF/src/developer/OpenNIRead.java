@@ -1,6 +1,8 @@
 package developer;
 
 import oculus.Application;
+import oculus.Settings;
+
 import org.OpenNI.*;
 
 public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
@@ -26,11 +28,10 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 	
 	public void startDepthCam() {
 		String sep = "\\"; // windows
-		if (app.os.equals("linux")) { sep = "/"; }
+		if (Settings.os.equals("linux")) { sep = "/"; }
 		String SAMPLES_XML = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"openNIconfig.xml";
 
-		try 
-		{
+		try {
 			if (depthCamInit == false) {
 				OutArg<ScriptNode> scriptNodeArg = new OutArg<ScriptNode>();
 				context = Context.createFromXmlFile(SAMPLES_XML, scriptNodeArg);

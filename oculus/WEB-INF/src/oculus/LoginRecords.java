@@ -11,7 +11,7 @@ public class LoginRecords {
 	
 	public static Vector<Record> list = new Vector<Record>();
 	public static State state = State.getReference();
-	public static Settings settings;
+	public static Settings settings = new Settings();
 	private static Application app = null; 
 	
 	
@@ -26,7 +26,7 @@ public class LoginRecords {
 	public void setApplication(Application a) {
 		app = a;
 		// System.out.println("OCULUS: login records set application");
-		settings = new Settings(app);		
+		///settings = new Settings();		
 	}
 	
 	public void beDriver() { 
@@ -81,7 +81,7 @@ public class LoginRecords {
 		String user = state.get(State.user);
 		if (user == null) return false;
 		if (user.equals("")) return false;
-		Settings settings = new Settings(app);
+		Settings settings = new Settings();
 		String admin = settings.readSetting("user0").toLowerCase();
 		return admin.equals(user.toLowerCase());
 	}

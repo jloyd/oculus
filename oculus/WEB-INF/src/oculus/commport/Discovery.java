@@ -118,8 +118,8 @@ public class Discovery {
 					Util.delay(TIMEOUT);
 					String id = getProduct();
 
-					// if (id == null)break;
-					// if (id.length() == 0)break;
+					if (id == null)break;
+					if (id.length() == 0)break;
 
 					Util.log("search product :" + id + " buad:" + BAUD_RATES[j], this);
 

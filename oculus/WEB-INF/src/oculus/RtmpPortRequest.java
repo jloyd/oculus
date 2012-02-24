@@ -9,7 +9,8 @@ import javax.servlet.http.*;
 public class RtmpPortRequest extends HttpServlet {
 	private Settings settings;
 	private static Application app = null;
-	
+
+	//TODO: need this??
 	public static void setApp(Application a) {
 		if(app != null) return;
 		app = a;
@@ -19,7 +20,7 @@ public class RtmpPortRequest extends HttpServlet {
 			throws ServletException, IOException {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
-		settings = new Settings(app);
+		settings = new Settings();
 		out.print(settings.readRed5Setting("rtmp.port"));
 		out.close();
 //		System.out.println("xmlhttphandler");

@@ -58,7 +58,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	public AbstractArduinoComm(Application app) {
 
 		application = app;
-		settings = new Settings(application);
+		settings = new Settings();
 		
 		speedslow = settings.getInteger("speedslow");
 		speedmed = settings.getInteger("speedmed");

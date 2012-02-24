@@ -19,7 +19,7 @@ public class EmailAlerts implements Observer {
 	/** Constructor */
 	public EmailAlerts(Application parent) {
 		app = parent;
-		settings = new Settings(app);
+		settings = new Settings();
 		if (settings.getBoolean(Settings.emailalerts)){
 			state.addObserver(this);
 			System.out.println("starting email alerts...");
