@@ -20,7 +20,7 @@ public class LoginRecords {
 	
 	
 	public LoginRecords(){ 
-		// System.out.println("OCULUS: login records started..");
+		Util.log("login records started..", this);
 	}
 	
 	public void setApplication(Application a) {

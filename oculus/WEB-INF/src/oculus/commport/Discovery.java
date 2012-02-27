@@ -39,7 +39,8 @@ public class Discovery {
 	private Vector<String> ports = new Vector<String>();
 
 	/* constructor makes a list of available ports */
-	public Discovery() {
+	public Discovery() {	
+		Util.log("discovery starting", this);
 		getAvailableSerialPorts();
 		search();
 	}
@@ -176,32 +177,52 @@ public class Discovery {
 
 		// be sure there is no old bytes in our reply
 		try {
+			
 			inputStream.skip(inputStream.available());
+		
 		} catch (IOException e) {
-			e.printStackTrace();
+			Util.log(e.getStackTrace().toString(),this);
+			return null;
 		}
+		
 		// send command to arduino
 		try {
 			outputStream.write(new byte[] { 'x', 13 });
 		} catch (IOException e) {
-			e.printStackTrace();
+			Util.log(e.getStackTrace().toString(),this);
+			return null;
 		}
 
 		// wait for reply
 		Util.delay(RESPONSE_DELAY);
 
-		// read it
-		int read = 0;
 		try {
-			read = inputStream.read(buffer); // TODO: hangs here on Linux
-												// desktop w/ physical serial
-												// port
+			
+			if(inputStream.available()>0){
+				
+				// read it
+				int read = 0;
+				try {
+					
+					read = inputStream.read(buffer); // TODO: hangs here on Linux
+														// desktop w/ physical serial
+														// port
+				} catch (IOException e) {
+					Util.log(e.getStackTrace().toString(),this);
+				}
+				
+				// read buffer 
+				for (int j = 0; j < read; j++) device += (char) buffer[j];
+			
+			} else {
+				Util.log("nothing in serial port",this);
+				return null;
+			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Util.log(e.getStackTrace().toString(),this);
+			return null;
 		}
-		for (int j = 0; j < read; j++)
-			device += (char) buffer[j];
-
+		
 		return device.trim();
 	}
 }
