@@ -11,7 +11,7 @@ import oculus.Util;
 
 import gnu.io.*;
 
-public class Discovery {
+public class Discovery implements SerialPortEventListener {
 
 	private State state = State.getReference();
 
@@ -58,7 +58,7 @@ public class Discovery {
 	/** connects on start up, return true is currently connected */
 	private boolean connect(final String address, final int rate) {
 
-		Util.log("connecting to: " + address + " buad:" + rate, this);
+		Util.log("try to connect to: " + address + " buad:" + rate, this);
 
 		try {
 
@@ -73,6 +73,10 @@ public class Discovery {
 			inputStream = serialPort.getInputStream();
 			outputStream = serialPort.getOutputStream();
 
+			// register for serial events
+			serialPort.addEventListener(this);
+			serialPort.notifyOnDataAvailable(true);
+			
 		} catch (Exception e) {
 			Util.log("error connecting to: " + address, this);
 			close();
@@ -83,6 +87,8 @@ public class Discovery {
 		if (inputStream == null) return false;
 		if (outputStream == null) return false;
 
+		Util.log("connected: " + address + " buad:" + rate, this);
+		
 		return true;
 	}
 
@@ -114,50 +120,11 @@ public class Discovery {
 		Util.log("number buad rates to try: " + BAUD_RATES.length, this);
 		for (int j = 0; j < BAUD_RATES.length; j++) {
 			for (int i = ports.size() - 1; i >= 0; i--) {
-				if (connect(ports.get(i), BAUD_RATES[j])) {
-
-					Util.delay(TIMEOUT);
-					String id = getProduct();
-
-					if (id == null)break;
-					if (id.length() == 0)break;
-
-					Util.log("search product :" + id + " buad:" + BAUD_RATES[j], this);
-
-					if (id.length() > 1) {
-
-						// trim delimiters "<xxxxx>" first
-						// test for '>'??
-						id = id.substring(1, id.length() - 1).trim();
-
-						if (id.equalsIgnoreCase(LIGHTS)) {
-
-							state.set(State.lightport, ports.get(i));
-
-						} else if (id.equalsIgnoreCase(OCULUS_DC)) {
-
-							state.set(State.serialport, ports.get(i));
-							state.set(State.firmware, OCULUS_DC);
-
-						} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
-
-							state.set(State.serialport, ports.get(i));
-							state.set(State.firmware, OCULUS_SONAR);
-							
-						} else if (id.equalsIgnoreCase(OCULUS_TILT)) {
-
-							state.set(State.serialport, ports.get(i));
-							state.set(State.firmware, OCULUS_TILT);
-
-						}
-
-						// other devices here if grows
-
-					}
+				if (connect(ports.get(i), BAUD_RATES[j])) {	
+					Util.delay(TIMEOUT*2);
+					
+					//close();
 				}
-
-				// close on each loop
-				close();
 			}
 		}
 		
@@ -165,64 +132,107 @@ public class Discovery {
 		if (state.get(State.firmware) == null) {
 			state.set(State.firmware, State.unknown);
 			Util.log("no hardware detected", this);
-			// state.dump();
 		}
 	}
 
-	/** send command to get product id */
-	public String getProduct() {
+	/**
+	 * check if this is a known derive, update in state
+	 */
+	public void lookup(String id){
 
-		byte[] buffer = new byte[32];
-		String device = new String();
+		Util.delay(TIMEOUT);
 
-		// be sure there is no old bytes in our reply
-		try {
-			
-			inputStream.skip(inputStream.available());
-		
-		} catch (IOException e) {
-			Util.log(e.getStackTrace().toString(),this);
-			return null;
+		if (id == null) return;
+		if (id.length() == 0) return;
+
+		Util.log("found product :" + id, this);
+
+		if (id.length() > 1) {
+
+			// trim delimiters "<xxxxx>" first
+			// test for '>'??
+			id = id.substring(1, id.length() - 1).trim();
+
+			if (id.equalsIgnoreCase(LIGHTS)) {
+
+				state.set(State.lightport, id);
+
+			} else if (id.equalsIgnoreCase(OCULUS_DC)) {
+
+				state.set(State.serialport, id);
+				state.set(State.firmware, OCULUS_DC);
+
+			} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
+
+				state.set(State.serialport, id);
+				state.set(State.firmware, OCULUS_SONAR);
+				
+			} else if (id.equalsIgnoreCase(OCULUS_TILT)) {
+
+				state.set(State.serialport, id);
+				state.set(State.firmware, OCULUS_TILT);
+
+			}
+
+			// other devices here if grows
+
 		}
-		
-		// send command to arduino
+	}
+	
+	/** send command to get product id */
+	public void getProduct() {
 		try {
 			outputStream.write(new byte[] { 'x', 13 });
 		} catch (IOException e) {
 			Util.log(e.getStackTrace().toString(),this);
-			return null;
+			return;
 		}
 
 		// wait for reply
 		Util.delay(RESPONSE_DELAY);
+	}
 
+	@Override
+	public void serialEvent(SerialPortEvent arg0) {
+	
+		byte[] buffer = new byte[32];
+		String device = new String();
+
+		// Util.log("event: " + arg0,this);
+		
+		// TODO: remove this, just skip instead when confident 
+		
+		int read = 0;
 		try {
 			
-			if(inputStream.available()>0){
-				
-				// read it
-				int read = 0;
-				try {
-					
-					read = inputStream.read(buffer); // TODO: hangs here on Linux
-														// desktop w/ physical serial
-														// port
-				} catch (IOException e) {
-					Util.log(e.getStackTrace().toString(),this);
-				}
-				
-				// read buffer 
-				for (int j = 0; j < read; j++) device += (char) buffer[j];
+			read = inputStream.read(buffer); 
 			
-			} else {
-				Util.log("nothing in serial port",this);
-				return null;
-			}
 		} catch (IOException e) {
 			Util.log(e.getStackTrace().toString(),this);
-			return null;
 		}
 		
-		return device.trim();
+		// read buffer 
+		for (int j = 0; j < read; j++) device += (char) buffer[j];
+		
+		Util.log("input: " + device.trim(), this);
+		
+		
+		getProduct();
+		device = new String();
+		read = 0;
+		try {
+			
+			read = inputStream.read(buffer);
+			
+		} catch (IOException e) {
+			Util.log(e.getStackTrace().toString(),this);
+		}
+		
+		// read buffer 
+		for (int j = 0; j < read; j++) device += (char) buffer[j];
+		
+		Util.log("lookup: " + device.trim(), this);
+		lookup(device.trim());
+		close();	
 	}
 }
