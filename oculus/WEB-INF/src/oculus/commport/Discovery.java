@@ -194,11 +194,12 @@ public class Discovery implements SerialPortEventListener {
 
 	@Override
 	public void serialEvent(SerialPortEvent arg0) {
+		
 	
 		byte[] buffer = new byte[32];
 		String device = new String();
 
-		// Util.log("event: " + arg0,this);
+		Util.log("event: " + arg0,this);
 		
 		// TODO: remove this, just skip instead when confident 
 		
@@ -215,8 +216,10 @@ public class Discovery implements SerialPortEventListener {
 		for (int j = 0; j < read; j++) device += (char) buffer[j];
 		
 		Util.log("input: " + device.trim(), this);
-		
-		
+			
+		// don't fire again 
+		serialPort.removeEventListener();
+	
 		getProduct();
 		device = new String();
 		read = 0;
