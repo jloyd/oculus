@@ -38,7 +38,7 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 					
 					System.out.println("sonar arduino watchdog time out, reboot!");
 					Util.beep();
-					Util.systemCall("shutdown -r -f -t 01");				
+					//Util.systemCall("shutdown -r -f -t 01");				
 					
 				}
 
