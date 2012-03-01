@@ -21,8 +21,8 @@ public class Settings {
 	public static final String developer = "developer";
 	public static final int ERROR = -1;
 	
-	public static String os = "windows" ;  //  "linux" or "windows" 
 	public final static String sep = System.getProperty("file.separator");
+	public static String os = "windows" ;  //  "linux" or "windows" 
 
 	
 	/** create new file if missing */
@@ -30,18 +30,14 @@ public class Settings {
 		
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
-		Util.log("OS = "+os);
-		
-		//sep = "\\"; // windows
-		//if (app.os.equals("linux")) { sep = "/"; }
 		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
 		loginactivity = System.getenv("RED5_HOME") +sep+"log"+sep+"loginactivity.txt";
 		settingsfile = System.getenv("RED5_HOME") +sep+"conf"+sep+"oculus_settings.txt";
 		movesfile = System.getenv("RED5_HOME") +sep+"log"+sep+"moves.txt";
 		stdout = System.getenv("RED5_HOME") +sep+"log"+sep+"jvm.stdout";
 		
-		if( ! new File(settingsfile).exists()) 
-			FactorySettings.createFile();
+		// be sure of basic configuration 
+		if( ! new File(settingsfile).exists()) FactorySettings.createFile();
 	}
 
 	/**
@@ -517,9 +513,12 @@ public class Settings {
 		return readSetting(key.toString());
 	}
 	
-
 	public String readSetting(FactorySettings key) {
 		return readSetting(key.toString());
+	}
+
+	public boolean getBoolean(FactorySettings setting) {
+		return getBoolean(setting.toString());
 	}
 	
 	

@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import oculus.FactorySettings;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
@@ -14,9 +15,10 @@ import gnu.io.*;
 
 public class Discovery implements SerialPortEventListener {
 
-	private State state = State.getReference();
+	private static State state = State.getReference();
+	private static Settings settings = new Settings();
 
-	/* serial port configuration parameters    */
+	/* serial port configuration parameters */
 	public static final int[] BAUD_RATES = { 57600, 115200 };
 	public static final int TIMEOUT = 2000;
 	public static final int DATABITS = SerialPort.DATABITS_8;
@@ -40,15 +42,44 @@ public class Discovery implements SerialPortEventListener {
 	private static Vector<String> ports = new Vector<String>();
 
 	/* read from device */
-	byte[] buffer = null; 
+	private static byte[] buffer = null; 
 	
 	/* constructor makes a list of available ports */
-	public Discovery() {	
-		getAvailableSerialPorts();
-		Util.log("discovery starting on: " + ports.size(), this);
-		search();
+	public Discovery() {
+		if(settings.getBoolean(FactorySettings.motordiscovery)){
+			searchMotors();
+		} else {
+			if(!settings.readSetting(FactorySettings.motorport).equals("false")){	
+				Util.debug("skipping discovery, found motors on: " + settings.readSetting(FactorySettings.motorport), this);
+				state.set(State.serialport, settings.readSetting(FactorySettings.motorport));
+				state.set(State.firmware, OCULUS_DC);
+				// TODO: manage other firmware types 
+			} else searchMotors();
+		}
+		
+		if(settings.getBoolean(FactorySettings.lightport)){ 
+			searchLights();	
+		} else {
+			if(!settings.readSetting(FactorySettings.lightport).equals("false")){
+				Util.debug("skipping discovery, found lights on: " + settings.readSetting(FactorySettings.lightport), this);
+				state.set(State.lightport, settings.readSetting(FactorySettings.lightport));
+			} else searchLights();	
+		} 
 	}
-
+	
+	private static String getName(){
+		
+		String name = "";
+		String com = serialPort.getName();
+		
+		if(Settings.os.equals("linux")) return com;
+		else for(int i = 0 ; i < com.length();i++)
+			if(com.charAt(i) != '/' && com.charAt(i) != '.')
+				name += com.charAt(i);
+		
+		return name;
+	}
+	
 	/** */
 	private void getAvailableSerialPorts() {
 		@SuppressWarnings("rawtypes")
@@ -62,7 +93,7 @@ public class Discovery implements SerialPortEventListener {
 	/** connects on start up, return true is currently connected */
 	private boolean connect(final String address, final int rate) {
 
-		Util.log("try to connect to: " + address + " buad:" + rate, this);
+	//	Util.log("try to connect to: " + address + " buad:" + rate, this);
 
 		try {
 
@@ -98,61 +129,56 @@ public class Discovery implements SerialPortEventListener {
 
 	/** Close the serial port streams */
 	private void close() {
-		
-		//if(serialPort.gserialPort.removeEventListener();
-		
 		if (serialPort != null) {
+			Util.log("close port: " + serialPort.getName() + " baud: " + serialPort.getBaudRate());
 			serialPort.close();
 			serialPort = null;
 		}
 		try {
-			if (inputStream != null) {
-				inputStream.close();
-			}
+			if (inputStream != null) inputStream.close();
 		} catch (Exception e) {
-			System.err.println("input stream close():" + e.getMessage());
+			Util.log("input stream close():" + e.getMessage(), this);
 		}
 		try {
-			if (outputStream != null)
-				outputStream.close();
+			if (outputStream != null) outputStream.close();
 		} catch (Exception e) {
-			System.err.println("output stream close():" + e.getMessage());
+			Util.log("output stream close():" + e.getMessage(), this);
 		}
 	}
 
 	/** Loop through all available serial ports and ask for product id's */
-	public void search() {
-		Util.log("number buad rates to try: " + BAUD_RATES.length, this);
-		for (int j = 0; j < BAUD_RATES.length; j++) {
-			for (int i = ports.size() - 1; i >= 0; i--) {
-				if (connect(ports.get(i), BAUD_RATES[j])) {	
-					
-					Util.delay(TIMEOUT*2);
-					close();
-				}
+	public void searchLights() {
+		getAvailableSerialPorts();
+		Util.log("discovery for lights starting on: " + ports.size() + " ports", this);
+		for (int i = ports.size() - 1; i >= 0; i--) {
+			if (connect(ports.get(i), BAUD_RATES[0])) {	
+				Util.delay(TIMEOUT*2);
+				close();
 			}
 		}
-		
-		// could not find, no hardware attached
-		if (state.get(State.firmware) == null) {
-			state.set(State.firmware, State.unknown);
-			Util.log("no hardware detected", this);
+		if (state.get(State.lightport) == null) {
+			state.set(State.lightport, State.unknown);
+			Util.log("no lights detected", this);
 		}
 	}
 	
-	private static String getName(){
-		
-		String name = "";
-		String com = serialPort.getName();
-		
-		if(Settings.os.equals("linux")) return com;
-		
-		for(int i = 0 ; i < com.length();i++)
-			if(com.charAt(i) != '/' && com.charAt(i) != '.')
-				name += com.charAt(i);
-		
-		return name;
+	/** Loop through all available serial ports and ask for product id's */
+	public void searchMotors() {
+		getAvailableSerialPorts();
+		Util.log("discovery for motors starting on: " + ports.size() + " ports", this);
+		for (int i = ports.size() - 1; i >= 0; i--) {
+			if (connect(ports.get(i), BAUD_RATES[1])) {				
+				Util.delay(TIMEOUT*2);
+				close();
+			}
+		}
+		if (state.get(State.firmware) == null) {
+			state.set(State.firmware, State.unknown);
+			Util.log("no motors detected", this);
+		}
 	}
+	
+
 
 	/**
 	 * check if this is a known derive, update in state
@@ -172,29 +198,41 @@ public class Discovery implements SerialPortEventListener {
 			if (id.equalsIgnoreCase(LIGHTS)) {
 
 				state.set(State.lightport, getName());
-				ports.remove(serialPort.getName());
+				settings.writeSettings(FactorySettings.lightport.toString(), getName());
+				
+			//	Util.log(ports.toString(), this);
+			//	ports.remove(serialPort.getName());
+			//	Util.log(ports.toString(), this);
 
 			} else if (id.equalsIgnoreCase(OCULUS_DC)) {
 
+				// TODO: MAYBE state shouldn't be used? settings only?
+				
+				
 				state.set(State.serialport, getName());
 				state.set(State.firmware, OCULUS_DC);
-				ports.remove(serialPort.getName());
+				settings.writeSettings(FactorySettings.motorport.toString(), getName());
+				;
 				
 			} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
 
 				state.set(State.serialport, getName());
-				state.set(State.firmware, OCULUS_SONAR);
-				ports.remove(serialPort.getName());
+				state.set(State.firmware, OCULUS_SONAR);				
+				settings.writeSettings(FactorySettings.motorport.toString(), getName());
+			
 			
 			} else if (id.equalsIgnoreCase(OCULUS_TILT)) {
 
 				state.set(State.serialport, getName());
 				state.set(State.firmware, OCULUS_TILT);
-				ports.remove(serialPort.getName());
+				
+				settings.writeSettings(FactorySettings.motorport.toString(), getName());
 				
 			}
 
-			// other devices here if grows
+			//TODO: other devices here if grows
+			
+			settings.writeFile();
 
 		}
 	}

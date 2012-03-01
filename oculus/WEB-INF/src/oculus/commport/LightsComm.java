@@ -19,7 +19,7 @@ public class LightsComm implements SerialPortEventListener {
 	private State state = State.getReference();
 	
 	public static final int SETUP = 2000;
-	public static final int BAUD_RATE = 9600;
+	public static final int BAUD_RATE = 57600;
 	//public static final int WATCHDOG_DELAY = 1500;
 
 	public static final byte[] DIM = {'f'};
