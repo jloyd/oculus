@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import oculus.Application;
 import oculus.OptionalSettings;
+import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
@@ -57,7 +58,6 @@ public class Discovery implements SerialPortEventListener {
 		if(motors == null){
 			
 			searchMotors(); 
-			// TODO: manage other firmware types 
 			
 		} else {		
 			if(motors.equals("auto")) {
@@ -71,28 +71,32 @@ public class Discovery implements SerialPortEventListener {
 			}	
 		}
 		
+		
+		/*
+		 * */
+	
 		String lights = settings.readSetting(OptionalSettings.oculed);
 		if(lights == null){
 			searchLights();	
 		} else {
-		
 			if(lights.equals("auto")) {
 				searchLights();	
 			} else {
 				Util.debug("skipping discovery, found lights on: " + lights, this);
-				state.set(State.lightport, getName());
+				state.set(State.lightport, lights);
 			}
 		}
+	
 		
 		state.dump();
 	}
 	
-	private String getName(){
+	private String getPortName(){
 		
 		if(serialPort==null){
 			
 			Util.log("... serial is null?");
-			return "kkkk";
+			return "wtf";
 		}
 		
 		String name = "";
@@ -176,7 +180,14 @@ public class Discovery implements SerialPortEventListener {
 
 	/** Loop through all available serial ports and ask for product id's */
 	public void searchLights() {
-		Util.log("discovery for lights starting...");
+	
+		// try to limit searching 
+		if(state.get(State.serialport)!=null) 
+			if(ports.contains(state.get(State.serialport)))
+				ports.remove(state.get(State.serialport));
+			
+		Util.debug("discovery for lights starting on: " + ports.size(), this);
+		
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (connect(ports.get(i), BAUD_RATES[0])) {	
 				Util.delay(TIMEOUT*2);
@@ -184,14 +195,23 @@ public class Discovery implements SerialPortEventListener {
 			}
 		}
 		if (state.get(State.lightport) == null) {
-			state.set(State.lightport, State.unknown);
-			Util.log("no lights detected", this);
+			///state.set(State.lightport, State.unknown);
+			Util.debug("...no lights detected", this);
 		}
 	}
 	
 	/** Loop through all available serial ports and ask for product id's */
 	public void searchMotors() {
-		Util.log("discovery for motors starting..."); 
+			
+		// try to limit searching 
+		String motors = settings.readSetting(OptionalSettings.arduinoculus);
+		if(motors!=null){
+			Util.debug("removing port:" + ports.toString(), this);
+			ports.remove(motors);
+		}
+		
+		Util.log("discovery for motors starting on: " + ports.size()); 
+	
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (connect(ports.get(i), BAUD_RATES[1])) {				
 				Util.delay(TIMEOUT*2);
@@ -199,8 +219,8 @@ public class Discovery implements SerialPortEventListener {
 			}
 		}
 		if (state.get(State.firmware) == null) {
-			state.set(State.firmware, State.unknown);
-			Util.log("no motors detected", this);
+			/////state.set(State.firmware, State.unknown);
+			Util.debug("...no motors detected", this);
 		}
 	}
 	
@@ -215,25 +235,25 @@ public class Discovery implements SerialPortEventListener {
 		if(id.startsWith("id")){
 			
 			id = id.substring(2, id.length());
-			Util.log("found product[" + id + "] on comm port: " +  getName(), this);
+			Util.log("found product[" + id + "] on comm port: " +  getPortName(), this);
 
 			if (id.equalsIgnoreCase(LIGHTS)) {
 
-				state.set(State.lightport, getName());
+				state.set(State.lightport, getPortName());
 				
 			} else if (id.equalsIgnoreCase(OCULUS_DC)) {
 
-				state.set(State.serialport, getName());
+				state.set(State.serialport, getPortName());
 				state.set(State.firmware, OCULUS_DC);
 				
 			} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
 
-				state.set(State.serialport, getName());
+				state.set(State.serialport, getPortName());
 				state.set(State.firmware, OCULUS_SONAR);	
 			
 			} else if (id.equalsIgnoreCase(OCULUS_TILT)) {
 
-				state.set(State.serialport, getName());
+				state.set(State.serialport, getPortName());
 				state.set(State.firmware, OCULUS_TILT);
 				
 			}
@@ -274,7 +294,7 @@ public class Discovery implements SerialPortEventListener {
 		}
 		
 		// don't fire again 
-		serialPort.removeEventListener();
+		// serialPort.removeEventListener();
 	
 		byte[] buffer = new byte[32];
 		
