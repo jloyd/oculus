@@ -228,19 +228,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		settings.writeFile();
 
 		// must be blocking search of all ports, but only once!
-		new Discovery();
-
-		// create matching class based on firmware
-		// Todo: state.equals(state.firmware, DiscoveryOc...); 
-		if (state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
-			comport = new oculus.commport.ArduinoCommSonar(this);
-		} else if (state.get(State.firmware).equals(Discovery.OCULUS_TILT)){
-			comport = new oculus.commport.ArduinoTilt(this);
-		} else {
-			comport = new ArduinoCommDC(this);
-		}
+		Discovery discovery = new Discovery();
+		comport = discovery.getMotors(this); 
+		light = discovery.getLights(this);
 		
-		light = new LightsComm(this);
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean("mute_rov_on_move");
 		new SystemWatchdog(this);
@@ -251,7 +242,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			openNIRead = new developer.OpenNIRead(this);
 		}
 
-		// open socket last
+		// open telnet socket 
 		if (settings.getInteger(OptionalSettings.commandport.toString()) > State.ERROR)
 			commandServer = new developer.CommandServer(this);
 
@@ -259,7 +250,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		grabberInitialize();
 		battery = BatteryLife.getReference();
-		System.out.println("OCULUS: initialize");
+		Util.debug("initialize done", this);
 
 	}
 

@@ -96,7 +96,7 @@ public class LightsComm implements SerialPortEventListener {
 			serialPort.notifyOnDataAvailable(true);
 			
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			Util.log("error connecting to the lights " , this);
 			return;
 		}
 	}

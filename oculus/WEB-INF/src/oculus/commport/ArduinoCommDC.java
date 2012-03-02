@@ -2,6 +2,7 @@ package oculus.commport;
 
 import oculus.Application;
 import oculus.State;
+import oculus.Util;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -35,7 +36,7 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 			serialPort.notifyOnDataAvailable(true);
 
 		} catch (Exception e) {
-			// log.error(e.getMessage());
+			Util.log("could NOT connect to the motors", this);
 			return;
 		}
 	}

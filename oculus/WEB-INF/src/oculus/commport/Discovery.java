@@ -6,7 +6,8 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import oculus.FactorySettings;
+import oculus.Application;
+import oculus.OptionalSettings;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
@@ -46,25 +47,44 @@ public class Discovery implements SerialPortEventListener {
 	
 	/* constructor makes a list of available ports */
 	public Discovery() {
-		if(settings.getBoolean(FactorySettings.motordiscovery)){
-			searchMotors();
-		} else {
-			if(!settings.readSetting(FactorySettings.motorport).equals("false")){	
-				Util.debug("skipping discovery, found motors on: " + settings.readSetting(FactorySettings.motorport), this);
-				state.set(State.serialport, settings.readSetting(FactorySettings.motorport));
+		
+		getAvailableSerialPorts();
+		
+		Util.log("discovery starting on: " + ports.size() + " ports", this);
+		for(int i = ports.size() - 1; i >= 0; i--) Util.debug("[" + i + "] port name: " + ports.get(i), this);
+		
+		String motors = settings.readSetting(OptionalSettings.arduinoculus);
+		if(motors == null){
+			
+			searchMotors(); 
+			// TODO: manage other firmware types 
+			
+		} else {		
+			if(motors.equals("auto")) {
+				searchMotors(); 
+			} else {
+			
+				Util.debug("skipping discovery, found motors on: " + motors, this);
+				state.set(State.serialport, motors);
 				state.set(State.firmware, OCULUS_DC);
-				// TODO: manage other firmware types 
-			} else searchMotors();
+			
+			}	
 		}
 		
-		if(settings.getBoolean(FactorySettings.lightport)){ 
+		String lights = settings.readSetting(OptionalSettings.oculed);
+		if(lights == null){
 			searchLights();	
 		} else {
-			if(!settings.readSetting(FactorySettings.lightport).equals("false")){
-				Util.debug("skipping discovery, found lights on: " + settings.readSetting(FactorySettings.lightport), this);
-				state.set(State.lightport, settings.readSetting(FactorySettings.lightport));
-			} else searchLights();	
-		} 
+		
+			if(lights.equals("auto")) {
+				searchLights();	
+			} else {
+				Util.debug("skipping discovery, found lights on: " + lights, this);
+				state.set(State.lightport, getName());
+			}
+		}
+		
+		state.dump();
 	}
 	
 	private static String getName(){
@@ -72,6 +92,7 @@ public class Discovery implements SerialPortEventListener {
 		String name = "";
 		String com = serialPort.getName();
 		
+		//TODO: get a port name, or full device path for linux 
 		if(Settings.os.equals("linux")) return com;
 		else for(int i = 0 ; i < com.length();i++)
 			if(com.charAt(i) != '/' && com.charAt(i) != '.')
@@ -82,6 +103,7 @@ public class Discovery implements SerialPortEventListener {
 	
 	/** */
 	private void getAvailableSerialPorts() {
+		ports.clear();
 		@SuppressWarnings("rawtypes")
 		Enumeration thePorts = CommPortIdentifier.getPortIdentifiers();
 		while (thePorts.hasMoreElements()) {
@@ -148,8 +170,7 @@ public class Discovery implements SerialPortEventListener {
 
 	/** Loop through all available serial ports and ask for product id's */
 	public void searchLights() {
-		getAvailableSerialPorts();
-		Util.log("discovery for lights starting on: " + ports.size() + " ports", this);
+		Util.log("discovery for lights starting...");
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (connect(ports.get(i), BAUD_RATES[0])) {	
 				Util.delay(TIMEOUT*2);
@@ -164,8 +185,7 @@ public class Discovery implements SerialPortEventListener {
 	
 	/** Loop through all available serial ports and ask for product id's */
 	public void searchMotors() {
-		getAvailableSerialPorts();
-		Util.log("discovery for motors starting on: " + ports.size() + " ports", this);
+		Util.log("discovery for motors starting..."); 
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (connect(ports.get(i), BAUD_RATES[1])) {				
 				Util.delay(TIMEOUT*2);
@@ -178,11 +198,7 @@ public class Discovery implements SerialPortEventListener {
 		}
 	}
 	
-
-
-	/**
-	 * check if this is a known derive, update in state
-	 */
+	/** check if this is a known derive, update in state */
 	public void lookup(String id){
 		
 		if (id == null) return;
@@ -198,42 +214,26 @@ public class Discovery implements SerialPortEventListener {
 			if (id.equalsIgnoreCase(LIGHTS)) {
 
 				state.set(State.lightport, getName());
-				settings.writeSettings(FactorySettings.lightport.toString(), getName());
 				
-			//	Util.log(ports.toString(), this);
-			//	ports.remove(serialPort.getName());
-			//	Util.log(ports.toString(), this);
-
 			} else if (id.equalsIgnoreCase(OCULUS_DC)) {
 
-				// TODO: MAYBE state shouldn't be used? settings only?
-				
-				
 				state.set(State.serialport, getName());
 				state.set(State.firmware, OCULUS_DC);
-				settings.writeSettings(FactorySettings.motorport.toString(), getName());
-				;
 				
 			} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
 
 				state.set(State.serialport, getName());
-				state.set(State.firmware, OCULUS_SONAR);				
-				settings.writeSettings(FactorySettings.motorport.toString(), getName());
-			
+				state.set(State.firmware, OCULUS_SONAR);	
 			
 			} else if (id.equalsIgnoreCase(OCULUS_TILT)) {
 
 				state.set(State.serialport, getName());
 				state.set(State.firmware, OCULUS_TILT);
 				
-				settings.writeSettings(FactorySettings.motorport.toString(), getName());
-				
 			}
 
 			//TODO: other devices here if grows
 			
-			settings.writeFile();
-
 		}
 	}
 	
@@ -260,7 +260,7 @@ public class Discovery implements SerialPortEventListener {
 	@Override
 	public void serialEvent(SerialPortEvent arg0) {
 	
-		Util.log("_event: " + arg0,this);
+		///Util.log("_event: " + arg0,this);
 		
 		if(buffer!=null){
 			Util.log("too much serial ",this);
@@ -290,9 +290,38 @@ public class Discovery implements SerialPortEventListener {
 				device += (char) buffer[j];
 		}
 		
-		Util.log("_lookup: " + device, this);
+		//Util.log("_lookup: " + device, this);
 		
 		lookup(device);
 		
+	}
+
+	public AbstractArduinoComm getMotors(Application application) {
+		// TODO Auto-generated method stub
+		
+		
+		
+		//new ArduinoCommDC(this);
+		// create matching class based on firmware
+		// Todo: state.equals(state.firmware, DiscoveryOc...); 
+		/*
+		if (state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
+			comport = new oculus.commport.ArduinoCommSonar(this);
+		} else if (state.get(State.firmware).equals(Discovery.OCULUS_TILT)){
+			comport = new oculus.commport.ArduinoTilt(this);
+		} else {
+		*/
+		
+		// comport = new ArduinoCommDC(this);
+		
+		//}
+		
+		
+		return new ArduinoCommDC(application);
+	}
+
+	public LightsComm getLights(Application application) {
+		// TODO Auto-generated method stub
+		return new LightsComm(application);
 	}
 }

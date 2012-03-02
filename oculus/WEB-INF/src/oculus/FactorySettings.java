@@ -8,14 +8,12 @@ import java.util.Properties;
 public enum FactorySettings {
 
 	/** these settings must be available in basic configuration */
-	
-	// salt is not listed and shouldn't be 
-	
 	skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
 	docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay, 
-	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, mute_rov_on_move, 
-	videoscale, volume, holdservo, loginnotify, reboot, motorport, lightport, motordiscovery, lightdiscovery;
-
+	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, muteonrovmove, 
+	videoscale, volume, holdservo, loginnotify, reboot ; 
+	
+	
 	/** get basic settings */
 	public static Properties createDeaults() {
 		Properties config = new Properties();
@@ -39,15 +37,19 @@ public enum FactorySettings {
 		config.setProperty(clicknudgemomentummult.toString(), "0.7");
 		config.setProperty(maxclickcam.toString(), "14");
 		config.setProperty(volume.toString(), "20");
-		config.setProperty(mute_rov_on_move.toString(), "true"); 
+		config.setProperty(muteonrovmove.toString(), "true"); 
 		config.setProperty(videoscale.toString(), "100");
 		config.setProperty(holdservo.toString(), "false");
 		config.setProperty(loginnotify.toString(), "false");
 		config.setProperty(reboot.toString(), "false");
+		
+		/*
 		config.setProperty(motordiscovery.toString(), "true");
 		config.setProperty(motorport.toString(), "false");
 		config.setProperty(lightdiscovery.toString(), "true");
 		config.setProperty(lightport.toString(), "false");
+		*/
+		
 		return config;
 	}
 
