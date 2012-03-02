@@ -93,7 +93,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			if (!isconnected){
 			
 				// TAKE IT DOWN! 
-				if(state.get(oculus.State.firmware).equals(oculus.State.unknown)){
+				if(state.get(oculus.State.firmware) == null ){ // .equals(oculus.State.unknown)){
 					if(state.getBoolean(oculus.State.developer)){
 						System.out.println("OCULUS: AbstractArduinoComm, not connected, rebooting");		
 						Util.systemCall("shutdown -r -f -t 01");	

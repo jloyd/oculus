@@ -46,7 +46,6 @@ public class LightsComm implements SerialPortEventListener {
 	private long lastSent = System.currentTimeMillis();
 	private long lastRead = System.currentTimeMillis();
 
-	// Settings settings = new Settings(); 
 	
 	// make sure all threads know if connected 
 	private boolean isconnected = false;
@@ -96,7 +95,7 @@ public class LightsComm implements SerialPortEventListener {
 			serialPort.notifyOnDataAvailable(true);
 			
 		} catch (Exception e) {
-			Util.log("error connecting to the lights " , this);
+			Util.log("could NOT connect to the the lights on:" + state.get(State.lightport), this);
 			return;
 		}
 	}

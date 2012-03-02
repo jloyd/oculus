@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import oculus.commport.AbstractArduinoComm;
-import oculus.commport.ArduinoCommDC;
 import oculus.commport.Discovery;
 import oculus.commport.LightsComm;
 
@@ -219,7 +218,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		salt = settings.readSetting("salt");
 		if (salt == null) {
-			System.out.println("initialize(), has no salt!");
+			Util.log("initialize(), has no salt!", this);
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
 		}
@@ -233,23 +232,22 @@ public class Application extends MultiThreadedApplicationAdapter {
 		light = discovery.getLights(this);
 		
 		httpPort = settings.readRed5Setting("http.port");
-		muteROVonMove = settings.getBoolean("mute_rov_on_move");
-		new SystemWatchdog(this);
-
+		muteROVonMove = settings.getBoolean(FactorySettings.muteonrovmove);
+		
 		if (settings.getBoolean(State.developer)) {
 			// moves.open(Settings.movesfile);
 			// new developer.EmailAlerts(this);
 			openNIRead = new developer.OpenNIRead(this);
 		}
 
-		// open telnet socket 
+		// open telnet socket .. should be developer? 
 		if (settings.getInteger(OptionalSettings.commandport.toString()) > State.ERROR)
 			commandServer = new developer.CommandServer(this);
 
 		Util.setSystemVolume(settings.getInteger(Settings.volume), this);
-
 		grabberInitialize();
 		battery = BatteryLife.getReference();
+		new SystemWatchdog(this);
 		Util.debug("initialize done", this);
 
 	}

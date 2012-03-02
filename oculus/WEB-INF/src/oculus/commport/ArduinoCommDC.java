@@ -36,7 +36,7 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 			serialPort.notifyOnDataAvailable(true);
 
 		} catch (Exception e) {
-			Util.log("could NOT connect to the motors", this);
+			Util.log("could NOT connect to the motors on: " + state.get(State.serialport), this);
 			return;
 		}
 	}
