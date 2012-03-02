@@ -87,7 +87,13 @@ public class Discovery implements SerialPortEventListener {
 		state.dump();
 	}
 	
-	private static String getName(){
+	private String getName(){
+		
+		if(serialPort==null){
+			
+			Util.log("... serial is null?");
+			return "kkkk";
+		}
 		
 		String name = "";
 		String com = serialPort.getName();
@@ -115,7 +121,7 @@ public class Discovery implements SerialPortEventListener {
 	/** connects on start up, return true is currently connected */
 	private boolean connect(final String address, final int rate) {
 
-	//	Util.log("try to connect to: " + address + " buad:" + rate, this);
+		Util.log("try to connect to: " + address + " buad:" + rate, this);
 
 		try {
 
@@ -260,7 +266,7 @@ public class Discovery implements SerialPortEventListener {
 	@Override
 	public void serialEvent(SerialPortEvent arg0) {
 	
-		///Util.log("_event: " + arg0,this);
+		Util.log("_event: " + arg0,this);
 		
 		if(buffer!=null){
 			Util.log("too much serial ",this);
@@ -268,7 +274,7 @@ public class Discovery implements SerialPortEventListener {
 		}
 		
 		// don't fire again 
-		// serialPort.removeEventListener();
+		serialPort.removeEventListener();
 	
 		byte[] buffer = new byte[32];
 		
@@ -290,7 +296,7 @@ public class Discovery implements SerialPortEventListener {
 				device += (char) buffer[j];
 		}
 		
-		//Util.log("_lookup: " + device, this);
+		Util.log("_lookup: " + device, this);
 		
 		lookup(device);
 		
