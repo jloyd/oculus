@@ -8,6 +8,7 @@ import gnu.io.SerialPortEventListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.TooManyListenersException;
 
 import oculus.Application;
 import oculus.State;
@@ -22,31 +23,25 @@ public class LightsComm implements SerialPortEventListener {
 	public static final int BAUD_RATE = 57600;
 	//public static final int WATCHDOG_DELAY = 1500;
 
-	public static final byte[] DIM = {'f'};
-	public static final byte[] BRIGHTER = {'b'};
-	public static final byte SET_PWM = 's';
-	public static final byte[] GET_VERSION = {'y'};
-	private static final byte[] ECHO_ON = {'e', '1'};
-	private static final byte[] ECHO_OFF = {'e', '0'};
-	public static final byte DOCKLIGHT = 'd';
+	public static final byte DIM = 'f';
+	public static final byte BRIGHTER = 'b';
+	//public static final byte SET_PWM = 's';
+	public static final byte GET_VERSION = 'y';
+	//private static final byte ECHO_ON = 'e';
+	//private static final byte ECHO_OFF = 'o';
 	
 	// comm cannel 
 	private SerialPort serialPort = null;
-	private InputStream in;
-	private OutputStream out;
+	private InputStream in= null;
+	private OutputStream out= null;
 	
 	// will be discovered from the device 
 	protected String version = null;
-
-	// input buffer
-	private byte[] buffer = new byte[32];
-	private int buffSize = 0;
 
 	// track write times
 	private long lastSent = System.currentTimeMillis();
 	private long lastRead = System.currentTimeMillis();
 
-	
 	// make sure all threads know if connected 
 	private boolean isconnected = false;
 	
@@ -71,8 +66,6 @@ public class LightsComm implements SerialPortEventListener {
 				public void run() {
 					connect();				
 					Util.delay(SETUP);
-					// start with them off 
-					// setLevel(0); 	
 				}	
 			}).start();
 		}	
@@ -89,15 +82,24 @@ public class LightsComm implements SerialPortEventListener {
 			// open streams
 			out = serialPort.getOutputStream();
 			in = serialPort.getInputStream();
-
-			// register for serial events
-			serialPort.addEventListener(this);
-			serialPort.notifyOnDataAvailable(true);
 			
 		} catch (Exception e) {
 			Util.log("could NOT connect to the the lights on:" + state.get(State.lightport), this);
 			return;
 		}
+		
+		
+		// register for serial events
+		try {
+			serialPort.addEventListener(this);
+		} catch (TooManyListenersException e) {
+			Util.log(e.getMessage(), this);
+		}
+		serialPort.notifyOnDataAvailable(true);
+		isconnected = true;	
+		
+		Util.log("connected to the the lights on:" + state.get(State.lightport), this);
+	
 	}
 
 	/** @return True if the serial port is open */
@@ -113,7 +115,6 @@ public class LightsComm implements SerialPortEventListener {
 		return floodLightOn;
 	}
 	
-	
 	@Override
 	/** buffer input on event and trigger parse on '>' charter  
 	 * 
@@ -125,56 +126,15 @@ public class LightsComm implements SerialPortEventListener {
 				byte[] input = new byte[32];
 				int read = in.read(input);
 				for (int j = 0; j < read; j++) {
-					// print() or println() from arduino code
-					if ((input[j] == '>') || (input[j] == 13) || (input[j] == 10)) {
-						// do what ever is in buffer 
-						if(buffSize > 0) execute();
-						// reset
-						buffSize = 0;
-						// track input from arduino
-						lastRead = System.currentTimeMillis();
-					} else if (input[j] == '<') {
-						// start of message
-						buffSize = 0;
-					} else {
-						// buffer until ready to parse
-						buffer[buffSize++] = input[j];
-					}
+					
+					Util.log("exec[" + "] read: " + read, this);
+					
+					
 				}
 			} catch (IOException e) {
 				System.out.println("event : " + e.getMessage());
 			}
 		}
-	}
-
-	// act on feedback from arduino  
-	private void execute() {
-		String response = "";
-		for(int i = 0 ; i < buffSize ; i++)
-			response += (char)buffer[i];
-		
-		// take action as arduino has just turned on 
-		if(response.equals("reset")){
-			
-			// might have new firmware after reseting 
-			version = null;
-			new Sender(GET_VERSION);
-			isconnected = true;
-			
-		} else if(response.startsWith("version:")){
-			
-			// NOTE: watchdog will send a get version command if idle comm port  
-			if(version == null){
-				// get just the number 
-				version = response.substring( 
-						response.indexOf("version:")+8, response.length());
-	
-				application.message("lights version: " + version, null, null);
-				
-			} else return;
-			// don't bother showing watchdog pings to user screen 
-		} else if(response.charAt(0) != GET_VERSION[0])		
-			application.message("light: " + response, null, null);
 	}
 
 	/** @return the time since last write() operation */
@@ -194,21 +154,18 @@ public class LightsComm implements SerialPortEventListener {
 
 	/** inner class to send commands */
 	private class Sender extends Thread {		
-		private byte[] command = null;
-		public Sender(final byte[] cmd) {
+		private byte command = 13;
+		public Sender(final byte cmd) {
 			command = cmd;
 			if(isConnected())start();
 		}
 		public void run() {
 			sendCommand(command);
+			Util.debug("send: " + command, this);
 		}
 	}
 
-	/** @param update is set to true to turn on echo'ing of serial commands */
-	public void setEcho(boolean update){
-		if(update) new Sender(ECHO_ON);
-		else new Sender(ECHO_OFF);
-	}
+	
 	
 	/** inner class to check if getting responses in timely manor 
 	private class WatchDog extends Thread {
@@ -264,18 +221,12 @@ public class LightsComm implements SerialPortEventListener {
 	 * @param command
 	 *            is a byte array of messages to send
 	 */
-	private synchronized void sendCommand(final byte[] command) {
+	private synchronized void sendCommand(final byte command) {
 		
 		if(!isconnected) return;
 		
 		try {
-				
-			// send 
 			out.write(command);
-		
-			// end of command 
-			out.write(13);
-			
 		} catch (Exception e) {
 			reset();
 			System.out.println(e.getMessage());
@@ -285,47 +236,35 @@ public class LightsComm implements SerialPortEventListener {
 		lastSent = System.currentTimeMillis();
 	}
 
-	/*
-	public void on() {
-		new Sender(new byte[]{SET_PWM, (byte) 255});
-	}
-	
-	public void off(){
-		new Sender(new byte[]{SET_PWM, 0});
-	}
-	*/
-	
 	public synchronized void setSpotLightBrightness(int target){
 		
 		if( !isConnected()){
-			System.out.println("lights not found");
-			// application.message("lights not found", null, null);
+			Util.log("lights NOT found", this);
 			return;
 		}
 		
 		int n = target*255/100;
-		new Sender(new byte[]{SET_PWM, (byte) n});
+		Util.log("set spot light: ", this);
+		new Sender((byte) n);
+		
 		spotLightBrightness = target;
 		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(spotLightBrightness));
-
 	}
 	
 	public synchronized void floodLight(String str){
 		if( !isConnected()){
-			System.out.println("lights not found");
+			Util.log("lights NOT found", this);
 			application.message("lights not found", null, null);
 			return;
 		}
-		byte n;
 		if (str.equals("on")) { 
-			n = 1;
+			new Sender((byte)'e');
 			floodLightOn = true;
 		}
 		else { 
-			n=0; 
+			new Sender((byte)'d');
 			floodLightOn = false; 
 		}
-		new Sender(new byte[]{DOCKLIGHT, n});
 		application.message("floodlight "+str, null, null);
 	}
 }

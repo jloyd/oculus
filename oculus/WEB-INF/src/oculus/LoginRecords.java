@@ -7,26 +7,20 @@ public class LoginRecords {
 
 	public static final String PASSENGER = "passenger";
 	public static final String DRIVER = "driver";
-	public static final int MAX_RECORDS = 20;
+	public static final int MAX_RECORDS = 50;
 	
 	public static Vector<Record> list = new Vector<Record>();
 	public static State state = State.getReference();
 	public static Settings settings = new Settings();
 	private static Application app = null; 
 	
-	
-	// TODO: only allow user to sign in once from a given ip??
-	// This should trigger an admin gmail warning if ppl share passwords?
-	
-	
 	public LoginRecords(){ 
-		Util.log("login records started..", this);
+		Util.debug("started", this);
 	}
 	
 	public void setApplication(Application a) {
 		app = a;
-		// System.out.println("OCULUS: login records set application");
-		///settings = new Settings();		
+		Util.debug("set application, called", this);		
 	}
 	
 	public void beDriver() { 
@@ -40,7 +34,7 @@ public class LoginRecords {
 				app.speech.mluv("lawg inn " + state.get(State.user));
 				// accessing 'Speech.mluv' directly so doesn't display text in client window on login 
 
-		if(state.getBoolean(State.developer)) System.out.println(this);
+		Util.log("beDriver(): " + this.toString(), this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
@@ -54,14 +48,12 @@ public class LoginRecords {
 			if(app!=null)
 				app.saySpeech("lawg inn " + state.get(State.user));
 
-		
-		if(state.getBoolean(State.developer)) System.out.println(this);
+		Util.log("bePassenger(): " + this.toString(), this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
 	
-	/** @return true if this user is already connected from this address */ 
-	/*
+	/** @return true if this user is already connected from this address
 	public boolean isConnected(final String user, final String ip){
 		for (int i = 0; i < list.size(); i++){
 			Record rec = list.get(i);
@@ -231,7 +223,7 @@ public class LoginRecords {
 			// this.id = id;
 			
 			if(state.getBoolean(State.developer))
-				System.out.println("OCULUS: ceated login: " + toString());
+				Util.log("ceated login: " + toString(), this);
 		}
 
 		public String getUser() {
@@ -274,8 +266,8 @@ public class LoginRecords {
 		public void logout() {
 			if(timeout==0){
 				timeout = System.currentTimeMillis();
-				System.out.println("OCULUS: logged out : " + toString());
-			} else System.out.println("OCULUS: __error: trying to logout twice");	
+				Util.log("logged out : " + toString(), this);
+			} else Util.log("error: trying to logout twice", this);	
 		}
 	}
 }

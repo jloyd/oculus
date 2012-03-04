@@ -31,7 +31,7 @@ public class Discovery implements SerialPortEventListener {
 	public static final String OCULUS_TILT = "oculusTilt";
 	public static final String OCULUS_SONAR = "oculusSonar";
 	public static final String OCULUS_DC = "oculusDC";
-	public static final String LIGHTS = "oculusLights";
+	public static final String LIGHTS = "L";
 	public static final long RESPONSE_DELAY = 1000;
 
 	/* reference to the underlying serial port */
@@ -76,10 +76,11 @@ public class Discovery implements SerialPortEventListener {
 			state.set(State.lightport, lights);
 		}
 	
-		
+		validate();
 		state.dump();
 	}
 	
+	/** */
 	private static String getPortName(){
 		
 		String name = "";
@@ -92,6 +93,26 @@ public class Discovery implements SerialPortEventListener {
 				name += com.charAt(i);
 		
 		return name;
+	}
+	
+	/** */
+	private void validate(){
+		if (state.get(State.firmware) == null){
+			Util.debug("No motors detected, try again..", this);
+			searchMotors();
+		}
+		if (state.get(State.serialport) == null){
+			Util.debug("No motors detected, try again..", this);
+			searchMotors();
+		}
+		if (state.get(State.lightport) == null){ 
+			Util.debug("NO lights detected, try again..", this);
+			searchLights();
+		}
+		
+		// show state if problems 
+		if (state.get(State.firmware) == null || state.get(State.serialport) == null || state.get(State.lightport) == null) 
+			Util.log(state.toString(), this);
 	}
 	
 	/** */
@@ -108,7 +129,7 @@ public class Discovery implements SerialPortEventListener {
 	/** connects on start up, return true is currently connected */
 	private boolean connect(final String address, final int rate) {
 
-		Util.log("try to connect to: " + address + " buad:" + rate, this);
+		Util.debug("try to connect to: " + address + " buad:" + rate, this);
 
 		try {
 
@@ -182,8 +203,6 @@ public class Discovery implements SerialPortEventListener {
 				close();
 			}
 		}
-		if (state.get(State.lightport) == null) 
-			Util.debug("NO lights detected", this);
 	}
 	
 	/** Loop through all available serial ports and ask for product id's */
@@ -204,28 +223,33 @@ public class Discovery implements SerialPortEventListener {
 				close();
 			}
 		}
-		if (state.get(State.firmware) == null)
-			Util.debug("No motors detected", this);
 	}
 	
 	/** check if this is a known derive, update in state */
-	public void lookup(String id){
+	public void lookup(String id){	
 		
 		if (id == null) return;
 		if (id.length() == 0) return;
+		id = id.trim();
+		
+		Util.debug("is a product?? [" + id + "] length: " + id.length(), this);
 
-		Util.log("is a product?? [" + id + "]", this);
-
-		if(id.startsWith("id")){
+		if (id.length() == 1 ){
+			if(id.equals(LIGHTS)){		
+				state.set(State.lightport, getPortName());
+				Util.debug("found lights on comm port: " +  getPortName(), this);		
+			}
+			
+			return;
+		} 
+			
+		if(id.startsWith("id")){	
 			
 			id = id.substring(2, id.length());
-			Util.log("found product[" + id + "] on comm port: " +  getPortName(), this);
-
-			if (id.equalsIgnoreCase(LIGHTS)) {
-
-				state.set(State.lightport, getPortName());
 				
-			} else if (id.equalsIgnoreCase(OCULUS_DC)) {
+			Util.debug("found product id[" + id + "] on comm port: " +  getPortName(), this);
+
+			if (id.equalsIgnoreCase(OCULUS_DC)) {
 
 				state.set(State.serialport, getPortName());
 				state.set(State.firmware, OCULUS_DC);
@@ -255,7 +279,6 @@ public class Discovery implements SerialPortEventListener {
 			Util.log(e.getStackTrace().toString(),this);
 			return;
 		}
-
 		try {
 			outputStream.write(new byte[] { 'x', 13 });
 		} catch (IOException e) {
@@ -270,10 +293,10 @@ public class Discovery implements SerialPortEventListener {
 	@Override
 	public void serialEvent(SerialPortEvent arg0) {
 	
-		Util.log("_event: " + arg0,this);
+		Util.debug("_event: " + arg0,this);
 		
 		if(buffer!=null){
-			Util.log("too much serial ",this);
+			Util.log("...too much serial?",this);
 			return;
 		}
 		
@@ -300,12 +323,12 @@ public class Discovery implements SerialPortEventListener {
 				device += (char) buffer[j];
 		}
 		
-		Util.log("_lookup: " + device, this);
+		Util.debug("_lookup: " + device, this);
 		
 		lookup(device);
-		
 	}
 
+	/** match types of firmware names and versions */
 	public AbstractArduinoComm getMotors(Application application) {
 		// TODO Auto-generated method stub
 		
@@ -330,8 +353,8 @@ public class Discovery implements SerialPortEventListener {
 		return new ArduinoCommDC(application);
 	}
 
+	/** manage types of ights here */
 	public LightsComm getLights(Application application) {
-		// TODO Auto-generated method stub
 		return new LightsComm(application);
 	}
 }
