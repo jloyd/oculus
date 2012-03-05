@@ -76,8 +76,8 @@ public class Discovery implements SerialPortEventListener {
 			state.set(State.lightport, lights);
 		}
 	
-		validate();
-		state.dump();
+		//validate();
+		// state.();
 	}
 	
 	/** */
@@ -111,8 +111,10 @@ public class Discovery implements SerialPortEventListener {
 		}
 		
 		// show state if problems 
-		if (state.get(State.firmware) == null || state.get(State.serialport) == null || state.get(State.lightport) == null) 
-			Util.log(state.toString(), this);
+		if (state.get(State.firmware) == null || state.get(State.serialport) == null || state.get(State.lightport) == null) {
+			Util.debug("..can't find motors and/or lights", this);
+			Util.debug(state.toString(), this);
+		}
 	}
 	
 	/** */

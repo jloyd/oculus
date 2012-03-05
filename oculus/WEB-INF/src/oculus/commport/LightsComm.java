@@ -16,21 +16,28 @@ import oculus.Util;
 
 public class LightsComm implements SerialPortEventListener {
 
-	// shared state variables 
 	private State state = State.getReference();
 	
 	public static final int SETUP = 2000;
+	public static final long DEAD_MAN_TIME_OUT = 10000;
+	public static final long USER_TIME_OUT = 3 * 60000;
 	public static final int BAUD_RATE = 57600;
-	//public static final int WATCHDOG_DELAY = 1500;
-
-	public static final byte DIM = 'f';
-	public static final byte BRIGHTER = 'b';
-	//public static final byte SET_PWM = 's';
+	public static final byte GET_PRODUCT = 'x';
 	public static final byte GET_VERSION = 'y';
-	//private static final byte ECHO_ON = 'e';
-	//private static final byte ECHO_OFF = 'o';
-	
-	// comm cannel 
+	private static final byte DOCK_ON = 'o';
+	private static final byte DOCK_OFF = 'f';
+	public static final byte SPOT_OFF = 'a';
+	public static final byte SPOT_1 = 'b';
+	public static final byte SPOT_2 = 'c';
+	public static final byte SPOT_3 = 'd';
+	public static final byte SPOT_4 = 'e';
+	public static final byte SPOT_5 = 'f';
+	public static final byte SPOT_6 = 'g';
+	public static final byte SPOT_7 = 'h';
+	public static final byte SPOT_8 = 'i';
+	public static final byte SPOT_9 = 'j';
+	public static final byte SPOT_MAX = 'k';
+
 	private SerialPort serialPort = null;
 	private InputStream in= null;
 	private OutputStream out= null;
@@ -47,6 +54,9 @@ public class LightsComm implements SerialPortEventListener {
 	
 	private int spotLightBrightness = 0;
 	private boolean floodLightOn = false;
+	
+	private static long z = 0;
+	private static long lastUserCommand = 0;
 	
 	// call back
 	private Application application = null;
@@ -68,6 +78,8 @@ public class LightsComm implements SerialPortEventListener {
 					Util.delay(SETUP);
 				}	
 			}).start();
+			
+			new WatchDog().start();
 		}	
 	}
 	
@@ -124,16 +136,81 @@ public class LightsComm implements SerialPortEventListener {
 		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
 				byte[] input = new byte[32];
+				String str = "";
 				int read = in.read(input);
 				for (int j = 0; j < read; j++) {
+					str += (char) input[j];
+				}
+
+				Util.log("read delta: " + getReadDelta() + " read[" + str.trim() + "]", this);
+				
+				lastRead = System.currentTimeMillis();
+			
+			} catch (IOException e) {
+				Util.log("event : " + e.getMessage(), this);
+			}
+		}
+	}	
+	
+	
+	/** inner class to check if getting responses in timely manor */
+	public class WatchDog extends Thread {
+		public WatchDog() {
+			this.setDaemon(true);
+		}
+
+		public void run() {
+			Util.delay(SETUP);
+			while (true) {
+				
+				Util.debug("read delta: " + getReadDelta() + " write delta: " + getWriteDelta(), this);
+				
+				if((System.currentTimeMillis() - lastUserCommand) > USER_TIME_OUT){
+					application.message("lights user time out", null, null);
+					sendCommand(SPOT_OFF);
+					sendCommand(DOCK_OFF);
+					floodLightOn = false;
+					spotLightBrightness = 0;
+				}
+				
+				// refresh values
+				if(getReadDelta() > (DEAD_MAN_TIME_OUT/2)){
 					
-					Util.log("exec[" + "] read: " + read, this);
+				//	application.message("can NOT get reply from the lights", null, null);
+				//	Util.debug("can NOT get reply from the lights", this);
 					
+					///setSpotLightBrightness(spotLightBrightness);
+					
+					if(floodLightOn) sendCommand(DOCK_ON);
+					else if(!floodLightOn) sendCommand(DOCK_OFF);
+					
+					if(spotLightBrightness==0) sendCommand((byte) SPOT_OFF);
+					else if(spotLightBrightness==10)sendCommand((byte) SPOT_1);
+					else if(spotLightBrightness==20) sendCommand((byte) SPOT_2);
+					else if(spotLightBrightness==30) sendCommand((byte) SPOT_3); 
+					else if(spotLightBrightness==40) sendCommand((byte) SPOT_4);
+					else if(spotLightBrightness==50) sendCommand((byte) SPOT_5);
+					else if(spotLightBrightness==60) sendCommand((byte) SPOT_6);
+					else if(spotLightBrightness==70) sendCommand((byte) SPOT_7);
+					else if(spotLightBrightness==80) sendCommand((byte) SPOT_8);
+					else if(spotLightBrightness==90) sendCommand((byte) SPOT_9);
+					else if(spotLightBrightness==100) sendCommand((byte) SPOT_MAX);
 					
 				}
-			} catch (IOException e) {
-				System.out.println("event : " + e.getMessage());
-			}
+				
+				// error state
+				if(getReadDelta() > DEAD_MAN_TIME_OUT){
+					
+					application.message("lights failure, time out!", null, null);
+					reset();
+					
+					Util.log("give up...", this);
+					
+				}
+				
+				Util.delay(SETUP);
+				
+			}		
 		}
 	}
 
@@ -160,37 +237,17 @@ public class LightsComm implements SerialPortEventListener {
 			if(isConnected())start();
 		}
 		public void run() {
-			sendCommand(command);
-			Util.debug("send: " + command, this);
+			try {
+				out.write(command);
+			} catch (Exception e) {
+				Util.debug(e.getMessage(), this);
+				reset();
+			}
+			lastSent = System.currentTimeMillis();
+			Util.debug(z++ + " send: " + (char)command, this);
 		}
 	}
 
-	
-	
-	/** inner class to check if getting responses in timely manor 
-	private class WatchDog extends Thread {
-		public WatchDog() {
-			this.setDaemon(true);
-		}
-		public void run() {
-			Util.delay(SETUP);
-			application.message("starting watchdog thread", null, null);
-			while (true) {
-				if (getReadDelta() > DEAD_TIME_OUT) {
-					if (isconnected) {
-						reset(); 
-						application.message("watchdog time out, resetting", null, null);
-					}
-				}
-
-				// send ping to keep connection alive 
-				if(getReadDelta() > (DEAD_TIME_OUT / 3))
-					if(isconnected) new Sender(GET_VERSION);
-			
-				Util.delay(WATCHDOG_DELAY);
-			}
-		}
-	}*/
 	
 	public void reset(){
 		if (isconnected) {
@@ -220,21 +277,16 @@ public class LightsComm implements SerialPortEventListener {
 	 * 
 	 * @param command
 	 *            is a byte array of messages to send
-	 */
+	*/
 	private synchronized void sendCommand(final byte command) {
 		
 		if(!isconnected) return;
 		
-		try {
-			out.write(command);
-		} catch (Exception e) {
-			reset();
-			System.out.println(e.getMessage());
-		}
+		new Sender(command);
 
 		// track last write
 		lastSent = System.currentTimeMillis();
-	}
+	} 
 
 	public synchronized void setSpotLightBrightness(int target){
 		
@@ -243,12 +295,24 @@ public class LightsComm implements SerialPortEventListener {
 			return;
 		}
 		
-		int n = target*255/100;
-		Util.log("set spot light: ", this);
-		new Sender((byte) n);
+		Util.log("set spot:" + target, this);
+		
+		if(target==0) sendCommand((byte) SPOT_OFF);
+		else if(target==10)sendCommand((byte) SPOT_1);
+		else if(target==20) sendCommand((byte) SPOT_2);
+		else if(target==30) sendCommand((byte) SPOT_3); 
+		else if(target==40) sendCommand((byte) SPOT_4);
+		else if(target==50) sendCommand((byte) SPOT_5);
+		else if(target==60) sendCommand((byte) SPOT_6);
+		else if(target==70) sendCommand((byte) SPOT_7);
+		else if(target==80) sendCommand((byte) SPOT_8);
+		else if(target==90) sendCommand((byte) SPOT_9);
+		else if(target==100) sendCommand((byte) SPOT_MAX);
 		
 		spotLightBrightness = target;
 		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(spotLightBrightness));
+		lastUserCommand = System.currentTimeMillis();
+		
 	}
 	
 	public synchronized void floodLight(String str){
@@ -258,13 +322,16 @@ public class LightsComm implements SerialPortEventListener {
 			return;
 		}
 		if (str.equals("on")) { 
-			new Sender((byte)'e');
+			sendCommand(DOCK_ON);
 			floodLightOn = true;
 		}
 		else { 
-			new Sender((byte)'d');
+			sendCommand(DOCK_OFF);
 			floodLightOn = false; 
 		}
+		
 		application.message("floodlight "+str, null, null);
+		lastUserCommand = System.currentTimeMillis();
+		
 	}
 }
