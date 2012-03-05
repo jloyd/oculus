@@ -520,6 +520,10 @@ public class Settings {
 	public boolean getBoolean(FactorySettings setting) {
 		return getBoolean(setting.toString());
 	}
+
+	public boolean getBoolean(OptionalSettings setting) {
+		return getBoolean(setting.toString());
+	}
 	
 	
 }

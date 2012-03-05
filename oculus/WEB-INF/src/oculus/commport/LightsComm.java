@@ -17,10 +17,9 @@ import oculus.Util;
 public class LightsComm implements SerialPortEventListener {
 
 	private State state = State.getReference();
-	
-	public static final int SETUP = 2000;
 	public static final long DEAD_MAN_TIME_OUT = 10000;
-	public static final long USER_TIME_OUT = 3 * 60000;
+	public static final long USER_TIME_OUT = 10 * 60000;
+	public static final int SETUP = 2000;
 	public static final int BAUD_RATE = 57600;
 	public static final byte GET_PRODUCT = 'x';
 	public static final byte GET_VERSION = 'y';
@@ -128,21 +127,18 @@ public class LightsComm implements SerialPortEventListener {
 	}
 	
 	@Override
-	/** buffer input on event and trigger parse on '>' charter  
-	 * 
-	 * Note, all feedback must be in single xml tags like: <feedback 123>
+	/**
 	 */
 	public void serialEvent(SerialPortEvent event) {
 		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
 				byte[] input = new byte[32];
-				String str = "";
-				int read = in.read(input);
-				for (int j = 0; j < read; j++) {
-					str += (char) input[j];
-				}
-
-				Util.log("read delta: " + getReadDelta() + " read[" + str.trim() + "]", this);
+				//int read =	
+				in.read(input);
+				
+				//String str = "";
+				//for (int j = 0; j < read; j++) str += (char) input[j]
+				//Util.log("read delta: " + getReadDelta() + " read[" + str.trim() + "]", this);
 				
 				lastRead = System.currentTimeMillis();
 			
@@ -171,15 +167,13 @@ public class LightsComm implements SerialPortEventListener {
 					sendCommand(DOCK_OFF);
 					floodLightOn = false;
 					spotLightBrightness = 0;
+			
+					lastUserCommand = System.currentTimeMillis();
+					
 				}
 				
 				// refresh values
 				if(getReadDelta() > (DEAD_MAN_TIME_OUT/2)){
-					
-				//	application.message("can NOT get reply from the lights", null, null);
-				//	Util.debug("can NOT get reply from the lights", this);
-					
-					///setSpotLightBrightness(spotLightBrightness);
 					
 					if(floodLightOn) sendCommand(DOCK_ON);
 					else if(!floodLightOn) sendCommand(DOCK_OFF);
@@ -202,9 +196,7 @@ public class LightsComm implements SerialPortEventListener {
 				if(getReadDelta() > DEAD_MAN_TIME_OUT){
 					
 					application.message("lights failure, time out!", null, null);
-					reset();
-					
-					Util.log("give up...", this);
+					//reset();
 					
 				}
 				
@@ -244,7 +236,8 @@ public class LightsComm implements SerialPortEventListener {
 				reset();
 			}
 			lastSent = System.currentTimeMillis();
-			Util.debug(z++ + " send: " + (char)command, this);
+			
+			//Util.debug("send: " + (char)command, this);
 		}
 	}
 

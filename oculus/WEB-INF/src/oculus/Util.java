@@ -18,6 +18,7 @@ import java.util.Vector;
 public class Util {
 
 	private static final String os  = System.getProperty("os.name"); 
+	private static final boolean developer = new Settings().getBoolean(OptionalSettings.developer);
 	private static final int PRECISION = 2;
 	
 	/**
