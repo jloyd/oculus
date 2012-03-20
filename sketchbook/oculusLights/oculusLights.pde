@@ -2,120 +2,122 @@
 ocuLED_Light
 
 
-ASCII Serial Commands
-All 2 byte pairs, except for GET_VERSION
+ ASCII Serial Commands
+ GET_VERSION = 'y'
 
-SPOT_ON = 's', [0-255] (intensity) 
-FLOOD_ON = 'd', [0-255] (intensity) 
-ECHO_ON = 'e', '1' (echo command back TRUE)
-ECHO_OFF = 'e', '0' (echo command back FALSE)
-GET_VERSION = 'y'
+ */
 
-*/
- 
-const int lightPinA = 3;    
-const int lightPinB = 11;   
-const int dockLightPin = 5; 
+const int lightPinA = 3;
+const int lightPinB = 11;
+const int dockLightPin = 5;
 
-boolean echo = false;
+unsigned long lastcmd = 0;
+int timeout = 720000;
 
-// buffer the command in byte buffer 
-const int MAX_BUFFER = 8;
-int buffer[MAX_BUFFER];
-int commandSize = 0;
+void setup() {
+ pinMode(lightPinA, OUTPUT);
+ pinMode(lightPinB, OUTPUT);
+ pinMode(dockLightPin, OUTPUT);
 
-//boolean lightOn = false;
-//int buttonState = 0;  
- 
-void setup() {                
-	pinMode(lightPinA, OUTPUT);     
-	pinMode(lightPinB, OUTPUT);
-	pinMode(dockLightPin, OUTPUT);
+ //overide default PWM freq
+ TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM20); // phase correct (1/2 freq)
+ //TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20); //
+'fast pwm' (1x freq)
+ //TCCR2B = _BV(CS22) | _BV(CS21) | _BV(CS20); // divide by 1024
+ TCCR2B = _BV(CS22) | _BV(CS20); // divide by 128
+ //TCCR2B = _BV(CS21) | _BV(CS20); // divide by 8
+ OCR2A = 0;
+ OCR2B = 0;
 
-
-	//overide default PWM freq
-	TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM20); // phase correct (1/2 freq)
-	//TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20); // 'fast pwm' (1x freq)
-	//TCCR2B = _BV(CS22) | _BV(CS21) | _BV(CS20); // divide by 1024 
-	TCCR2B = _BV(CS22) | _BV(CS20); // divide by 128 
-	//TCCR2B = _BV(CS21) | _BV(CS20); // divide by 8 
-	OCR2A = 0; 
-	OCR2B = 0; 
-
-	//pinMode(buttonPin, INPUT);
-	Serial.begin(57600);
-	Serial.println("<reset>");
+ Serial.begin(57600);
+ Serial.print('R');
 }
 
 void loop() {
+ int input = 0;
+ if( Serial.available() > 0 ){
+   input = Serial.read();
+   parseCommand(input);
+   lastcmd = millis();
+ }
 
-  if( Serial.available() > 0 ){
-    // commands take priority 
-    manageCommand(); 
-  } 
-
+ if (millis() - lastcmd > timeout) {
+   // if no comm with host, stop motors
+   lastcmd = millis();
+   OCR2A = 0;
+   OCR2B = 0;
+   digitalWrite(dockLightPin, LOW);
+ }
 }
 
-void manageCommand(){
+void parseCommand(int cmd){
 
-  int input = Serial.read();
+ if(cmd == 'x'){
+   Serial.print('L');
+   return;
+ }
 
-  // end of command -> exec buffered commands 
-  if((input == 13) || (input == 10)){
-    if(commandSize > 0){
-      parseCommand();
-      commandSize = 0; 
-    }
-  } else {
+ if(cmd == 'y'){
+   Serial.print('1');
+   return;
+ }
 
-    // buffer it 
-    buffer[commandSize++] = input;
+ if(cmd == 'f'){
+   digitalWrite(dockLightPin, LOW);
+   Serial.print(cmd);
+   return;
+ }
 
-    // protect buffer
-    if(commandSize >= MAX_BUFFER){
-      commandSize = 0;
-      // Serial.println("<overflow>");
-    }
-  }
-}
+ if(cmd == 'o'){
+   digitalWrite(dockLightPin, HIGH);
+   Serial.print(cmd);
+   return;
+ }
 
-void parseCommand(){
+ if(cmd == 'a'){
+   OCR2A = 0;
+   OCR2B = 0;
+ }
+ else if(cmd == 'b'){
+   OCR2A = 80;
+   OCR2B = 80;
+ }
+ else if(cmd == 'c'){
+   OCR2A = 100;
+   OCR2B = 100;
+ }
+ else if(cmd == 'd'){
+   OCR2A = 120;
+   OCR2B = 120;
+ }
+ else if(cmd == 'e'){
+   OCR2A = 140;
+   OCR2B = 140;
+ }
+ else if(cmd == 'f'){
+   OCR2A = 160;
+   OCR2B = 160;
+ }
+ else if(cmd == 'g'){
+   OCR2A = 180;
+   OCR2B = 180;
+ }
+ else if(cmd == 'h'){
+   OCR2A = 200;
+   OCR2B = 200;
+ }
+ else if(cmd == 'i'){
+   OCR2A = 220;
+   OCR2B = 220;
+ }
+ else if(cmd == 'j'){
+   OCR2A = 240;
+   OCR2B = 240;
+ }
+ else if(cmd == 'k'){
+   OCR2A = 255;
+   OCR2B = 255;
+ }
 
-	if(buffer[0] == 'x'){
-		Serial.println("<id:oculusLights>");
-	}  
-	if(buffer[0] == 'y') {
-		Serial.println("<version:0.1.3>"); 
-	} 
-	if(buffer[0] == 's'){
-    	OCR2A = buffer[1];
-		OCR2B = buffer[1];
-	}
-	if(buffer[0] == 'd') {
-		if(buffer[1]==0) { digitalWrite(dockLightPin, LOW); }
-		else { digitalWrite(dockLightPin, HIGH); }
-	}
-	if(buffer[0] == 'e') {
-		if(buffer[1] == '1')
-			echo = true;
-		if(buffer[1] == '0')
-			echo = false ;
-	} 
-
-  // echo the command back 
-	if(echo) { 
-		Serial.print("<");
-		Serial.print((char)buffer[0]);
-
-		if(commandSize > 1)
-			Serial.print(',');    
-
-		for(int b = 1 ; b < commandSize ; b++) {
-			Serial.print((String)buffer[b]);  
-			if (b<(commandSize-1)) 
-				Serial.print(',');    
-		} 
-		Serial.println(">");
-	}
-	
+ Serial.print(cmd);
 }
