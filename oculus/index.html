@@ -66,9 +66,9 @@ a:hover { color: #ffffff; background-color: transparent; text-decoration: none; 
 // -----------------------------------------------------------------------------
 // Globals
 // Major version of Flash required
-var requiredMajorVersion = 10;
+var requiredMajorVersion = 11;
 // Minor version of Flash required
-var requiredMinorVersion = 0;
+var requiredMinorVersion = 1;
 // Minor version of Flash required
 var requiredRevision = 0;
 // -----------------------------------------------------------------------------
@@ -116,13 +116,23 @@ if (hasRequestedVersion) {
 			"type", "application/x-shockwave-flash",
 			"pluginspage", "http://www.adobe.com/go/getflashplayer"
 	);
-  } else {  // flash is too old or we can't detect the plugin
-    var alternateContent = 'Alternate HTML content should be placed here. '
-  	+ 'This content requires the Adobe Flash Player. '
-   	+ '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-    document.write(alternateContent);  // insert non-flash content
+  } else {  // flash is older than requested version
+		AC_FL_RunContent(
+				"src", "flash/oculus_player9",
+				"width", "640",
+				"height", "480",
+				"wmode","transparent",
+				"id", "oculus_player",
+				"quality", "high",
+				"bgcolor", "#869ca7",
+				"name", "oculus_player",
+				"allowScriptAccess","always",
+				"type", "application/x-shockwave-flash",
+				"pluginspage", "http://www.adobe.com/go/getflashplayer"
+		);
   }
  </script>
+ <!-- 
 <noscript>
   	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 			id="oculus_player" width="100%" height="100%" 
@@ -144,6 +154,7 @@ if (hasRequestedVersion) {
 			</embed>
 	</object>
 </noscript>
+-->
 </div>
 </td>
 
@@ -604,6 +615,9 @@ Calibration:
 <a class="blackbg" href="javascript: autodock('calibrate');">calibrate auto-dock</a><br>
 <a class="blackbg" href="javascript: muteROVonmovetoggle();">mute 
 <span style="font-variant: smallcaps;">ROV</span> when moving on/off</a><br>
+ <!--
+ self mic push T to talk <input type="checkbox" id="push_to_talk_checkbox" name="push_to_talk_checkbox" value="0"><br>
+ -->
 </div>
 
 <!-- driving settings -->

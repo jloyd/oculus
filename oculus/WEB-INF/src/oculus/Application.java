@@ -323,7 +323,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	/** */
-	public void playersignin() {
+	public void playersignin() {		
+		// set video, audio quality mode in grabber flash, depending on server/client OS
+		String videosoundmode="high"; // windows, default
+		if (Settings.os.equals("linux")) {
+			videosoundmode="low";
+		}
 
 		if (player != null) {
 			pendingplayer = Red5.getConnectionLocal();
@@ -348,6 +353,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 				// log.info(str);
 				System.out.println("OCULUS: playersignin(): " + str);
 				messageGrabber(str, null);
+				
+				sc.invoke("videoSoundMode", new Object[] { videosoundmode });
 			}
 		} else {
 			player = Red5.getConnectionLocal();
@@ -365,6 +372,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageGrabber(str, "connection " + state.get(State.user) + "&nbsp;connected");
 			System.out.println("OCULUS: playersignin(), " + str);
 			loginRecords.beDriver();
+			
+			IServiceCapableConnection sc = (IServiceCapableConnection) player;
+			sc.invoke("videoSoundMode", new Object[] { videosoundmode });
+			Util.log("player video sound mode = "+videosoundmode, this);
 		}
 	}
 
@@ -804,7 +815,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 		sc.invoke("videoSoundMode", new Object[] { str });
-		Util.log("video sound mode = "+str, this);
+		Util.log("grabber video sound mode = "+str, this);
 	}
 	
 	public void publish(String str) {
