@@ -4,6 +4,7 @@ import oculus.Application;
 import oculus.Observer;
 import oculus.Settings;
 import oculus.State;
+import oculus.Util;
 
 /** */
 public class EmailAlerts implements Observer {
@@ -11,7 +12,7 @@ public class EmailAlerts implements Observer {
 	// how low of battery to warm user with email
 	// any lower and my dell will go into 
 	// low power mode, need time to park it   
-	public static final int WARN_LEVEL = 35;
+	public static final int WARN_LEVEL = 40;
 	private Application app = null;
 	private Settings settings;
 	private State state = State.getReference();
@@ -22,7 +23,7 @@ public class EmailAlerts implements Observer {
 		settings = new Settings();
 		if (settings.getBoolean(Settings.emailalerts)){
 			state.addObserver(this);
-			System.out.println("starting email alerts...");
+			oculus.Util.debug("starting email alerts...", this);
 		}
 	}
 
@@ -30,6 +31,8 @@ public class EmailAlerts implements Observer {
 	public void updated(String key) {
 		
 		if( ! key.equals(State.batterylife)) return;
+		
+		Util.debug(".. checking battey", this);
 		
 		if (state.getInteger(State.batterylife) < WARN_LEVEL) {
 			
@@ -46,7 +49,10 @@ public class EmailAlerts implements Observer {
 			
 			// send email 
 			new SendMail("Oculus Message", msg, app); 
-
+			
+			// stop listening 
+			state.removeObserver(this);
+			
 			// TODO: trigger auto dock
 			// app.autodock();
 		}

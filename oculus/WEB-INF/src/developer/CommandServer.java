@@ -10,7 +10,6 @@ import oculus.Application;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
-import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.State;
 import oculus.Updater;
@@ -432,7 +431,9 @@ public class CommandServer implements Observer {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				int i = 0;
 				while(true) {
+					Util.debug("opening connection again: " + i++, this);
 					go();
 				}
 			}
@@ -442,8 +443,11 @@ public class CommandServer implements Observer {
 	/** do forever */ 
 	public void go(){
 		
+		Integer port = settings.getInteger(OptionalSettings.commandport.toString());
+		if(port==Settings.ERROR) port = 4444;
+		
 		try {
-			serverSocket = new ServerSocket(settings.getInteger(OptionalSettings.commandport.toString()));
+			serverSocket = new ServerSocket(port);
 		} catch (Exception e) {
 			System.out.println("OCULUS: server sock error: " + e.getMessage());
 			return;
