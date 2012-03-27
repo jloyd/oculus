@@ -261,6 +261,10 @@ public class CommandServer implements Observer {
 			if(cmd[0].equals("bye")) { out.print("bye"); shutDown(); }
 						
 			if(cmd[0].equals("find")) {
+				
+				out.println("disabled");
+				
+				/*
 				if(state.getBoolean(oculus.State.dockgrabbusy)){
 				
 					Util.log("calling _find_ too often.", this);
@@ -284,8 +288,6 @@ public class CommandServer implements Observer {
 							if( ! state.block(oculus.State.dockgrabbusy, "false", 30000))
 								Util.log("timed out waiting on dock grab ", this);
 							
-							
-							/*
 							// int i = 0;
 							while(grabbusy){
 					
@@ -299,14 +301,14 @@ public class CommandServer implements Observer {
 									break;
 								}
 							}	
-							*/
-								
+							
 							// put results in state for any that care 
 							state.set(oculus.State.dockgrabtime, (System.currentTimeMillis() - start));
 							
 						}
 					}).start();
-				 }
+				 }*/
+								
 			}
 			
 			//if(cmd[0].equals("battery")) battery.battStats();

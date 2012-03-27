@@ -15,12 +15,12 @@ public class LoginRecords {
 	private static Application app = null; 
 	
 	public LoginRecords(){ 
-		Util.debug("started", this);
+//		Util.debug("started", this);
 	}
 	
 	public void setApplication(Application a) {
 		app = a;
-		Util.debug("set application, called", this);		
+//		Util.debug("set application, called", this);		
 	}
 	
 	public void beDriver() { 

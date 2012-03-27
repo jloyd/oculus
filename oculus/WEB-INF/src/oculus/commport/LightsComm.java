@@ -54,7 +54,7 @@ public class LightsComm implements SerialPortEventListener {
 	private int spotLightBrightness = 0;
 	private boolean floodLightOn = false;
 	
-	private static long z = 0;
+	// private static long z = 0;
 	private static long lastUserCommand = 0;
 	
 	// call back
@@ -159,7 +159,7 @@ public class LightsComm implements SerialPortEventListener {
 			Util.delay(SETUP);
 			while (true) {
 				
-				Util.debug("read delta: " + getReadDelta() + " write delta: " + getWriteDelta(), this);
+				// Util.debug("read delta: " + getReadDelta() + " write delta: " + getWriteDelta(), this);
 				
 				if((System.currentTimeMillis() - lastUserCommand) > USER_TIME_OUT){
 					application.message("lights user time out", null, null);
@@ -167,9 +167,7 @@ public class LightsComm implements SerialPortEventListener {
 					sendCommand(DOCK_OFF);
 					floodLightOn = false;
 					spotLightBrightness = 0;
-			
-					lastUserCommand = System.currentTimeMillis();
-					
+					lastUserCommand = System.currentTimeMillis();		
 				}
 				
 				// refresh values

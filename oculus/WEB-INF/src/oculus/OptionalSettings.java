@@ -5,7 +5,7 @@ import java.util.Properties;
 /** place extensions to settings here */
 public enum OptionalSettings {
 	
-	emailalerts, emailaddress, emailpassword, developer, commandport, stopdelay, vself, offcenter, aboutface, arduinoculus, oculed;
+	emailaddress, emailpassword, developer, commandport, stopdelay, vself, offcenter, aboutface, arduinoculus, oculed;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
@@ -37,14 +37,14 @@ public enum OptionalSettings {
 		return config;
 	}*/
 	
-	/** add in settings */
+	/** add in settings 
 	public static Properties appendDeveloper(Properties config, String email, String pass){
 		config.setProperty(emailaddress.toString(), email);
 		config.setProperty(emailpassword.toString(), pass);
 		config.setProperty(emailalerts.toString(), "true");
 		config.setProperty(developer.toString(), "true");
 		return config;
-	}
+	}*/
 	
 	/** write to file in the order set in enum 
 	public static void CreateFile(FileWriter file, Properties props){

@@ -16,6 +16,8 @@ import org.red5.server.api.service.IServiceCapableConnection;
 import org.jasypt.util.password.*;
 import org.red5.io.amf3.ByteArray;
 
+import developer.UpdateFTP;
+
 /** red5 application */
 public class Application extends MultiThreadedApplicationAdapter {
 
@@ -234,15 +236,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean(FactorySettings.muteonrovmove);
 		
-		if (settings.getBoolean(State.developer)) {
-			// moves.open(Settings.movesfile);
-			// new developer.EmailAlerts(this);
+		if (settings.getBoolean(State.developer)) 
 			openNIRead = new developer.OpenNIRead(this);
-		}
-
-		// open telnet socket .. should be developer? 
-		if (settings.getInteger(OptionalSettings.commandport.toString()) > State.ERROR)
+	
+		if (settings.readSetting(OptionalSettings.emailaddress)!=null)
+			new developer.EmailAlerts(this);
+			
+		if (settings.getInteger(OptionalSettings.commandport) > State.ERROR)
 			commandServer = new developer.CommandServer(this);
+		
+		if(UpdateFTP.configured()) new developer.UpdateFTP();
 
 		Util.setSystemVolume(settings.getInteger(Settings.volume), this);
 		grabberInitialize();

@@ -141,6 +141,7 @@ public class State {
 		return str;
 	}
 	
+	/**/
 	public boolean block(final String member, final String target, int timeout){
 		
 		long start = System.currentTimeMillis();
@@ -167,6 +168,7 @@ public class State {
 			}
 		}
 	}
+	
 	
 	/** Put a name/value pair into the configuration */
 	public synchronized void set(final String key, final String value) {
@@ -293,18 +295,4 @@ public class State {
 		return get(cmd.toString()); 
 	}
 	
-	/*
-	public void purgeListeners(){
-		observers.clear();
-	}
-	*/
-	
-	// public void removeListener(Observer connectionHandler) {
-		// if(observers.contains(connectionHandler)){
-			//System.out.println("size is : " + observers.size() + " found guy to del.");
-	
-	//	observers.remove(connectionHandler);
-		
-		//System.out.println("listeners now: " + observers.size());
-	// }
 }

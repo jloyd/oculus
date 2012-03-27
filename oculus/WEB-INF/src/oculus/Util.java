@@ -18,7 +18,7 @@ import java.util.Vector;
 public class Util {
 
 	private static final String os  = System.getProperty("os.name"); 
-	private static final boolean developer = new Settings().getBoolean(OptionalSettings.developer);
+//	private static final boolean developer = new Settings().getBoolean(OptionalSettings.developer);
 	private static final int PRECISION = 2;
 	
 	/**
@@ -368,7 +368,7 @@ public class Util {
 	 * 				is the phrase to turn from text to speech 
 	 */
 	public static void beep() {
-		if(os.startsWith("windows")){
+		if(os.equals("windows")){
 			systemCall("nircmdc.exe beep 500 1000");
 		}else log("need linux beep"); // TODO: 
 	}

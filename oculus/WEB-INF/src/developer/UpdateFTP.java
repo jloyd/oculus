@@ -1,10 +1,12 @@
 package developer;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
-import oculus.Application;
+import oculus.LoginRecords;
 import oculus.Observer;
-import oculus.OptionalSettings;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
@@ -12,51 +14,68 @@ import oculus.Util;
 /** */
 public class UpdateFTP implements Observer {
 
-	public static final int WARN_LEVEL = 40;
-	private Settings settings = new Settings();
-	private State state = State.getReference();
-	public static FTP ftp = new FTP();
-	private Application app = null;
+	// private static final int WARN_LEVEL = 40;
+	
+	private static State state = State.getReference();
+	// private static Settings settings = new Settings();
+	private static FTP ftp = new FTP();
+
 	private String host, port, user, pass, folder;
+	int i = 0;
+	
+	public static boolean configured(){
+		File propfile = new File(Settings.ftpconfig);
+		return propfile.exists();
+	}
 
 	/** Constructor */
-	public UpdateFTP(Application parent) {
-		app = parent;
+	public UpdateFTP(){ 
+		
+		Properties props = new Properties();
+		
+		try {
 
-		host = settings.readSetting(OptionalSettings.ftphost);
-		user = settings.readSetting(OptionalSettings.ftpuser);
-		pass = settings.readSetting(OptionalSettings.ftppass);
-		port = "21"; // settings.readSetting(OptionalSettings.ftphost);
-		folder = settings.readSetting(OptionalSettings.ftpfolder);
-
-		// if ((host != null) && (user != null) && (port != null) && (folder !=
-		// null)){
+			FileInputStream propFile = new FileInputStream(Settings.ftpconfig);
+			props.load(propFile);
+			propFile.close();
+			
+		} catch (Exception e) {
+			return;
+		}	
+		
+		user = (String) props.getProperty("user", System.getProperty("user.name"));
+		host = (String) props.getProperty("host", "localhost");
+		folder = (String) props.getProperty("folder", "telemetry");
+		port = (String) props.getProperty("port", "21");
+		pass = props.getProperty("password", "zdy");
+		
 		state.addObserver(this);
 		Util.debug("starting FTP alerts...", this);
-		// }
-
-		state.dump();
+		
 	}
 
 	@Override
-	public void updated(String key) {
+	public void updated(final String key) {
 
 		Util.debug("_ftp updated checking: " + key, this);
 		
-		/*
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				
 				try {
 					
-					Util.debug("ftp connecting", this);
+					Util.debug(i++ + " ftp connecting", this);
 					
 					ftp.connect(host, port, user, pass);
 					ftp.cwd(folder);
-					ftp.storString("ip.php", ///state.get(State.externaladdress)
-						 new java.util.Date().toString());
-				
+					
+					ftp.storString("ip.php", state.get(State.externaladdress));
+					ftp.storString("last.php", new java.util.Date().toString());
+					ftp.storString("user.php", System.getProperty("user.name"));
+					ftp.storString("users.php", new LoginRecords().toString());
+					ftp.storString("state.php", state.toString());
+					
 					ftp.disconnect();
 					
 				} catch (IOException e) {
@@ -65,38 +84,7 @@ public class UpdateFTP implements Observer {
 				
 			}
 		}).start();
-		*/
-
-		// if (state.getInteger(State.batterylife) < WARN_LEVEL) {
-/*
-		new Runnable() {
-			@Override
-			public void run() {
-				try {
-					
-					Util.debug("ftp connecting", this);
-					
-					ftp.connect(host, port, user, pass);
-					ftp.cwd(folder);
-					ftp.storString("ip.php", ///state.get(State.externaladdress)
-						 new java.util.Date().toString());
-					
-				} catch (IOException e) {
-					Util.debug(e.getLocalizedMessage(), this);
-				}
-
-				try {
-					ftp.disconnect();
-				} catch (IOException e) {
-					Util.debug(e.getLocalizedMessage(), this);
-				}
-
-				Util.debug("done ftp", this);
-			}
-		};
-
-		// } */
-		
+	
 		
 	}
 }

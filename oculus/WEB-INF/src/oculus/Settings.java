@@ -3,7 +3,6 @@ package oculus;
 import java.io.*;
 import java.util.Properties;
 
-import com.sun.org.apache.xml.internal.serializer.utils.Utils;
 
 public class Settings {
 
@@ -12,6 +11,7 @@ public class Settings {
 	public static String settingsfile;
 	public static String movesfile;
 	public static String stdout;
+	public static String ftpconfig;
 	
 	// put all constants here
 	public static final String emailalerts = "emailalerts";
@@ -23,7 +23,6 @@ public class Settings {
 	
 	public final static String sep = System.getProperty("file.separator");
 	public static String os = "windows" ;  //  "linux" or "windows" 
-
 	
 	/** create new file if missing */
 	public Settings(){
@@ -31,6 +30,8 @@ public class Settings {
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
 		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
+		
+		ftpconfig = System.getenv("RED5_HOME") +sep+"conf"+sep+"ftp.properties";
 		loginactivity = System.getenv("RED5_HOME") +sep+"log"+sep+"loginactivity.txt";
 		settingsfile = System.getenv("RED5_HOME") +sep+"conf"+sep+"oculus_settings.txt";
 		movesfile = System.getenv("RED5_HOME") +sep+"log"+sep+"moves.txt";
@@ -524,6 +525,8 @@ public class Settings {
 	public boolean getBoolean(OptionalSettings setting) {
 		return getBoolean(setting.toString());
 	}
-	
-	
+
+	public int getInteger(OptionalSettings settings) {
+		return getInteger(settings.toString());
+	}	
 }
