@@ -18,7 +18,7 @@ import java.util.Vector;
 public class Util {
 
 	private static final String os  = System.getProperty("os.name"); 
-//	private static final boolean developer = new Settings().getBoolean(OptionalSettings.developer);
+	private static final boolean debug = new Settings().getBoolean(OptionalSettings.debugenabled);
 	private static final int PRECISION = 2;
 	
 	/**
@@ -449,7 +449,7 @@ public class Util {
 	
 
 	public static void debug(String str, Object c) {
-		System.out.println("DEBUG: " + c.getClass().getName() + ", " +str);
+		if(debug) System.out.println("DEBUG: " + c.getClass().getName() + ", " +str);
 	}
 
 	public static void log(String str, Object c) {
@@ -457,6 +457,6 @@ public class Util {
 	}
 
 	public static void log(String str) {
-		System.out.println("OCULUS: Util, " +str);
+		System.out.println("OCULUS: static, " +str);
 	}
 }

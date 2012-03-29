@@ -57,7 +57,7 @@ public class UpdateFTP implements Observer {
 	@Override
 	public void updated(final String key) {
 
-		Util.debug("_ftp updated checking: " + key, this);
+		Util.debug("___ftp updated checking: " + key, this);
 		
 		new Thread(new Runnable() {
 			@Override
@@ -65,16 +65,23 @@ public class UpdateFTP implements Observer {
 				
 				try {
 					
-					Util.debug(i++ + " ftp connecting", this);
-					
 					ftp.connect(host, port, user, pass);
 					ftp.cwd(folder);
 					
 					ftp.storString("ip.php", state.get(State.externaladdress));
 					ftp.storString("last.php", new java.util.Date().toString());
 					ftp.storString("user.php", System.getProperty("user.name"));
-					ftp.storString("users.php", new LoginRecords().toString());
+					
+					// String stats = state.toString();
+					// if(stats!=null) ftp.storString("state.php", "<html><body>"+ stats.replaceAll(" : ", "<br>") + "</body</html>");
+					// if(stats!=null) 
+					
 					ftp.storString("state.php", state.toString());
+
+					// String log = new LoginRecords().toString();
+					// if(log!=null)
+						
+					ftp.storString("users.php",  new LoginRecords().toString());
 					
 					ftp.disconnect();
 					

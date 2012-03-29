@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import oculus.Util;
+
 /**
  * Basic FTP functionality 
  */
@@ -26,10 +28,10 @@ public class FTP {
 	 */
     public synchronized void connect(String host, String port, String user, String pass) throws IOException {
 
-    	System.out.println("_host : " + host );
-    	System.out.println("port : " + port );
-    	System.out.println("user : " + user );
-    	System.out.println("pass : " + pass );
+    	// System.out.println("host : " + host );
+    	// System.out.println("port : " + port );
+    	// System.out.println("user : " + user );
+    	// System.out.println("pass : " + pass );
     	
         socket = new Socket(host, Integer.parseInt(port));
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -53,13 +55,9 @@ public class FTP {
             throw new IOException("bad password: " + response);
     }
 
-    /**
-     * Disconnects from the FTP server.
-     */
+    /** Disconnects from the FTP server. */
     public synchronized void disconnect() throws IOException {
-
         try {
-
             sendLine("QUIT");
             if(socket.isConnected())socket.close();
         }
@@ -83,7 +81,9 @@ public class FTP {
     /**
      *  Sends a file to be stored on the FTP server.
      */
-    public synchronized boolean storString(String filename, String input) throws IOException {
+    public synchronized boolean storString(final String filename, final String input) throws IOException {
+    	
+    	if((filename== null) || (input==null)) return false;
     	
     	ascii();
         sendLine("PASV");
@@ -114,7 +114,9 @@ public class FTP {
         // 
         sendLine("STOR " + filename);
         Socket dataSocket = new Socket(ip, port);
-     
+        
+        Util.log("ftp connected: " + dataSocket.toString() + " " + filename);
+        
         response = readLine();
         if (!response.startsWith("150 ")) {
             throw new IOException("bad perms to send the file");
