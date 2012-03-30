@@ -105,12 +105,12 @@ public class BatteryLife {
 	public void battStats() { 
 		
 		if(app == null){
-			System.out.println("app not yet configured");
+			Util.debug("app not yet configured", this);
 			return;
 		}
 		
 		if(batterypresent == false){
-			System.out.println("no battery found");
+			Util.debug("no battery found", this);
 			return;
 		}
 		
@@ -118,7 +118,7 @@ public class BatteryLife {
 			public void run() {
 			
 				if (batterypresent == false) {
-					System.out.println("no batery found in thread");
+					Util.debug("no battery found", this);
 					return;
 				}
 				
