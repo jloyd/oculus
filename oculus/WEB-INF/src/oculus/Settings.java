@@ -22,6 +22,7 @@ public class Settings {
 	public static final int ERROR = -1;
 	
 	public final static String sep = System.getProperty("file.separator");
+	public static final String pushtotalk = "pushtotalk";
 	public static String os = "windows" ;  //  "linux" or "windows" 
 	
 	/** create new file if missing */

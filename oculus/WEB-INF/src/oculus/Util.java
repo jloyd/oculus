@@ -449,14 +449,14 @@ public class Util {
 	
 
 	public static void debug(String str, Object c) {
-		if(debug) System.out.println("DEBUG: " + c.getClass().getName() + ", " +str);
+		System.out.println("DEBUG: " + c.getClass().getName() + ", " +str+", "+getTime());
 	}
 
 	public static void log(String str, Object c) {
-		System.out.println("OCULUS: " + c.getClass().getName() + ", " +str);
+		System.out.println("OCULUS: " + c.getClass().getName() + ", " +str+", "+getTime());
 	}
 
 	public static void log(String str) {
-		System.out.println("OCULUS: static, " +str);
+		System.out.println("OCULUS: Util, " +str+", "+getTime());
 	}
 }

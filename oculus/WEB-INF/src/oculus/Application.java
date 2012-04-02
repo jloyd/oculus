@@ -373,7 +373,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 			str = state.get(State.user) + " connected from: " + player.getRemoteAddress();
 			messageGrabber(str, "connection " + state.get(State.user) + "&nbsp;connected");
-			System.out.println("OCULUS: playersignin(), " + str);
+			Util.log("playersignin(), " + str, this);
 			loginRecords.beDriver();
 			
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
@@ -679,6 +679,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			setGrabberVideoSoundMode(str);
 			messageplayer("video/sound mode set to: "+str, null, null);
 			break;
+		case pushtotalktoggle:
+			settings.writeSettings("pushtotalk", str);
+			messageplayer("self mic push T to talk "+str, null, null);
+			break;
+			
 		}
 	}
 
@@ -1141,6 +1146,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str += " vidctroffset " + settings.readSetting("vidctroffset");
 			str += " rovvolume " + settings.readSetting(Settings.volume);
 			str += " stream " + stream + " selfstream stop";
+			str += " pushtotalk " + settings.readSetting("pushtotalk");
 			if (loginRecords.isAdmin())
 				str += " admin true";
 			if (state.get(State.dockstatus) != null)
@@ -1463,8 +1469,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 				int height = Integer.parseInt(vals[1]);
 				int fps = Integer.parseInt(vals[2]);
 				int quality = Integer.parseInt(vals[3]);
+				boolean pushtotalk = settings.getBoolean(Settings.pushtotalk);
 				sc.invoke("publish", new Object[] { str, width, height, fps,
-						quality });
+						quality, pushtotalk });
 				// sc.invoke("publish", new Object[] { str, 160, 120, 8, 85 });
 				new Thread(new Runnable() {
 					public void run() {
@@ -1477,12 +1484,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 						playerstream = true;
 					}
 				}).start();
-				System.out.println("OCULUS: player broadcast start");
+				Util.log("OCULUS: player broadcast start", this);
 			} else {
-				sc.invoke("publish", new Object[] { "stop", null, null, null,null });
+				sc.invoke("publish", new Object[] { "stop", null, null, null,null,null });
 				grabberPlayPlayer(0);
 				playerstream = false;
-				System.out.println("OCULUS: player broadcast stop");
+				Util.log("OCULUS: player broadcast stop",this);
 			}
 		}
 	}

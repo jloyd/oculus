@@ -65,6 +65,7 @@ var xmlhttp=null;
 var spotlightlevel = -1;
 var videoscale = 100;
 var pingcountertimer;
+var pushtotalk;
 
 function loaded() {
 	if (clicksteeron) { clicksteer("on"); }
@@ -368,7 +369,7 @@ function setstatus(status, value) {
 	}
 	if (status=="vidctroffset") { ctroffset = parseInt(value); }
 	//if (status=="motion" && value=="disabled") { motionenabled = false; }
-	if (value == "connected" && !connected) { // initialize
+	if (status=="connection" && value == "connected" && !connected) { // initialize
 		overlay("off");
 		countdowntostatuscheck(); 
 		connected = true;
@@ -418,6 +419,16 @@ function setstatus(status, value) {
 	}
 	if (status == "developer") { document.getElementById("developermenu").style.display = ""; }
 	if (status == "debug") { debug(value); }
+	if (status=="pushtotalk") {
+		if (value=="false") {
+			pushtotalk = false;
+			getFlashMovie("oculus_player").unmutePlayerMic();
+		}
+		else {
+			pushtotalk = true;
+			getFlashMovie("oculus_player").mutePlayerMic();
+		}
+	}
  
 }
 
@@ -492,7 +503,7 @@ function keyBoardPressed(event) {
 		if (keycode == 86) { camera('downabit'); } // v
 		if (steeringmode == "forward") { document.getElementById("forward").style.backgroundImage = "none"; }
 		
-		if (keycode == 84 && broadcastmicon==false && (broadcasting=="mic" || broadcasting=="camandmic")) { // T
+		if (keycode == 84 && broadcastmicon==false && pushtotalk==true && (broadcasting=="mic" || broadcasting=="camandmic")) { // T
 			getFlashMovie("oculus_player").unmutePlayerMic();
 			broadcastmicon = true;
 			setstatus("selfstream","mic ON");
@@ -504,13 +515,35 @@ function keyBoardPressed(event) {
 function keyBoardReleased(event) {
 	if (enablekeyboard) {
 		var keycode = event.keyCode;
-		if (keycode == 84 && (broadcasting=="mic" || broadcasting=="camandmic")) {
+		if (keycode == 84 && pushtotalk==true && (broadcasting=="mic" || broadcasting=="camandmic")) {
 			getFlashMovie("oculus_player").mutePlayerMic();
 			setstatus("selfstream",broadcasting);
 			broadcastmicon = false;
 			//message("mute player mic", "orange");
 		}
 	}
+}
+
+function pushtotalktoggle() {
+	var str;
+	if (pushtotalk) {
+		pushtotalk = false;
+		getFlashMovie("oculus_player").unmutePlayerMic();
+		str = "false";
+	}
+	else {
+		pushtotalk = true;
+		getFlashMovie("oculus_player").mutePlayerMic();
+		str = "true";			
+	}
+	if (broadcasting=="mic" || broadcasting=="camandmic") {
+		setstatus("selfstream",broadcasting);
+		if (str=="true") { broadcastmicon  = false; }
+		else { broadcastmicon = true; }
+	}
+	message("sending: sending push T to talk "+str, sentcmdcolor);
+	callServer("pushtotalktoggle", str);
+	lagtimer = new Date().getTime(); // has to be *after* message()
 }
 
 function motionenabletoggle() {

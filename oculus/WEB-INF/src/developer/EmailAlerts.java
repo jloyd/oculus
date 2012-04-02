@@ -51,7 +51,7 @@ public class EmailAlerts implements Observer {
 			new SendMail("Oculus Message", msg, app); 
 			
 			// stop listening 
-			// state.removeObserver(this);
+//			state.removeObserver(this);
 			
 			// TODO: trigger auto dock
 			// app.autodock();
