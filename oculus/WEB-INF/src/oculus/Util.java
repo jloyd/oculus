@@ -449,7 +449,7 @@ public class Util {
 	
 
 	public static void debug(String str, Object c) {
-		System.out.println("DEBUG: " + c.getClass().getName() + ", " +str+", "+getTime());
+		if(debug) System.out.println("DEBUG: " + c.getClass().getName() + ", " +str+", "+getTime());
 	}
 
 	public static void log(String str, Object c) {
