@@ -26,8 +26,8 @@ public class LightsComm implements SerialPortEventListener {
 	
 	public static final byte GET_PRODUCT = 'x';
 	public static final byte GET_VERSION = 'y';
-	private static final byte DOCK_ON = 'o';
-	private static final byte DOCK_OFF = 'f';
+	private static final byte DOCK_ON = 'w';
+	private static final byte DOCK_OFF = 'o';
 	public static final byte SPOT_OFF = 'a';
 	public static final byte SPOT_1 = 'b';
 	public static final byte SPOT_2 = 'c';
