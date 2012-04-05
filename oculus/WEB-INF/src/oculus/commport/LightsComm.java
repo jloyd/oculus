@@ -147,8 +147,8 @@ public class LightsComm implements SerialPortEventListener {
 				for (int j = 0; j < read; j++){
 					if((input[j] != 10) && (input[j] != 13)){
 						// str += (char) input[j];
-						if(commands.contains((char) input[j])){	
-							commands.remove(new Character((char) input[j]));
+						if(commands.contains((byte) input[j])){	
+							commands.remove((byte) input[j]);
 						}
 					}
 				}
@@ -157,14 +157,14 @@ public class LightsComm implements SerialPortEventListener {
 				if(commands.size() > TOO_MANY_COMMANDS) error();
 				
 				// re-send if not replied 
-				if(commands.size() > (TOO_MANY_COMMANDS/2)){
+				//if(commands.size() > (TOO_MANY_COMMANDS/3)){
 					Util.debug("command buffer" + commands.toString(), this);
 					
 					//for(int i = 0 ; i < commands.size() ; i++ )
 						//sendCommand(commands.get(i));
 					
 					///commands.clear();
-				}
+				//}
 				
 				// really, we just care are getting replies.
 				lastRead = System.currentTimeMillis();
