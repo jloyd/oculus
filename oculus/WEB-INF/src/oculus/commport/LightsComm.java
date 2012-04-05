@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.TooManyListenersException;
+import java.util.Vector;
 
 import developer.SendMail;
 
@@ -17,12 +18,12 @@ import oculus.State;
 import oculus.Util;
 
 public class LightsComm implements SerialPortEventListener {
-
-	private State state = State.getReference();
+	
 	public static final long DEAD_MAN_TIME_OUT = 30000;
 	public static final long USER_TIME_OUT = 20 * 60000;
-	public static final int BAUD_RATE = 57600;
-	public static final int SETUP = 2000;
+	public static final int TOO_MANY_COMMANDS = 10;
+	private static final int BAUD_RATE = 57600;
+	private static final int SETUP = 2000;
 	
 	public static final byte GET_PRODUCT = 'x';
 	public static final byte GET_VERSION = 'y';
@@ -44,6 +45,10 @@ public class LightsComm implements SerialPortEventListener {
 	private InputStream in= null;
 	private OutputStream out= null;
 	
+	// TODO: 
+	// put error state in global object 
+	private State state = State.getReference();
+	
 	// will be discovered from the device 
 	protected String version = null;
 
@@ -51,6 +56,9 @@ public class LightsComm implements SerialPortEventListener {
 	private long lastSent = System.currentTimeMillis();
 	private long lastRead = System.currentTimeMillis();
 	private long lastUserCommand = System.currentTimeMillis();
+	
+	// track the out going and in comming commands 
+	private Vector<Byte> commands = new Vector<Byte>();
 
 	// make sure all threads know if connected 
 	private boolean isconnected = false;
@@ -133,18 +141,34 @@ public class LightsComm implements SerialPortEventListener {
 		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
 				byte[] input = new byte[32];
-				
 				int read = in.read(input);
-				Util.log("bytes in: " + read, this);
-			
-				String str = "";
+				// Util.log("bytes in: " + read, this);
+				// String str = new String();
 				for (int j = 0; j < read; j++){
-					str += (char) input[j] + "\n";
-					Util.log(j + " - com read delta: " + getReadDelta() + " read[" + str.trim() + "]", this);
+					if((input[j] != 10) && (input[j] != 13)){
+						// str += (char) input[j];
+						if(commands.contains((char) input[j])){	
+							commands.remove(new Character((char) input[j]));
+						}
+					}
+				}
+				
+				// error state also 
+				if(commands.size() > TOO_MANY_COMMANDS) error();
+				
+				// re-send if not replied 
+				if(commands.size() > (TOO_MANY_COMMANDS/2)){
+					Util.debug("command buffer" + commands.toString(), this);
+					
+					//for(int i = 0 ; i < commands.size() ; i++ )
+						//sendCommand(commands.get(i));
+					
+					///commands.clear();
 				}
 				
 				// really, we just care are getting replies.
 				lastRead = System.currentTimeMillis();
+				
 			
 			} catch (IOException e) {
 				Util.log("event : " + e.getMessage(), this);
@@ -163,7 +187,8 @@ public class LightsComm implements SerialPortEventListener {
 			Util.delay(SETUP);
 			while (true) {
 				
-				Util.debug("read delta: " + getReadDelta() + " write delta: " + getWriteDelta() + " user: " + (System.currentTimeMillis() - lastUserCommand), this);
+				Util.debug("cmds: " + commands.size() + " read delta: " + getReadDelta() + " write delta: " + getWriteDelta()
+						+ " user: " + (System.currentTimeMillis() - lastUserCommand), this);
 				
 				if((System.currentTimeMillis() - lastUserCommand) > USER_TIME_OUT){
 					if(floodLightOn || (spotLightBrightness>0)){
@@ -177,7 +202,7 @@ public class LightsComm implements SerialPortEventListener {
 				}
 				
 				// refresh values
-				if(getReadDelta() > (DEAD_MAN_TIME_OUT/2)){
+				if(getReadDelta() > (DEAD_MAN_TIME_OUT/3)){
 					
 					Util.debug("spotLightBrightness = " + spotLightBrightness, this);
 					
@@ -199,22 +224,22 @@ public class LightsComm implements SerialPortEventListener {
 				}
 				
 				// error state
-				if(getReadDelta() > DEAD_MAN_TIME_OUT){
-					
-					application.message("lights failure, time out!", null, null);
-					Util.debug("lights failure, time out!", this);
-					disconnect();
-					
-					new SendMail("lights error", "lights failure, time out, disconnecting" + " read delta: " + getReadDelta() + " write delta: " + getWriteDelta());
-					return; 
-				}
+				if(getReadDelta() > DEAD_MAN_TIME_OUT) error();
 				
 				Util.delay(SETUP);
-				
 			}		
 		}
 	}
 
+	/** */ 
+	public void error(){
+		disconnect();
+		application.message("lights failure, time out!", null, null);
+		Util.debug("lights failure, time out!", this);
+		new SendMail("lights error", "lights failure, time out, disconnecting with command buffer: " + commands.size() 
+				+ " read delta: " + getReadDelta() + " write delta: " + getWriteDelta());
+	}
+	
 	/** @return the time since last write() operation */
 	public long getWriteDelta() {
 		return System.currentTimeMillis() - lastSent;
@@ -247,10 +272,12 @@ public class LightsComm implements SerialPortEventListener {
 			lastSent = System.currentTimeMillis();
 			
 			Util.debug("send: " + (char)command, this);
+		
+			commands.add(command);
 		}
 	}
 
-	
+	/** */
 	public void reset(){
 		if (isconnected) {
 			new Thread(new Runnable() { 
