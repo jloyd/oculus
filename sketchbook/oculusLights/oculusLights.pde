@@ -43,10 +43,12 @@ void parseCommand(int cmd){
 
  if(cmd == 'x'){
    Serial.print('L');
+   return;
  }
 
  if(cmd == 'y'){
    Serial.print('1');
+   return;
  }
 
  if(cmd == 'o'){
@@ -102,6 +104,6 @@ void parseCommand(int cmd){
    OCR2B = 255;
  }
 
- Serial.print(cmd);
+ Serial.print((char)cmd);
 
 }
