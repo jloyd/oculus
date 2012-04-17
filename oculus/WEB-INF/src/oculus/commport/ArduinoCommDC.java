@@ -1,6 +1,7 @@
 package oculus.commport;
 
 import oculus.Application;
+import oculus.Settings;
 import oculus.State;
 import oculus.Util;
 
@@ -10,7 +11,7 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEventListener, ArduioPort {
-	
+
 	public ArduinoCommDC(Application app) {
 		super(app);
 
@@ -34,6 +35,8 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 			// register for serial events
 			serialPort.addEventListener(this);
 			serialPort.notifyOnDataAvailable(true);
+			
+//			if (Settings.os == "linux") { Util.delay(SETUP); }
 
 		} catch (Exception e) {
 			Util.log("could NOT connect to the motors on: " + state.get(State.serialport), this);

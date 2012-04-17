@@ -77,6 +77,8 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 				public void run() {
 					connect();
 					Util.delay(SETUP);
+					Util.log("Connected to the motors on: " + state.get(State.serialport), this);
+
 					byte[] cam = { CAM, (byte) camservopos };
 					sendCommand(cam);
 					Util.delay(camwait);

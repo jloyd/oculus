@@ -16,6 +16,7 @@ import developer.SendMail;
 import oculus.Application;
 import oculus.State;
 import oculus.Util;
+import oculus.commport.AbstractArduinoComm.Sender;
 
 public class LightsComm implements SerialPortEventListener {
 	
@@ -24,6 +25,7 @@ public class LightsComm implements SerialPortEventListener {
 	public static final int TOO_MANY_COMMANDS = 10;
 	private static final int BAUD_RATE = 57600;
 	private static final int SETUP = 2000;
+	public static final int WATCHDOG_DELAY = 5000;
 	
 	public static final byte GET_PRODUCT = 'x';
 	public static final byte GET_VERSION = 'y';
@@ -242,7 +244,8 @@ public class LightsComm implements SerialPortEventListener {
 				// error state
 				if(getReadDelta() > DEAD_MAN_TIME_OUT) error();
 				
-				Util.delay(SETUP);
+				sendCommand((byte) GET_VERSION);
+				Util.delay(WATCHDOG_DELAY);
 			}		
 		}
 	}
