@@ -163,7 +163,7 @@ public class LightsComm implements SerialPortEventListener {
 				//if(commands.size() > (TOO_MANY_COMMANDS/3)){
 				
 				
-				Util.debug("in: " + str.toString(), this);
+				//Util.debug("in: " + str.toString(), this);
 
 				//Util.debug("command buffer" + commands.toString(), this);
 					
@@ -205,8 +205,8 @@ public class LightsComm implements SerialPortEventListener {
 			Util.delay(SETUP);
 			while (true) {
 			
-				Util.debug(/* "cmds: " + commands.size() + */ " read delta: " + getReadDelta() + " write delta: " + getWriteDelta()
-						+ " user: " + (System.currentTimeMillis() - lastUserCommand), this);
+				//Util.debug(/* "cmds: " + commands.size() + */ " read delta: " + getReadDelta() + " write delta: " + getWriteDelta()
+			//			+ " user: " + (System.currentTimeMillis() - lastUserCommand), this);
 
 				if((System.currentTimeMillis() - lastUserCommand) > USER_TIME_OUT){
 					if(floodLightOn || (spotLightBrightness>0)){
@@ -222,7 +222,7 @@ public class LightsComm implements SerialPortEventListener {
 				// refresh values
 				if(getReadDelta() > (DEAD_MAN_TIME_OUT/3)){
 					
-					Util.debug("spotLightBrightness = " + spotLightBrightness, this);
+					//Util.debug("spotLightBrightness = " + spotLightBrightness, this);
 					
 					if(floodLightOn) sendCommand(DOCK_ON);
 					else if(!floodLightOn) sendCommand(DOCK_OFF);
@@ -290,7 +290,7 @@ public class LightsComm implements SerialPortEventListener {
 			}
 			lastSent = System.currentTimeMillis();
 			
-			Util.debug("send: " + (char)command, this);
+			//Util.debug("send: " + (char)command, this);
 
 		}
 	}

@@ -44,7 +44,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	public boolean holdservo;
 	
 	public int camservodirection = 0;
-	public int camservopos = camservohoriz;
+	public int camservopos; 
 	public int camwait = 400;
 	public int camdelay = 50;
 	public int speedfast = 255;
@@ -63,6 +63,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		speedslow = settings.getInteger("speedslow");
 		speedmed = settings.getInteger("speedmed");
 		camservohoriz = settings.getInteger("camservohoriz");
+		camservopos = camservohoriz;
 		camposmax = settings.getInteger("camposmax");
 		camposmin = settings.getInteger("camposmin");
 		nudgedelay = settings.getInteger("nudgedelay");
@@ -79,7 +80,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 					Util.delay(SETUP);
 					Util.log("Connected to the motors on: " + state.get(State.serialport), this);
 
-					byte[] cam = { CAM, (byte) camservopos };
+					byte[] cam = { CAM, (byte) camservohoriz };
 					sendCommand(cam);
 					Util.delay(camwait);
 					sendCommand(CAMRELEASE);

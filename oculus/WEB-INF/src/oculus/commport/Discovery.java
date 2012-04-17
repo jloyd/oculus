@@ -20,7 +20,7 @@ public class Discovery implements SerialPortEventListener {
 	private static Settings settings = new Settings();
 
 	/* serial port configuration parameters */
-	public static final int[] BAUD_RATES = { 57600, 115200 };
+	//public static final int[] BAUD_RATES = { 115200, 57600 };
 	public static final int TIMEOUT = 2000;
 	public static final int DATABITS = SerialPort.DATABITS_8;
 	public static final int STOPBITS = SerialPort.STOPBITS_1;
@@ -52,19 +52,6 @@ public class Discovery implements SerialPortEventListener {
 		
 		String motors = settings.readSetting(OptionalSettings.arduinoculus);
 		String lights = settings.readSetting(OptionalSettings.oculed);
-//		if (Settings.os.equals("linux")) {
-//			Util.log("skipping discovery, Linux OS", this);
-//			if (motors != null ) {
-//				Util.debug("linux motors port obtained from settings on: " + motors, this);
-//				state.set(State.serialport, motors);
-//				state.set(State.firmware, OCULUS_DC);
-//			}
-//			if (lights != null) {
-//				Util.debug("linux lights port obtained from settings on: " + lights, this);
-//				state.set(State.lightport, lights);
-//			}
-//			return;
-//		}
 		
 		getAvailableSerialPorts();
 		
@@ -76,7 +63,7 @@ public class Discovery implements SerialPortEventListener {
 		Util.debug("discovery starting on: " + ports.size() + " ports", this);
 		for(int i = ports.size() - 1; i >= 0; i--) 
 			Util.debug("[" + i + "] port name: " + ports.get(i), this);
-				
+		
 		if(motors == null){			
 			searchMotors(); 
 		} else {			
@@ -91,9 +78,7 @@ public class Discovery implements SerialPortEventListener {
 			Util.debug("skipping discovery, found lights on: " + lights, this);
 			state.set(State.lightport, lights);
 		}
-	
-		//validate();
-		// state.();
+
 	}
 	
 	/** */
@@ -109,28 +94,6 @@ public class Discovery implements SerialPortEventListener {
 				name += com.charAt(i);
 		
 		return name;
-	}
-	
-	/** */
-	private void validate(){
-		if (state.get(State.firmware) == null){
-			Util.debug("No motors detected, try again..", this);
-			searchMotors();
-		}
-		if (state.get(State.serialport) == null){
-			Util.debug("No motors detected, try again..", this);
-			searchMotors();
-		}
-		if (state.get(State.lightport) == null){ 
-			Util.debug("NO lights detected, try again..", this);
-			searchLights();
-		}
-		
-		// show state if problems 
-		if (state.get(State.firmware) == null || state.get(State.serialport) == null || state.get(State.lightport) == null) {
-			Util.debug("..can't find motors and/or lights", this);
-			Util.debug(state.toString(), this);
-		}
 	}
 	
 	/** */
@@ -162,11 +125,16 @@ public class Discovery implements SerialPortEventListener {
 			inputStream = serialPort.getInputStream();
 			outputStream = serialPort.getOutputStream();
 			
-			if (rate==115200) {
+			Util.log("connected: " + address + " buad:" + rate, this);
+			
+			if (true) { // rate==115200) {
+				Util.delay(TIMEOUT*2);
+				Util.debug("querying port... ",this);
 				doPortQuery();
 			}
 			else {
 				// register for serial events
+				Util.debug("registering port listeners... ",this);
 				serialPort.addEventListener(this);
 				serialPort.notifyOnDataAvailable(true);
 			}
@@ -181,7 +149,6 @@ public class Discovery implements SerialPortEventListener {
 		if (inputStream == null) return false;
 		if (outputStream == null) return false;
 
-		Util.log("connected: " + address + " buad:" + rate, this);
 		return true;
 	}
 
@@ -225,7 +192,8 @@ public class Discovery implements SerialPortEventListener {
 		
 		for (int i = ports.size() - 1; i >= 0; i--) {
 			if (state.get(State.lightport)!=null) { break; } // stop if find it
-			if (connect(ports.get(i), BAUD_RATES[0])) {	
+			//if (connect(ports.get(i), BAUD_RATES[0])) {	
+			if (connect(ports.get(i), 57600)) {
 				Util.delay(TIMEOUT*2);
 				if (serialPort != null) { close(); }
 			}
@@ -236,18 +204,17 @@ public class Discovery implements SerialPortEventListener {
 	public void searchMotors() {
 			
 		// try to limit searching 
-		String lights = settings.readSetting(OptionalSettings.oculed);
-		if(lights!=null){
-			Util.debug("removing lights port:" + ports.toString(), this);
-			ports.remove(lights);
-		}
+		if(state.get(State.lightport)!=null) 
+			if(ports.contains(state.get(State.lightport)))
+				ports.remove(state.get(State.lightport));
 		
 		Util.debug("discovery for motors starting on: " + ports.size(), this); 
 	
-		for (int i = ports.size() - 1; i >= 0; i--) {
-		//for (int i=0; i<ports.size(); i++) {
+		//for (int i = ports.size() - 1; i >= 0; i--) {
+		for (int i=0; i<ports.size(); i++) {
 			if (state.get(State.serialport)!=null) { break; } // stop if find it
-			if (connect(ports.get(i), BAUD_RATES[1])) {	
+			//if (connect(ports.get(i), BAUD_RATES[1])) {
+			if (connect(ports.get(i), 115200)) {
 				Util.delay(TIMEOUT*2);
 				if (serialPort != null) { close(); }
 			}
@@ -367,26 +334,6 @@ public class Discovery implements SerialPortEventListener {
 
 	/** match types of firmware names and versions */
 	public AbstractArduinoComm getMotors(Application application) {
-		// TODO Auto-generated method stub
-		
-		
-		
-		//new ArduinoCommDC(this);
-		// create matching class based on firmware
-		// Todo: state.equals(state.firmware, DiscoveryOc...); 
-		/*
-		if (state.get(State.firmware).equals(Discovery.OCULUS_SONAR)){
-			comport = new oculus.commport.ArduinoCommSonar(this);
-		} else if (state.get(State.firmware).equals(Discovery.OCULUS_TILT)){
-			comport = new oculus.commport.ArduinoTilt(this);
-		} else {
-		*/
-		
-		// comport = new ArduinoCommDC(this);
-		
-		//}
-		
-		
 		return new ArduinoCommDC(application);
 	}
 	
