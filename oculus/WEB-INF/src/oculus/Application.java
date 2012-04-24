@@ -661,13 +661,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case holdservo:
 			if (str.equalsIgnoreCase("true")) {
 				comport.holdservo = true;
-				settings.writeSettings(FactorySettings.holdservo.toString(),
-						str);
 			} else {
 				comport.holdservo = false;
-				settings.writeSettings(FactorySettings.holdservo.toString(),
-						str);
 			}
+			settings.writeSettings(FactorySettings.holdservo.toString(), str);
 			messageplayer("holdservo " + str, null, null);
 			break;
 		case opennisensor:

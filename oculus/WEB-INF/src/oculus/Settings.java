@@ -333,6 +333,7 @@ public class Settings {
 	public void writeSettings(String setting, String value) {
 		value = value.trim();
 		FileInputStream filein;
+//		Util.debug("attempting setting of: "+setting+" "+value, this);
 		
 		// TODO: WHOA BAD, USE VECTOR 
 		// what the heck is a Vector, Victor?
@@ -346,9 +347,10 @@ public class Settings {
 			int i = 0;
 			while ((lines[i] = reader.readLine()) != null) {
 				String items[] = lines[i].split(" ");
-				if(items.length!=2){
+				if(items.length==2){
 					if ((items[0].toUpperCase()).equals(setting.toUpperCase())) {
 						lines[i] = setting + " " + value;
+//						Util.debug(lines[i], this);
 					}
 				}
 				i++;
