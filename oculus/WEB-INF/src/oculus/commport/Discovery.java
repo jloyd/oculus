@@ -56,15 +56,15 @@ public class Discovery implements SerialPortEventListener {
 		getAvailableSerialPorts();
 		
 		if(ports.size()==0){
-			Util.log("no serial ports found", this);
+			Util.log("no serial ports found on host, fatal", this);
 			return;
 		}
 		
-		Util.debug("discovery starting on: " + ports.size() + " ports", this);
-		for(int i = ports.size() - 1; i >= 0; i--) 
-			Util.debug("[" + i + "] port name: " + ports.get(i), this);
-		
-		if(motors == null){			
+		if(motors == null){		
+			Util.debug("discovery starting on: " + ports.size() + " ports", this);
+			for(int i = ports.size() - 1; i >= 0; i--) 
+				Util.debug("[" + i + "] port name: " + ports.get(i), this);
+			
 			searchMotors(); 
 		} else {			
 			Util.debug("skipping discovery, found motors on: " + motors, this);
@@ -73,12 +73,15 @@ public class Discovery implements SerialPortEventListener {
 		}
 		
 		if(lights == null){
+			Util.debug("discovery starting on: " + ports.size() + " ports", this);
+			for(int i = ports.size() - 1; i >= 0; i--) 
+				Util.debug("[" + i + "] port name: " + ports.get(i), this);
+			
 			searchLights();	
 		} else {
 			Util.debug("skipping discovery, found lights on: " + lights, this);
 			state.set(State.lightport, lights);
 		}
-
 	}
 	
 	/** */

@@ -33,8 +33,11 @@ public enum FactorySettings {
 		config.setProperty(vfull.toString(), "640_480_8_95");
 		config.setProperty(vcustom.toString(), "1024_768_8_85");
 		config.setProperty(vset.toString(), "vmed");
+		config.setProperty(selfmicpushtotalk.toString(), "true");
+		config.setProperty(pushtotalk.toString(), "true");
 		config.setProperty(maxclicknudgedelay.toString(), "580");
 		config.setProperty(clicknudgemomentummult.toString(), "0.7");
+		config.setProperty(clicknudgedelaymomentumfactor.toString(), "0.7");
 		config.setProperty(maxclickcam.toString(), "14");
 		config.setProperty(volume.toString(), "20");
 		config.setProperty(muteonrovmove.toString(), "true"); 

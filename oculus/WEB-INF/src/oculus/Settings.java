@@ -38,6 +38,10 @@ public class Settings {
 		movesfile = System.getenv("RED5_HOME") +sep+"log"+sep+"moves.txt";
 		stdout = System.getenv("RED5_HOME") +sep+"log"+sep+"jvm.stdout";
 		
+		// if red5 home lookup fails when using junit
+		if(settingsfile.startsWith("null"))
+			settingsfile = "./../" + settingsfile.substring("null/".length(), settingsfile.length());
+		
 		// be sure of basic configuration 
 		if( ! new File(settingsfile).exists()) FactorySettings.createFile();
 	}
