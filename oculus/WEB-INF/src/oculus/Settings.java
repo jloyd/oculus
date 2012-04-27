@@ -31,7 +31,7 @@ public class Settings {
 		
 		// if red5 home lookup fails when using JUnit
 		String redhome = System.getenv("RED5_HOME");
-		if(redhome==null) redhome = "." + sep + ".." +sep + ".." + sep +".." + sep;
+		if(redhome==null) redhome = /*"." + sep + ".." +sep + */ ".." + sep +".." + sep;
 		
 		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
 		
