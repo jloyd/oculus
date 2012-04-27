@@ -82,11 +82,5 @@ public class SettingsTest {
 		cords = settings.readSetting(OptionalSettings.vself.toString()).split("_");
 		if(cords.length!=4) fail("vself options are invalid in settings file"); 
 		
-		/*for (OptionalSettings factory : OptionalSettings.values()) {
-			String val = factory.toString();
-			if (!defaults.containsKey(val))
-				fail("optional setting missing: " + factory.toString());
-		}*/
-		
 	}
 }

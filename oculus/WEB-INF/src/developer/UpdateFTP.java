@@ -17,11 +17,9 @@ public class UpdateFTP implements Observer {
 	// private static final int WARN_LEVEL = 40;
 	
 	private static State state = State.getReference();
-	// private static Settings settings = new Settings();
 	private static FTP ftp = new FTP();
 
 	private String host, port, user, pass, folder;
-	int i = 0;
 	
 	public static boolean configured(){
 		File propfile = new File(Settings.ftpconfig);
@@ -47,7 +45,7 @@ public class UpdateFTP implements Observer {
 		host = (String) props.getProperty("host", "localhost");
 		folder = (String) props.getProperty("folder", "telemetry");
 		port = (String) props.getProperty("port", "21");
-		pass = props.getProperty("password", "zdy");
+		pass = props.getProperty("password");
 		
 		state.addObserver(this);
 		Util.debug("starting FTP alerts...", this);
