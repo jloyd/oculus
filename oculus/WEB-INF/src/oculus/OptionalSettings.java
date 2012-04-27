@@ -5,12 +5,14 @@ import java.util.Properties;
 /** place extensions to settings here */
 public enum OptionalSettings {
 	
-	debugenabled, emailaddress, emailpassword, developer, commandport, stopdelay, vself, offcenter, aboutface, arduinoculus, oculed;
+	emailaddress, emailpassword, developer, debugenabled, commandport, stopdelay, vself, offcenter, aboutface, arduinoculus, oculed;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
 		Properties config = FactorySettings.createDeaults();
 		config.setProperty(developer.toString(), "false");
+		config.setProperty(debugenabled.toString(), "false");
+		config.setProperty(stopdelay.toString(), "0");
 		config.setProperty(commandport.toString(), "4444");
 		config.setProperty(vself.toString(), "320_240_8_85");
 		return config;

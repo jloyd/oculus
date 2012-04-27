@@ -3,7 +3,6 @@ package oculus;
 import java.io.*;
 import java.util.Properties;
 
-
 public class Settings {
 
 	public static String framefile;
@@ -15,10 +14,10 @@ public class Settings {
 	
 	// put all constants here
 	// public static final String emailalerts = "emailalerts";
-	public static final String volume = "volume";
 	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
 	public static final String developer = "developer";
+	public static final String volume = "volume";
 	public static final int ERROR = -1;
 	
 	public final static String sep = System.getProperty("file.separator");
@@ -30,20 +29,23 @@ public class Settings {
 		
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
+		// if red5 home lookup fails when using JUnit
+		String redhome = System.getenv("RED5_HOME");
+		if(redhome==null) redhome = "." + sep + ".." +sep + ".." + sep +".." + sep;
+		
 		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
 		
-		ftpconfig = System.getenv("RED5_HOME") +sep+"conf"+sep+"ftp.properties";
-		loginactivity = System.getenv("RED5_HOME") +sep+"log"+sep+"loginactivity.txt";
-		settingsfile = System.getenv("RED5_HOME") +sep+"conf"+sep+"oculus_settings.txt";
-		movesfile = System.getenv("RED5_HOME") +sep+"log"+sep+"moves.txt";
-		stdout = System.getenv("RED5_HOME") +sep+"log"+sep+"jvm.stdout";
-		
-		// if red5 home lookup fails when using junit
-		if(settingsfile.startsWith("null"))
-			settingsfile = "./../" + settingsfile.substring("null/".length(), settingsfile.length());
+		ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
+		loginactivity = redhome+sep+"log"+sep+"loginactivity.txt";
+		settingsfile = redhome+sep+"conf"+sep+"oculus_settings.txt";
+		movesfile = redhome+sep+"log"+sep+"moves.txt";
+		stdout = redhome+sep+"log"+sep+"jvm.stdout";
 		
 		// be sure of basic configuration 
-		if( ! new File(settingsfile).exists()) FactorySettings.createFile();
+		if( ! new File(settingsfile).exists()) {
+			Util.log("warning, settings file created with defaults.", this);
+			FactorySettings.createFile();
+		}
 	}
 
 	/**
