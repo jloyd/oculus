@@ -1,3 +1,13 @@
+/*
+OcuLED 
+send single byte commands:
+x : hardware description (returns 'L' for 'lights')
+y : firmware version
+o : floodlight off
+w : floodlight on
+a-k : spotlight 0-100%
+*/
+
 const int lightPinA = 3;
 const int lightPinB = 11;
 const int dockLightPin = 5;
