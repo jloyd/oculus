@@ -7,6 +7,7 @@ import java.util.Vector;
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 
 import oculus.Application;
+import oculus.BatteryLife;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
@@ -26,14 +27,15 @@ public class CommandServer implements Observer {
 	private static Application app = null;
 
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
+	private static BatteryLife battery = BatteryLife.getReference(); 
 	private static oculus.State state = oculus.State.getReference();
 	private static LoginRecords records = new LoginRecords();
-	private static oculus.Settings settings;
+	private static oculus.Settings settings = new Settings(); 	
+	
 	
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread {
 	
-		private oculus.State state = oculus.State.getReference();
 		private Socket clientSocket = null;
 		private BufferedReader in = null;
 		private PrintWriter out = null;
@@ -49,7 +51,7 @@ public class CommandServer implements Observer {
 				out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
 			
 			} catch (IOException e) {				
-				System.out.println("OCULUS: fail aquire tcp streams: " + e.getMessage());
+				Util.log("fail aquire tcp streams: " + e.getMessage(), this);
 				shutDown();
 				return;
 			}
@@ -63,13 +65,8 @@ public class CommandServer implements Observer {
 				final String inputstr = in.readLine();
 				user = inputstr.substring(0, inputstr.indexOf(':')).trim();
 				pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
-				
-				// sendToGroup(clientSocket.getInetAddress() + " attempt by " + user);
-				
+								
 				if(app.logintest(user, pass)==null){
-					
-					// was plain text password?
-					// System.out.println("plain text pass word sent from: " + clientSocket.getInetAddress());
 					
 				    ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 					passwordEncryptor.setAlgorithm("SHA-1");
@@ -96,7 +93,6 @@ public class CommandServer implements Observer {
 		@Override
 		public void run() {
 			
-			//out.println("state override true");
 			state.set(oculus.State.override, true);
 		
 			Util.beep();
@@ -120,8 +116,9 @@ public class CommandServer implements Observer {
 					str = str.trim();
 					if(str.length()>1){
 						
-						//if(settings.getBoolean(Settings.developer))	
 						Util.debug("address [" + clientSocket + "] message [" + str + "]", this);
+						
+						out.println("echo: "+str);
 						
 						// do both for now 
 						manageCommand(str);
@@ -133,13 +130,12 @@ public class CommandServer implements Observer {
 				}
 			} catch (Exception e) {
 				System.out.println("OCULUS: command server read thread, " + e.getMessage());
-				// e.printStackTrace(System.out);
 				shutDown();
 			}
 		}
 
 		public void doPlayer(String str){
-			Util.log("doplayer(), " + str, this);			
+			Util.log("__doplayer(), " + str, this);			
 			int index = str.indexOf(" ");
 			if(index == -1){
 				app.playerCallServer(str, null);
@@ -160,8 +156,6 @@ public class CommandServer implements Observer {
 
 			// log to console, and notify other users of leaving
 			System.out.println("OCULUS: command server: closing socket [" + clientSocket + "]");
-			
-			// sendToGroup(clientSocket.getInetAddress() + " has left the group.");
 
 			try {
 
@@ -182,9 +176,7 @@ public class CommandServer implements Observer {
 			final String[] cmd = str.split(" ");
 				
 			if(cmd[0].equals("tail")) {
-				
-				// default if not set 
-				int lines = 30;
+				int lines = 30; // default if not set 
 				if(cmd.length==2) lines = Integer.parseInt(cmd[1]);
 				String log = Util.tail(new File(oculus.Settings.stdout), lines);
 				
@@ -193,7 +185,7 @@ public class CommandServer implements Observer {
 						out.println(log);
 			}
 			
-			//if(cmd[0].equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
+			if(cmd[0].equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
 					
 			//TODO: TEST 
 			if(cmd[0].equals("home")) 
@@ -205,26 +197,11 @@ public class CommandServer implements Observer {
 				Util.systemCall("java -classpath \"./webapps/oculus/WEB-INF/classes/\" developer.terminal.ScriptServer " 
 						+ state.get(oculus.State.localaddress) + " " + serverSocket.getLocalPort() + " " + user + " " + pass + " " + cmd[1]); 
 			
-			// if(cmd[0].equals("purge")) state.purgeListeners();
-			
-			// if(cmd[0].equals("stop")) port.stopGoing();
-				
 			if(cmd[0].equals("restart")) app.restart(); 
 		
-			// if(cmd[0].equals("softwareupdate")) app.softwareUpdate("update"); 
+			if(cmd[0].equals("softwareupdate")) app.softwareUpdate("update"); 
 			
 			if(cmd[0].equals("image")) { app.frameGrab(); }
-				
-				// remove ?
-				// while(state.getBoolean(oculus.State.framegrabbusy)){
-				//	System.out.println("... cmd mgr, grab waiting....");
-				//	Util.delay(300);
-				//}
-	
-				// state change will be seen anyway 
-				//out.println("done frame grab");
-				//System.out.println("... done image grab ...");
-				// }
 			
 			/*
 			if(cmd[0].equals("move")){
@@ -241,30 +218,20 @@ public class CommandServer implements Observer {
 			*/
 			
 			if(cmd[0].equals("cam")){ app.publish("camera"); }
-			//	port.camHoriz();
-			//	port.camCommand("down");
-			//	Util.delay(1500);
-			//	port.camCommand("stop");
-			//}
 			
-			if(cmd[0].equals("memory")) {
-				
+			if(cmd[0].equals("memory")) {		
 				out.println("memory : " +
 						((double)Runtime.getRuntime().freeMemory()
-								/ (double)Runtime.getRuntime().totalMemory()) + "%");
+								/ (double)Runtime.getRuntime().totalMemory()) + " %");
 				
 				out.println("memorytotal : "+Runtime.getRuntime().totalMemory());    
 			    out.println("memoryfree : "+Runtime.getRuntime().freeMemory());
-			
 			}
 			
 			if(cmd[0].equals("bye")) { out.print("bye"); shutDown(); }
 						
 			if(cmd[0].equals("find")) {
 				
-				out.println("disabled");
-				
-				/*
 				if(state.getBoolean(oculus.State.dockgrabbusy)){
 				
 					Util.log("calling _find_ too often.", this);
@@ -272,7 +239,7 @@ public class CommandServer implements Observer {
 					
 				} else {
 					
-		//			state.set(oculus.State.dockgrabbusy, true);
+					state.set(oculus.State.dockgrabbusy, true);
 					
 					new Thread(new Runnable() {
 						
@@ -283,39 +250,24 @@ public class CommandServer implements Observer {
 							long start = System.currentTimeMillis();
 
 							// are the same thing 
-							// app.playerCallServer(PlayerCommands.dockgrab, null);
 							app.dockGrab();
-							if( ! state.block(oculus.State.dockgrabbusy, "false", 30000))
+							if( ! state.block(oculus.State.dockgrabbusy, "false", 45000))
 								Util.log("timed out waiting on dock grab ", this);
 							
-							// int i = 0;
-							while(grabbusy){
-					
-								// System.out.println(" ... wait: " + i);
-								Util.delay(100);
-								
-								if(i++>500) {
-									System.out.println("OCULUS: CommandServer, give up on finding dock"); 
-									state.set(oculus.State.dockgrabbusy, false);
-									grabbusy = false;
-									break;
-								}
-							}	
 							
 							// put results in state for any that care 
 							state.set(oculus.State.dockgrabtime, (System.currentTimeMillis() - start));
 							
 						}
 					}).start();
-				 }*/
-								
+				 }
 			}
 			
-			//if(cmd[0].equals("battery")) battery.battStats();
+			if(cmd[0].equals("battery")) battery.battStats();
 								
 			//if(cmd[0].equals("dock") && docker!=null) docker.autoDock("go");
 			
-			//if(cmd[0].equals("undock") && docker!=null) docker.dock("undock");
+			// if(cmd[0].equals("undock") && docker!=null) docker.dock("undock");
 									
 			/// if(cmd[0].equals("stop")) port.stopGoing();
 				
@@ -333,7 +285,7 @@ public class CommandServer implements Observer {
 			}
 
 			if(cmd[0].equals("state")) {
-				if(cmd.length==2) state.set(cmd[1], cmd[2]);
+				if(cmd.length==3) state.set(cmd[1], cmd[2]);
 				else out.println(state.toString());
 			}		
 			
@@ -358,21 +310,13 @@ public class CommandServer implements Observer {
 					System.out.println("setting value = " + settings.readSetting(cmd[1])); 
 					
 				} else out.println(settings.toString());
-			}
-		
-			
-			
+			}	
 		}
 	}
 	
 	@Override
 	/** send to socket on state change */ 
 	public void updated(String key) {
-		
-		// track local boolean flags 
-		// if(key.equals(oculus.State.dockslope)){
-		//	grabbusy = false;
-		//}
 		
 		String value = state.get(key);
 		if(value==null) {
@@ -402,12 +346,9 @@ public class CommandServer implements Observer {
 	/** */
 	public CommandServer(oculus.Application a) {
 		
-		if(app != null) return;
+		if(app == null) app = a;
+		else return;
 		
-		app = a;
-		
-		settings = new Settings(); 	
-
 		/** register for updates, share state with all threads */  
 		state.addObserver(this);
 		
@@ -446,7 +387,7 @@ public class CommandServer implements Observer {
 	public void go(){
 		
 		Integer port = settings.getInteger(OptionalSettings.commandport.toString());
-		if(port==Settings.ERROR) port = 4444;
+		if(port==Settings.ERROR) port = 4444; // default on error 
 		
 		try {
 			serverSocket = new ServerSocket(port);
@@ -473,7 +414,7 @@ public class CommandServer implements Observer {
 				}	
 				
 				System.out.println("OCULUS: failed to open client socket: " + e.getMessage());
-				Util.delay(State.ONE_MINUTE);
+				// Util.delay(State.ONE_MINUTE);
 			}
 		}
 	}

@@ -70,14 +70,7 @@ public class UpdateFTP implements Observer {
 					ftp.storString("last.php", new java.util.Date().toString());
 					ftp.storString("user.php", System.getProperty("user.name"));
 					
-					// String stats = state.toString();
-					// if(stats!=null) ftp.storString("state.php", "<html><body>"+ stats.replaceAll(" : ", "<br>") + "</body</html>");
-					// if(stats!=null) 
-					
 					ftp.storString("state.php", state.toString());
-
-					// String log = new LoginRecords().toString();
-					// if(log!=null)
 						
 					ftp.storString("users.php",  new LoginRecords().toString());
 					
@@ -86,10 +79,7 @@ public class UpdateFTP implements Observer {
 				} catch (IOException e) {
 					Util.debug(e.getLocalizedMessage(), this);
 				}
-				
 			}
 		}).start();
-	
-		
 	}
 }

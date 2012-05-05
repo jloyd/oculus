@@ -368,9 +368,10 @@ public class Util {
 	 * 				is the phrase to turn from text to speech 
 	 */
 	public static void beep() {
-		if(os.equals("windows")){
+		if(Settings.os.equals("windows")){
 			systemCall("nircmdc.exe beep 500 1000");
-		}else log("need linux beep"); // TODO: 
+		}else log("need linux beep"); 
+		// TODO: linux beep
 	}
 	
 	public static String[] tail ( File file, String match ){

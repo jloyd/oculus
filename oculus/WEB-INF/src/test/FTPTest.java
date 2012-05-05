@@ -77,37 +77,4 @@ public class FTPTest {
 		}
 	}
 
-	/*
-	@Test
-	public void testDisconnect() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public void testCwd() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public void testStorString() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public void testBin() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public void testAscii() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	@Test
-	public void testPasv() {
-		fail("Not yet implemented"); // TODO
-	}
-	*/
-	
-
 }
