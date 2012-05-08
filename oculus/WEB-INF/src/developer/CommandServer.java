@@ -11,6 +11,7 @@ import oculus.BatteryLife;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.OptionalSettings;
+import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.State;
 import oculus.Updater;
@@ -104,19 +105,19 @@ public class CommandServer implements Observer {
 				while (true) {
 
 					// been closed ?
-					if(out!=null) if(out.checkError()) shutDown();			
+					// if(out!=null) if(out.checkError()) shutDown();			
 					
 					// blocking read from the client stream up to a '\n'
 					String str = in.readLine();
 
 					// client is terminating?
 					if (str == null) break;
-					
+							
 					// parse and run it 
 					str = str.trim();
-					if(str.length()>1){
+					if(str.length()>2){
 						
-						Util.debug("address [" + clientSocket + "] message [" + str + "]", this);
+						Util.debug(" address [" + clientSocket + "] message [" + str + "]", this);
 						
 						out.println("echo: "+str);
 						
@@ -129,24 +130,33 @@ public class CommandServer implements Observer {
 					}
 				}
 			} catch (Exception e) {
-				System.out.println("OCULUS: command server read thread, " + e.getMessage());
+				Util.log("read thread, " + e.getMessage());
 				shutDown();
 			}
 		}
 
 		public void doPlayer(String str){
-			Util.log("__doplayer(), " + str, this);			
+			
+			Util.log("doplayer("+str+"), " + str, this);		
+			
 			int index = str.indexOf(" ");
 			if(index == -1){
+				
 				app.playerCallServer(str, null);
+			
 			} else {
 			
 				String cmd = str.substring(0, str.indexOf(' '));
+				PlayerCommands playerCommand = PlayerCommands.valueOf(cmd);
+				
+				if(playerCommand==null) return;
+				
 				String param = str.substring(str.indexOf(' '), str.length());
 				
-				System.out.println("cmd: " + cmd);
-				System.out.println("par: " + param);
-				app.playerCallServer(cmd, param);
+				Util.log("cmd: " + cmd);
+				Util.log("parm: " + param);
+				
+				app.playerCallServer(playerCommand.toString(), param.trim());
 				
 			}
 		}
@@ -232,8 +242,20 @@ public class CommandServer implements Observer {
 						
 			if(cmd[0].equals("find")) {
 				
-				if(state.getBoolean(oculus.State.dockgrabbusy)){
+				if(state.get(PlayerCommands.publish.toString()) == null) {
 				
+					out.println(".. the camera is off, retard.");
+					return;
+					
+				} else {
+					if(state.get(PlayerCommands.publish.toString()).equals("stop")){
+						out.println(".. the camera is off, retard.");
+						return;
+					}
+				}
+				
+				if(state.getBoolean(oculus.State.dockgrabbusy)){
+					out.println("calling _find_ too often.");
 					Util.log("calling _find_ too often.", this);
 					return;
 					

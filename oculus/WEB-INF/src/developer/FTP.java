@@ -65,7 +65,6 @@ public class FTP {
         finally {
         	socket = null; 
         }
-
     }
     
     /**

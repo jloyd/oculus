@@ -9,19 +9,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.TooManyListenersException;
-import java.util.Vector;
 
 import developer.SendMail;
 
 import oculus.Application;
+import oculus.PlayerCommands;
 import oculus.State;
 import oculus.Util;
-import oculus.commport.AbstractArduinoComm.Sender;
 
 public class LightsComm implements SerialPortEventListener {
 	
 	public static final long DEAD_MAN_TIME_OUT = 30000;
-	public static final long USER_TIME_OUT = 20 * 60000;
+	public static final long USER_TIME_OUT = 5 * 60000;
 	public static final int TOO_MANY_COMMANDS = 10;
 	private static final int BAUD_RATE = 57600;
 	private static final int SETUP = 2000;
@@ -47,8 +46,6 @@ public class LightsComm implements SerialPortEventListener {
 	private InputStream in= null;
 	private OutputStream out= null;
 	
-	// TODO: 
-	// put error state in global object 
 	private State state = State.getReference();
 	
 	// will be discovered from the device 
@@ -59,13 +56,8 @@ public class LightsComm implements SerialPortEventListener {
 	private long lastRead = System.currentTimeMillis();
 	private long lastUserCommand = System.currentTimeMillis();
 	
-	// track the out going and in comming commands 
-	//private Vector<Byte> commands = new Vector<Byte>();
-
 	// make sure all threads know if connected 
 	private boolean isconnected = false;
-	private int spotLightBrightness = 0;
-	private boolean floodLightOn = false;
 	
 	// call back
 	private Application application = null;
@@ -79,7 +71,8 @@ public class LightsComm implements SerialPortEventListener {
 	 */
 	public LightsComm(Application app) {
 		application = app; 
-		
+		state.set(PlayerCommands.floodlight.toString(), true);
+		state.set(PlayerCommands.spotlightsetbrightness.toString(), 0);
 		if( state.get(State.lightport) != null ){
 			new Thread(new Runnable() { 
 				public void run() {
@@ -130,11 +123,11 @@ public class LightsComm implements SerialPortEventListener {
 	}
 	
 	public int spotLightBrightness() {
-		return spotLightBrightness;
+		return state.getInteger(PlayerCommands.spotlightsetbrightness.toString());
 	}
 	
 	public boolean floodLightOn() {
-		return floodLightOn;
+		return state.getBoolean(PlayerCommands.floodlight.toString());
 	}
 	
 	@Override
@@ -144,50 +137,20 @@ public class LightsComm implements SerialPortEventListener {
 			try {
 				byte[] input = new byte[32];
 				int read = in.read(input);
+				
 				// Util.log("bytes in: " + read, this);
+				
 				String str = new String();
 				for (int j = 0; j < read; j++){
 					///if((input[j] != 10) && (input[j] != 13)){
 						str += (char) input[j];
 					}	
 
-	//if((input[j] != 10) && (input[j] != 13)){
-						// str += (char) input[j];
-		//				if(commands.contains((byte) input[j])){	
-			//				commands.remove((byte) input[j]);
+				// Util.log("bytes in: " + str.trim(), this);
 				
-				// error state also 
-				//if(commands.size() > TOO_MANY_COMMANDS) error();
-				
-				// re-send if not replied 
-				//if(commands.size() > (TOO_MANY_COMMANDS/3)){
-				
-				
-				//Util.debug("in: " + str.toString(), this);
-
-				//Util.debug("command buffer" + commands.toString(), this);
-					
-					//for(int i = 0 ; i < commands.size() ; i++ )
-						//sendCommand(commands.get(i));
-					
-					///commands.clear();
-				
-				// error state also 
-				///if(commands.size() > TOO_MANY_COMMANDS) error();
-				
-				// re-send if not replied 
-				//if(commands.size() > (TOO_MANY_COMMANDS/3)){
-					///Util.debug("command buffer" + commands.toString(), this);
-					
-					//for(int i = 0 ; i < commands.size() ; i++ )
-						//sendCommand(commands.get(i));
-					
-					///commands.clear();
-				//}
 				// really, we just care are getting replies.
 				lastRead = System.currentTimeMillis();
 				
-			
 			} catch (IOException e) {
 				Util.log("event : " + e.getMessage(), this);
 			}
@@ -204,47 +167,46 @@ public class LightsComm implements SerialPortEventListener {
 		public void run() {
 			Util.delay(SETUP);
 			while (true) {
-			
-				//Util.debug(/* "cmds: " + commands.size() + */ " read delta: " + getReadDelta() + " write delta: " + getWriteDelta()
-			//			+ " user: " + (System.currentTimeMillis() - lastUserCommand), this);
-
 				if((System.currentTimeMillis() - lastUserCommand) > USER_TIME_OUT){
-					if(floodLightOn || (spotLightBrightness>0)){
+					if(state.getBoolean(PlayerCommands.floodlight.toString()) 
+							|| (state.getInteger(PlayerCommands.spotlightsetbrightness.toString())>0)){
+						
 							application.message("lights on too long", null, null);
 							sendCommand(SPOT_OFF);
 							sendCommand(DOCK_OFF);
 							// TODO: check input and set these flags!
-							floodLightOn = false;
-							spotLightBrightness = 0;
+							state.set(PlayerCommands.floodlight.toString(), "false"); 
+							state.set(PlayerCommands.spotlightsetbrightness.toString(), 0);
 						}
 				}
 				
 				// refresh values
 				if(getReadDelta() > (DEAD_MAN_TIME_OUT/3)){
 					
-					//Util.debug("spotLightBrightness = " + spotLightBrightness, this);
+					Util.debug("_spotLightBrightness = " + state.getInteger(PlayerCommands.spotlightsetbrightness.toString()), this);
 					
-					if(floodLightOn) sendCommand(DOCK_ON);
-					else if(!floodLightOn) sendCommand(DOCK_OFF);
+					if(state.getBoolean(PlayerCommands.floodlight.toString())) sendCommand(DOCK_ON);
+					else sendCommand(DOCK_OFF);
 					
-					if(spotLightBrightness==0) sendCommand((byte) SPOT_OFF);
-					else if(spotLightBrightness==10)sendCommand((byte) SPOT_1);
-					else if(spotLightBrightness==20) sendCommand((byte) SPOT_2);
-					else if(spotLightBrightness==30) sendCommand((byte) SPOT_3); 
-					else if(spotLightBrightness==40) sendCommand((byte) SPOT_4);
-					else if(spotLightBrightness==50) sendCommand((byte) SPOT_5);
-					else if(spotLightBrightness==60) sendCommand((byte) SPOT_6);
-					else if(spotLightBrightness==70) sendCommand((byte) SPOT_7);
-					else if(spotLightBrightness==80) sendCommand((byte) SPOT_8);
-					else if(spotLightBrightness==90) sendCommand((byte) SPOT_9);
-					else if(spotLightBrightness==100) sendCommand((byte) SPOT_MAX);
+					int spot = state.getInteger(PlayerCommands.spotlightsetbrightness.toString());
+					if(spot==0) sendCommand((byte) SPOT_OFF);
+					else if(spot==10)sendCommand((byte) SPOT_1);
+					else if(spot==20) sendCommand((byte) SPOT_2);
+					else if(spot==30) sendCommand((byte) SPOT_3); 
+					else if(spot==40) sendCommand((byte) SPOT_4);
+					else if(spot==50) sendCommand((byte) SPOT_5);
+					else if(spot==60) sendCommand((byte) SPOT_6);
+					else if(spot==70) sendCommand((byte) SPOT_7);
+					else if(spot==80) sendCommand((byte) SPOT_8);
+					else if(spot==90) sendCommand((byte) SPOT_9);
+					else if(spot==100) sendCommand((byte) SPOT_MAX);
 					
 				}
 				
 				// error state
 				if(getReadDelta() > DEAD_MAN_TIME_OUT) error();
 				
-				sendCommand((byte) GET_VERSION);
+				// sendCommand((byte) GET_VERSION);
 				Util.delay(WATCHDOG_DELAY);
 			}		
 		}
@@ -356,8 +318,9 @@ public class LightsComm implements SerialPortEventListener {
 		else if(target==90) sendCommand((byte) SPOT_9);
 		else if(target==100) sendCommand((byte) SPOT_MAX);
 		
-		spotLightBrightness = target;
-		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(spotLightBrightness));
+		//spotLightBrightness = target;
+		state.set(PlayerCommands.spotlightsetbrightness.toString(), target);
+		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(target));
 		lastUserCommand = System.currentTimeMillis();
 		
 	}
@@ -370,11 +333,13 @@ public class LightsComm implements SerialPortEventListener {
 		}
 		if (str.equals("on")) { 
 			sendCommand(DOCK_ON);
-			floodLightOn = true;
+			// floodLightOn = true;
+			state.set(PlayerCommands.floodlight.toString(), true);
 		}
 		else { 
 			sendCommand(DOCK_OFF);
-			floodLightOn = false; 
+			// floodLightOn = false;
+			state.set(PlayerCommands.floodlight.toString(), false);
 		}
 		
 		application.message("floodlight "+str, null, null);

@@ -14,6 +14,9 @@ import oculus.Util;
 /** */
 public class UpdateFTP implements Observer {
 
+	public static final int DEFAULT_TIME = 5 * 60000; 
+	public static final String ftpTimer = "ftpTimer";
+	
 	// private static final int WARN_LEVEL = 40;
 	
 	private static State state = State.getReference();
@@ -47,20 +50,34 @@ public class UpdateFTP implements Observer {
 		port = (String) props.getProperty("port", "21");
 		pass = props.getProperty("password");
 		
-		state.addObserver(this);
-		Util.debug("starting FTP alerts...", this);
+		// state.addObserver(this);
 		
-	}
-
-	@Override
-	public void updated(final String key) {
-
-		Util.debug("___ftp updated checking: " + key, this);
+		// Util.debug("starting FTP alerts...", this);
 		
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				
+				while(true){
+					// state.set(ftpTimer, true);
+					updateServer();
+					Util.delay(DEFAULT_TIME);
+				}
+			}
+		}).start();
+	}
+	
+	@Override
+	public void updated(final String key) {
+		
+		if( ! key.equals(ftpTimer)) return;
+		
+	}
+	
+		
+	public void updateServer() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
 				try {
 					
 					ftp.connect(host, port, user, pass);
@@ -68,16 +85,14 @@ public class UpdateFTP implements Observer {
 					
 					ftp.storString("ip.php", state.get(State.externaladdress));
 					ftp.storString("last.php", new java.util.Date().toString());
-					ftp.storString("user.php", System.getProperty("user.name"));
-					
+					ftp.storString("user.php", System.getProperty("user.name"));		
 					ftp.storString("state.php", state.toString());
-						
 					ftp.storString("users.php",  new LoginRecords().toString());
 					
 					ftp.disconnect();
 					
 				} catch (IOException e) {
-					Util.debug(e.getLocalizedMessage(), this);
+					Util.debug(e.getMessage(), this);
 				}
 			}
 		}).start();

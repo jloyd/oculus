@@ -618,9 +618,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			disconnectOtherConnections();
 			break;
 		case monitor:
-			if (Settings.os.equals("linux")) {
+			if (Settings.os.equals("linux"))
 				messageplayer("unsupported in linux",null,null);
-			}
+			
 			monitor(str);
 			break;
 		case showlog:
@@ -659,11 +659,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			light.floodLight(str);
 			break;
 		case holdservo:
-			if (str.equalsIgnoreCase("true")) {
-				comport.holdservo = true;
-			} else {
-				comport.holdservo = false;
-			}
+			if (str.equalsIgnoreCase("true")) comport.holdservo = true;
+			else comport.holdservo = false;
 			settings.writeSettings(FactorySettings.holdservo.toString(), str);
 			messageplayer("holdservo " + str, null, null);
 			break;

@@ -49,8 +49,7 @@ public class FTPTest {
 		user = (String) props.getProperty("user", System.getProperty("user.name"));
 		host = (String) props.getProperty("host", "localhost");
 		port = (String) props.getProperty("port", "21");
-		pass = props.getProperty("password");
-			
+		pass = props.getProperty("password");	
 	}
 
 	@Test
@@ -76,5 +75,4 @@ public class FTPTest {
 			System.out.println("ftp disconnected");
 		}
 	}
-
 }

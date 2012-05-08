@@ -16,6 +16,8 @@ public class State {
 	public static final String serialport = "serialport";
 	public static final String lightport = "lightport";
 	public static final String target = "target";
+	// public static final String spotLightBrightness = "spotLightBrightness";
+	// public static final String floodLightOn = "floodLightOn";
 	public static final String boottime = "boottime";
 	public static final String batterylife = "batterylife";
 	public static final String batterystatus = "batterstatus";
