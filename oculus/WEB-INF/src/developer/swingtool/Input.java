@@ -6,6 +6,7 @@ import java.net.*;
 import javax.swing.*;
 
 import oculus.PlayerCommands;
+import oculus.Util;
 
 import java.awt.event.*;
 
@@ -27,18 +28,31 @@ public class Input extends JTextField implements KeyListener {
 			System.exit(-1);
 		}
 
-		
 		// if connected, login now
 		out.println(usr + ":" + pass);
 		
-		// get up to date 
-		// out.println("state");
-		
 		// listen for key input 
 		addKeyListener(this);
-		// requestFocus();
-
+		
+		// send dummy messages
+		new WatchDog().start();
 	}
+	
+	/** inner class to check if getting responses in timely manor */
+	public class WatchDog extends Thread {
+		public WatchDog() {
+			this.setDaemon(true);
+		}
+		public void run() {
+			Util.delay(1000);
+			while (true) {
+				Util.delay(1000);
+				out.println("  ");
+				// PlayerCommands.chat.toString());
+			}
+		}
+	}
+	
 	
 	// Manager user input
 	public void send() {
@@ -46,9 +60,6 @@ public class Input extends JTextField implements KeyListener {
 
 			// get keyboard input
 			userInput = getText().trim();
-			
-			// log to console
-			// System.out.println("user typed :" + userInput);
 			
 			// send the user input to the server if is valid
 			if (userInput.length() > 0) out.println(userInput);
@@ -114,7 +125,6 @@ public class Input extends JTextField implements KeyListener {
 
 				setCaretPosition(getText().length() + 2);
 				
-				
 			}
 		} 
 	}
@@ -122,7 +132,5 @@ public class Input extends JTextField implements KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		
-		// System.out.println("............ " + e.toString());
-
 	}
 }

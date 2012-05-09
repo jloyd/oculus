@@ -119,7 +119,7 @@ public class CommandServer implements Observer {
 						
 						Util.debug(" address [" + clientSocket + "] message [" + str + "]", this);
 						
-						out.println("echo: "+str);
+						// out.println("echo: "+str);
 						
 						// do both for now 
 						manageCommand(str);
@@ -153,8 +153,7 @@ public class CommandServer implements Observer {
 				
 				String param = str.substring(str.indexOf(' '), str.length());
 				
-				Util.log("cmd: " + cmd);
-				Util.log("parm: " + param);
+				Util.log("cmd: " + cmd + " parm: " + param);
 				
 				app.playerCallServer(playerCommand.toString(), param.trim());
 				
@@ -184,7 +183,14 @@ public class CommandServer implements Observer {
 		/** add extra commands, macros here */ 
 		public void manageCommand(final String str){
 			final String[] cmd = str.split(" ");
-				
+			
+			/*
+			if(cmd[0].equals("messages")) {
+				for(int i = 0; i < app.userMessages.size() ;i++){
+					out.println(app.userMessages.get(i));
+				}
+			}*/
+			
 			if(cmd[0].equals("tail")) {
 				int lines = 30; // default if not set 
 				if(cmd.length==2) lines = Integer.parseInt(cmd[1]);

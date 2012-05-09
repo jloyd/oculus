@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Vector;
 
 import oculus.commport.AbstractArduinoComm;
 import oculus.commport.Discovery;
@@ -22,6 +23,7 @@ import developer.UpdateFTP;
 public class Application extends MultiThreadedApplicationAdapter {
 
 	private static final int STREAM_CONNECT_DELAY = 2000;
+	// private static final int MAX_MESSAGES = 20; // buffer user screen for telnet 
 	private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 
 	private static String salt;
@@ -41,7 +43,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean pendingplayerisnull = true;
 	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
-
+	// public Vector<String> userMessages = new Vector<String>();
+	
 	//dev stuff
 	private developer.CommandServer commandServer = null;
 	private developer.LogManager moves = new developer.LogManager();
@@ -52,21 +55,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public String stream = null;
 	public Speech speech = new Speech();
 	
-	//public String os = Settings.os;  //  "linux" or "windows"
-
 	public Application() {
 		super();
-		
-		///if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
-		//else { os = "windows"; }
-		//System.out.println("OCULUS: OS = "+os);
 		
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		FrameGrabHTTP.setApp(this);
 		RtmpPortRequest.setApp(this);
 		AuthGrab.setApp(this);
-		//settings = new Settings(this);
 		initialize();
 	}
 
@@ -99,7 +95,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		String str = "login from: " + connection.getRemoteAddress() + " failed";
-		System.out.println("OCULUS: appConnect(): " + str);
+		Util.log("appConnect(): " + str);
 		messageGrabber(str, "");
 		return false;
 	}
@@ -108,18 +104,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void appDisconnect(IConnection connection) {
 		if (connection.equals(player)) {
 			String str = state.get(State.user) + " disconnected";
-			System.out.println("OCULUS: appDisconnect(): " + str); 
+			Util.log("appDisconnect(): " + str); 
 
 			messageGrabber(str, "connection awaiting&nbsp;connection");
 		
 			// admin = false;			
 			// TODO: issue 24
 			loginRecords.signout();
-			System.out.println("OCULUS: after appDisconnect(): " + loginRecords);
+			Util.log("appDisconnect(): " + loginRecords);
 			
 			if(settings.getBoolean(Settings.developer))
 				if(state.get(State.user) == null)
-					System.out.println("OCULUS: user was logged out correctly...");
+					Util.log("OCULUS: user was logged out correctly...");
 			
 			player = null;
 
@@ -182,9 +178,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		str += " stream " + stream;
 		messageGrabber("connected to subsystem", "connection " + str);
-		System.out.println("OCULUS: grabber signed in from " + grabber.getRemoteAddress());
-		// System.out.println("grabbbersignin");
-		// stream = "stop";
+		Util.log("OCULUS: grabber signed in from " + grabber.getRemoteAddress());
 		if (playerstream) {
 			grabberPlayPlayer(1);
 			messageGrabber("playerbroadcast", "1");
@@ -208,9 +202,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		setGrabberVideoSoundMode(videosoundmode);
 
-		// do it differently if sonar on board
-		// if( different firmware ??) docker = new BradzAutoDock();
-		// TODO: BRAD
 		docker = new AutoDock(this, grabber, comport, light);
 		loginRecords.setApplication(this);
 	}
@@ -245,7 +236,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getInteger(OptionalSettings.commandport) > State.ERROR)
 			commandServer = new developer.CommandServer(this);
 		
-		if(UpdateFTP.configured()) new developer.UpdateFTP();
+		if (UpdateFTP.configured()) new developer.UpdateFTP();
 
 		Util.setSystemVolume(settings.getInteger(Settings.volume), this);
 		grabberInitialize();
@@ -354,7 +345,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						+ pendingplayer.getRemoteAddress();
 				
 				// log.info(str);
-				System.out.println("OCULUS: playersignin(): " + str);
+				Util.log("OCULUS: playersignin(): " + str);
 				messageGrabber(str, null);
 				
 				sc.invoke("videoSoundMode", new Object[] { videosoundmode });
@@ -436,7 +427,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		if (state.getBoolean(State.developer))
 			if (!fn.equals(PlayerCommands.statuscheck))
-				System.out.println("playerCallServer(): " + fn + " " + str);
+				Util.log("playerCallServer(): " + fn + " " + str);
 
 		switch (fn) {
 		case chat:
@@ -455,25 +446,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// temp 'solution' 
 		if( ! state.getBoolean(oculus.State.override)){
 		 if (Red5.getConnectionLocal() != player && player != null) {
-			 System.out.println("passenger, command dropped: " + fn.toString());
+			 Util.log("passenger, command dropped: " + fn.toString());
 			 return;
 		 }
 		}
 		
 		
 		switch (fn) {
-		/*
-		 * case tail: int lines = 30; if(cmd.length==2) lines =
-		 * Integer.parseInt(cmd[1]); String t = Util.tail(new
-		 * File(oculus.Settings.stdout), lines);
-		 * 
-		 * if(t!=null) if(t.length() > 1) out.println(t);
-		 * 
-		 * break;
-		 */
-
 		case writesetting:
-			System.out.println("setting: " + str);
+			Util.log("setting: " + str);
 			if (settings.readSetting(cmd[0]) == null) {
 				settings.newSetting(cmd[0], cmd[1]);
 				messageplayer("new setting: " + cmd[1], null, null);
@@ -506,7 +487,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 
 		case systemcall:
-			System.out.println("received: " + str);
+			Util.log("received: " + str);
 			messageplayer("system command received", null, null);
 			Util.systemCall(str);
 			break;
@@ -779,7 +760,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		// messageplayer("streaming "+str,"stream",stream);
 		messageGrabber("streaming " + stream, "stream " + stream);
-		System.out.println("OCULUS: streaming " + stream);
+		Util.log("OCULUS: streaming " + stream);
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -845,10 +826,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				// messageGrabber("stream "+str);
 				messageplayer("command received: publish " + str, null, null);
 				state.set(PlayerCommands.publish, str);
-				System.out.println("PUBLISHED:" + state.get(PlayerCommands.publish));
+				Util.log("PUBLISHED:" + state.get(PlayerCommands.publish));
 			}
 		} catch (NumberFormatException e) {
-			System.out.println("publish() " + e.getMessage());
+			Util.log("publish() " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -889,7 +870,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public boolean frameGrab() {
 
 		 if(state.getBoolean(State.framegrabbusy) || !(stream.equals("camera") || stream.equals("camandmic"))) {
-			 System.out.println("OCULUS: framegrab busy or unavailable, command dropped");
+			 Util.log("OCULUS: framegrab busy or unavailable, command dropped");
 			 return false;
 		 }
 
@@ -949,21 +930,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 		_RAWBitmapImage.readBytes(c);
 		if (BCurrentlyAvailable > 0) {
 			state.set(State.framegrabbusy, false);
-			// state.set("framegrablast", false);
-			
 			FrameGrabHTTP.img = c;
 			AuthGrab.img = c;
 
-			// TODO: BRAD !!
 		}
 	}
 
 	private void messageplayer(String str, String status, String value) {
+		
+		//if(userMessages.size()>MAX_MESSAGES) userMessages.remove(0);
+		// userMessages.add(new java.util.Date().toString() + " " + str);
+		
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			sc.invoke("message", new Object[] { str, "green", status, value });
 		}
-		// System.out.println(str);
 	}
 
 	private void sendplayerfunction(String fn, String params) {
@@ -1034,6 +1015,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void message(String str, String status, String value) {
+		if(commandServer!=null) commandServer.sendToGroup(str);
 		messageplayer(str, status, value);
 	}
 
@@ -1176,7 +1158,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			s += "<br>restarting stream";
 		}
 		messageplayer(s, null, null);
-		System.out.println("stream changed to " + str);
+		Util.log("stream changed to " + str);
 	}
 
 	private void streamSettingsSet(String str) {
@@ -1187,7 +1169,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			s += "<br>restarting stream";
 		}
 		messageplayer(s, null, null);
-		System.out.println("OCULUS: stream changed to " + str);
+		Util.log("stream changed to " + str);
 	}
 
 	private String streamSettings() {
@@ -1367,7 +1349,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** */
 	public void messageGrabber(String str, String status) {
-		// System.out.println(str);
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("message", new Object[] { str, status });
@@ -1423,7 +1404,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String str = "connection connected streamsettings " + streamSettings();
 		messageplayer(state.get(State.user) + " connected to OCULUS", "multiple", str);
 		str = state.get(State.user) + " connected from: " + player.getRemoteAddress();
-		System.out.println("OCULUS: assumeControl(), " + str);
+		Util.log("assumeControl(), " + str);
 		messageGrabber(str, null);
 		initialstatuscalled = false;
 		pendingplayerisnull = true;
@@ -1435,8 +1416,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		pendingplayerisnull = true;
 		String str = user + " added as passenger";
 		messageplayer(str, null, null);
-		// log.info(str);
-		System.out.println("OCULUS: " + str);
+		Util.log(str);
 		messageGrabber(str, null);
 		if (!stream.equals("stop")) {
 			Collection<Set<IConnection>> concollection = getConnections();
@@ -1693,21 +1673,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		}
-		System.out.println("OCULUS: chat: " + str);
+		Util.log("chat: " + str);
 		messageGrabber("<CHAT>" + str, null);
 		if (commandServer != null) commandServer.sendToGroup(str);
 	}
 
 	private void showlog() {
 	
-		//System.out.println
-		// messageplayer("", "debug", "OCULUS: showlog");
-		
 		String[] tail = Util.tail(new File(Settings.stdout), "OCULUS");
 		String str = null;
 		if(tail!=null){
 			
-			// debug ... 
 			str = "&bull; returned: " + tail.length + "lines from: " + 
 				Settings.stdout + "<br>";
 			
@@ -1743,7 +1719,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void saveAndLaunch(String str) {
-		System.out.println("saveandlaunch: " + str);
+		Util.log("saveandlaunch: " + str);
 		String message = "";
 		Boolean oktoadd = true;
 		Boolean restartrequired = false;
@@ -1924,7 +1900,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				public void run() {
 					Updater up = new Updater();
 					final String fileurl = up.checkForUpdateFile();
-					System.out.println("downloading url: " + fileurl);
+					Util.log("downloading url: " + fileurl);
 					Downloader dl = new Downloader();
 					if (dl.FileDownload(fileurl, "update.zip", "download")) {
 						messageplayer("update download complete, unzipping...",

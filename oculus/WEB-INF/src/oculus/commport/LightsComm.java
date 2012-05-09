@@ -20,7 +20,7 @@ import oculus.Util;
 public class LightsComm implements SerialPortEventListener {
 	
 	public static final long DEAD_MAN_TIME_OUT = 30000;
-	public static final long USER_TIME_OUT = 5 * 60000;
+	public static final long USER_TIME_OUT = 10 * 60000;
 	public static final int TOO_MANY_COMMANDS = 10;
 	private static final int BAUD_RATE = 57600;
 	private static final int SETUP = 2000;
@@ -114,7 +114,6 @@ public class LightsComm implements SerialPortEventListener {
 		isconnected = true;	
 		
 		Util.log("connected to the the lights on:" + state.get(State.lightport), this);
-	
 	}
 
 	/** @return True if the serial port is open */
@@ -183,7 +182,7 @@ public class LightsComm implements SerialPortEventListener {
 				// refresh values
 				if(getReadDelta() > (DEAD_MAN_TIME_OUT/3)){
 					
-					Util.debug("_spotLightBrightness = " + state.getInteger(PlayerCommands.spotlightsetbrightness.toString()), this);
+					// Util.debug("_spotLightBrightness = " + state.getInteger(PlayerCommands.spotlightsetbrightness.toString()), this);
 					
 					if(state.getBoolean(PlayerCommands.floodlight.toString())) sendCommand(DOCK_ON);
 					else sendCommand(DOCK_OFF);
@@ -251,9 +250,6 @@ public class LightsComm implements SerialPortEventListener {
 				reset();
 			}
 			lastSent = System.currentTimeMillis();
-			
-			//Util.debug("send: " + (char)command, this);
-
 		}
 	}
 
@@ -318,7 +314,6 @@ public class LightsComm implements SerialPortEventListener {
 		else if(target==90) sendCommand((byte) SPOT_9);
 		else if(target==100) sendCommand((byte) SPOT_MAX);
 		
-		//spotLightBrightness = target;
 		state.set(PlayerCommands.spotlightsetbrightness.toString(), target);
 		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(target));
 		lastUserCommand = System.currentTimeMillis();
@@ -333,17 +328,14 @@ public class LightsComm implements SerialPortEventListener {
 		}
 		if (str.equals("on")) { 
 			sendCommand(DOCK_ON);
-			// floodLightOn = true;
 			state.set(PlayerCommands.floodlight.toString(), true);
 		}
 		else { 
 			sendCommand(DOCK_OFF);
-			// floodLightOn = false;
 			state.set(PlayerCommands.floodlight.toString(), false);
 		}
 		
 		application.message("floodlight "+str, null, null);
 		lastUserCommand = System.currentTimeMillis();
-		
 	}
 }

@@ -7,7 +7,6 @@ import java.util.Vector;
 public class State {
 
 	public static final String SEPERATOR = " : ";
-
 	public static final String user = "user";
 	public static final String logintime = "logintime";
 	public static final String userisconnected = "userisconnected";
@@ -16,8 +15,6 @@ public class State {
 	public static final String serialport = "serialport";
 	public static final String lightport = "lightport";
 	public static final String target = "target";
-	// public static final String spotLightBrightness = "spotLightBrightness";
-	// public static final String floodLightOn = "floodLightOn";
 	public static final String boottime = "boottime";
 	public static final String batterylife = "batterylife";
 	public static final String batterystatus = "batterstatus";
@@ -31,14 +28,11 @@ public class State {
 	public static final String firmware = "firmware";
 	public static final String unknown = "unknown";	
 	public static final String override = "override";
-
 	public static final String commwatchdog = "commwatchdog";
 	public static final String framegrabbusy = "framegrabbusy";
-	
 	public static final String sonarback = "sonarback";
 	public static final String sonarright = "sonarright";
 	public static final String sonarleft = "sonarleft";
-	
 	public static final String dockgrabbusy = "dockgrabbusy";
 	public static final String docking = "docking";
 	public static final String dockxsize = "dockxsize";	
