@@ -3,14 +3,14 @@ package oculus;
 public enum PlayerCommands {
 
 	// all valid commands
-	publish, move, nudge, slide, dockgrab, framegrab, battstats, restart, docklineposupdate, autodock, autodockcalibrate, 
+	publish, floodlight, move, nudge, slide, dockgrab, framegrab, battstats, docklineposupdate, autodock, autodockcalibrate, 
 	speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate, 
 	tilttest, speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
 	streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate, 
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
-	floodlight, writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle;
+    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart;
 
 	// sub-set that are restricted to "user0"
 	public enum AdminCommands {

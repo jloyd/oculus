@@ -19,6 +19,7 @@ import org.red5.io.amf3.ByteArray;
 
 import developer.UpdateFTP;
 
+
 /** red5 application */
 public class Application extends MultiThreadedApplicationAdapter {
 
@@ -423,7 +424,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final PlayerCommands fn, final String str) {
 
-		final String[] cmd = str.split(" ");
+		String[] cmd = null;
+		if(str!=null) cmd = str.split(" ");
 
 		if (state.getBoolean(State.developer))
 			if (!fn.equals(PlayerCommands.statuscheck))
@@ -940,6 +942,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		//if(userMessages.size()>MAX_MESSAGES) userMessages.remove(0);
 		// userMessages.add(new java.util.Date().toString() + " " + str);
+		if(commandServer!=null) commandServer.sendToGroup(str);
 		
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;

@@ -97,75 +97,75 @@ public class CommandServer implements Observer {
 			state.set(oculus.State.override, true);
 		
 			Util.beep();
+			
 			sendToGroup(printers.size() + " tcp connections active");
 			
-			try {
+			// loop on input from the client
+			int i = 0;
+			while (true) {
 
-				// loop on input from the client
-				while (true) {
-
-					// been closed ?
-					// if(out!=null) if(out.checkError()) shutDown();			
-					
-					// blocking read from the client stream up to a '\n'
-					String str = in.readLine();
-
-					// client is terminating?
-					if (str == null) break;
-							
-					// parse and run it 
-					str = str.trim();
-					if(str.length()>2){
-						
-						Util.debug(" address [" + clientSocket + "] message [" + str + "]", this);
-						
-						// out.println("echo: "+str);
-						
-						// do both for now 
-						manageCommand(str);
-						
-						// TODO: COLIN  
-						doPlayer(str);
+				// been closed ?
+				if(out!=null) if(out.checkError()) break;			
 				
+				// blocking read from the client stream up to a '\n'
+				String str = null;
+				try {
+					str = in.readLine();
+				} catch (Exception e) {
+					Util.log("readLine(): " + e.getMessage(), this);
+					break;
+				}
+
+				// client is terminating?
+				if (str == null) {
+					Util.debug("read thread, closing.", this);
+					break;
+				}
+						
+				// parse and run it 
+				str = str.trim();
+				if(str.length()>2){
+					
+					Util.debug(" address [" + clientSocket + "] message [" + str + "]", this);
+					
+					out.println("[" + i++ + "] echo: "+str);
+					
+					// do both for now 
+					manageCommand(str);
+					
+					// TODO: COLIN  
+					try {
+						doPlayer(str);
+					} catch (Exception e) {
+						// e.printStackTrace(System.err);
+						// Util.debug("player err: " + e.getLocalizedMessage(), this);
 					}
 				}
-			} catch (Exception e) {
-				Util.log("read thread, " + e.getMessage());
-				shutDown();
 			}
+		
+			// 
+			shutDown();
 		}
 
-		public void doPlayer(String str){
+		/**
+		 * @param str a give command string with one or many words 
+		 */
+		public void doPlayer(final String str){
 			
-			Util.log("doplayer("+str+"), " + str, this);		
+			Util.log("doplayer("+str+")", this);	
 			
-			int index = str.indexOf(" ");
-			if(index == -1){
-				
-				app.playerCallServer(str, null);
-			
-			} else {
-			
-				String cmd = str.substring(0, str.indexOf(' '));
-				PlayerCommands playerCommand = PlayerCommands.valueOf(cmd);
-				
-				if(playerCommand==null) return;
-				
-				String param = str.substring(str.indexOf(' '), str.length());
-				
-				Util.log("cmd: " + cmd + " parm: " + param);
-				
-				app.playerCallServer(playerCommand.toString(), param.trim());
-				
-			}
+			String[] cmd = str.trim().split(" ");
+			if(cmd.length==1) app.playerCallServer(str, null);		
+			if(cmd.length==2) app.playerCallServer(cmd[0], cmd[1]);
 		}
 		
 		// close resources
 		private void shutDown() {
 
 			// log to console, and notify other users of leaving
-			System.out.println("OCULUS: command server: closing socket [" + clientSocket + "]");
-
+			Util.log("closing socket [" + clientSocket + "]", this);
+			sendToGroup(printers.size() + " tcp connections active");
+			
 			try {
 
 				// close resources
@@ -178,7 +178,6 @@ public class CommandServer implements Observer {
 				e.printStackTrace();
 			}
 		}
-	
 		
 		/** add extra commands, macros here */ 
 		public void manageCommand(final String str){
@@ -190,6 +189,11 @@ public class CommandServer implements Observer {
 					out.println(app.userMessages.get(i));
 				}
 			}*/
+			
+			if(cmd[0].equals("help")) {
+				for (PlayerCommands factory : PlayerCommands.values()) 
+					out.println(factory.toString());
+			}
 			
 			if(cmd[0].equals("tail")) {
 				int lines = 30; // default if not set 
@@ -420,11 +424,11 @@ public class CommandServer implements Observer {
 		try {
 			serverSocket = new ServerSocket(port);
 		} catch (Exception e) {
-			System.out.println("OCULUS: server sock error: " + e.getMessage());
+			Util.log("server sock error: " + e.getMessage(), this);
 			return;
 		} 
 		
-		System.out.println("OCULUS: listening with socket [" + serverSocket + "] ");
+		Util.debug("listening with socket [" + serverSocket + "] " + serverSocket.toString(), this);
 		
 		// serve new connections until killed
 		while (true) {
@@ -441,8 +445,7 @@ public class CommandServer implements Observer {
 					return;					
 				}	
 				
-				System.out.println("OCULUS: failed to open client socket: " + e.getMessage());
-				// Util.delay(State.ONE_MINUTE);
+				Util.log("failed to open client socket: " + e.getMessage(), this);
 			}
 		}
 	}

@@ -12,16 +12,15 @@ import oculus.State;
 import oculus.Util;
 
 /** */
-public class UpdateFTP implements Observer {
-
+public class UpdateFTP { // implements Observer {
+	// private static final int WARN_LEVEL = 40;
 	public static final int DEFAULT_TIME = 5 * 60000; 
 	public static final String ftpTimer = "ftpTimer";
 	
-	// private static final int WARN_LEVEL = 40;
-	
+	private static int delay = DEFAULT_TIME;
 	private static State state = State.getReference();
 	private static FTP ftp = new FTP();
-
+	
 	private String host, port, user, pass, folder;
 	
 	public static boolean configured(){
@@ -50,9 +49,8 @@ public class UpdateFTP implements Observer {
 		port = (String) props.getProperty("port", "21");
 		pass = props.getProperty("password");
 		
-		// state.addObserver(this);
-		
-		// Util.debug("starting FTP alerts...", this);
+		if(props.getProperty("update")!=null)
+			delay = Integer.parseInt(props.getProperty("update").trim()) + 60000;
 		
 		new Thread(new Runnable() {
 			@Override
@@ -60,19 +58,20 @@ public class UpdateFTP implements Observer {
 				while(true){
 					// state.set(ftpTimer, true);
 					updateServer();
-					Util.delay(DEFAULT_TIME);
+					Util.delay(delay);
 				}
 			}
 		}).start();
 	}
 	
+	/*
 	@Override
 	public void updated(final String key) {
 		
 		if( ! key.equals(ftpTimer)) return;
 		
 	}
-	
+	*/
 		
 	public void updateServer() {
 		new Thread(new Runnable() {

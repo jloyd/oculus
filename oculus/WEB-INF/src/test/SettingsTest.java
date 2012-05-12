@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import oculus.FactorySettings;
 import oculus.OptionalSettings;
+import oculus.PlayerCommands;
 import oculus.Settings;
 
 import org.junit.After;
@@ -40,6 +41,20 @@ public class SettingsTest {
 		}
 	}
 
+	@Test
+	public void validatePlayerCommands(){
+		
+		/*for(PlayerCommands.AdminCommands cmd : PlayerCommands.AdminCommands.values()){
+			PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
+			if(exists!=null) fail("admin commands in player commands? " + exists);
+		}
+		*/
+		for(PlayerCommands.AdminCommands cmd : PlayerCommands.AdminCommands.values()){
+			PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
+			if(exists==null) fail("admin commands in player commands? " + exists);
+		}
+	}
+	
 	@Test
 	public void validateDefaultSetting() {
 		Properties defaults = FactorySettings.createDeaults();
