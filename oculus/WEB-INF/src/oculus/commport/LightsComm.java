@@ -20,7 +20,7 @@ import oculus.Util;
 public class LightsComm implements SerialPortEventListener {
 	
 	public static final long DEAD_MAN_TIME_OUT = 30000;
-	public static final long USER_TIME_OUT = 10 * 60000;
+	public static final long USER_TIME_OUT = 5 * 60000;
 	public static final int TOO_MANY_COMMANDS = 10;
 	private static final int BAUD_RATE = 57600;
 	private static final int SETUP = 2000;
@@ -43,7 +43,7 @@ public class LightsComm implements SerialPortEventListener {
 	public static final byte SPOT_MAX = 'k';
 
 	private SerialPort serialPort = null;
-	private InputStream in= null;
+	private InputStream in = null;
 	private OutputStream out= null;
 	
 	private State state = State.getReference();
@@ -71,7 +71,7 @@ public class LightsComm implements SerialPortEventListener {
 	 */
 	public LightsComm(Application app) {
 		application = app; 
-		state.set(PlayerCommands.floodlight.toString(), true);
+		state.set(PlayerCommands.floodlight.toString(), false);
 		state.set(PlayerCommands.spotlightsetbrightness.toString(), 0);
 		if( state.get(State.lightport) != null ){
 			new Thread(new Runnable() { 
@@ -136,16 +136,15 @@ public class LightsComm implements SerialPortEventListener {
 			try {
 				byte[] input = new byte[32];
 				int read = in.read(input);
-				
-				// Util.log("bytes in: " + read, this);
-				
 				String str = new String();
+				
+				// convert to charaters 
 				for (int j = 0; j < read; j++){
 					///if((input[j] != 10) && (input[j] != 13)){
 						str += (char) input[j];
 					}	
 
-				// Util.log("bytes in: " + str.trim(), this);
+				Util.log(read + " bytes in: " + str.trim(), this);
 				
 				// really, we just care are getting replies.
 				lastRead = System.currentTimeMillis();
@@ -181,9 +180,7 @@ public class LightsComm implements SerialPortEventListener {
 				
 				// refresh values
 				if(getReadDelta() > (DEAD_MAN_TIME_OUT/3)){
-					
-					// Util.debug("_spotLightBrightness = " + state.getInteger(PlayerCommands.spotlightsetbrightness.toString()), this);
-					
+										
 					if(state.getBoolean(PlayerCommands.floodlight.toString())) sendCommand(DOCK_ON);
 					else sendCommand(DOCK_OFF);
 					
@@ -300,7 +297,7 @@ public class LightsComm implements SerialPortEventListener {
 			return;
 		}
 		
-		Util.log("set spot:" + target, this);
+		Util.log("set spot: " + target, this);
 		
 		if(target==0) sendCommand((byte) SPOT_OFF);
 		else if(target==10)sendCommand((byte) SPOT_1);
@@ -316,8 +313,7 @@ public class LightsComm implements SerialPortEventListener {
 		
 		state.set(PlayerCommands.spotlightsetbrightness.toString(), target);
 		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(target));
-		lastUserCommand = System.currentTimeMillis();
-		
+		lastUserCommand = System.currentTimeMillis();	
 	}
 	
 	public synchronized void floodLight(String str){

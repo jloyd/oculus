@@ -44,7 +44,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean pendingplayerisnull = true;
 	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
-	// public Vector<String> userMessages = new Vector<String>();
 	
 	//dev stuff
 	private developer.CommandServer commandServer = null;
@@ -53,8 +52,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	// try to make private
 	public boolean muteROVonMove = false;
-	public String stream = null;
 	public Speech speech = new Speech();
+	public String stream = null;
 	
 	public Application() {
 		super();
@@ -940,9 +939,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private void messageplayer(String str, String status, String value) {
 		
-		//if(userMessages.size()>MAX_MESSAGES) userMessages.remove(0);
-		// userMessages.add(new java.util.Date().toString() + " " + str);
-		if(commandServer!=null) commandServer.sendToGroup(str);
+		if(str!=null) if(commandServer!=null) commandServer.sendToGroup("message: " + str);
 		
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
@@ -1018,7 +1015,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void message(String str, String status, String value) {
-		if(commandServer!=null) commandServer.sendToGroup(str);
+		if(str!=null) if(commandServer!=null) commandServer.sendToGroup("message: " + str);
 		messageplayer(str, status, value);
 	}
 
@@ -1678,7 +1675,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		Util.log("chat: " + str);
 		messageGrabber("<CHAT>" + str, null);
-		if (commandServer != null) commandServer.sendToGroup(str);
+		if(str!=null) if (commandServer != null) commandServer.sendToGroup("message: " + str);
 	}
 
 	private void showlog() {

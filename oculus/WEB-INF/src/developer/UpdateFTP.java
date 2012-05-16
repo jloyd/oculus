@@ -14,7 +14,7 @@ import oculus.Util;
 /** */
 public class UpdateFTP { // implements Observer {
 	// private static final int WARN_LEVEL = 40;
-	public static final int DEFAULT_TIME = 5 * 60000; 
+	public static final int DEFAULT_TIME = 10 * 60000; 
 	public static final String ftpTimer = "ftpTimer";
 	
 	private static int delay = DEFAULT_TIME;

@@ -349,17 +349,12 @@ public class CommandServer implements Observer {
 	@Override
 	/** send to socket on state change */ 
 	public void updated(String key) {
-		
 		String value = state.get(key);
 		if(value==null) {
-			if(state.getBoolean(State.developer))
-				System.out.println("OCULUS: CommanndServer, state deleted " + SEPERATOR + key);
+			sendToGroup("state deleted: " + key + SEPERATOR + value); 
 		}
 		else {
-			if(state.getBoolean(State.developer))
-				System.out.println("OCULUS: CommanndServer, state updated: " + key + " " + value);
-			
-			sendToGroup(key + SEPERATOR + value); 
+			sendToGroup("state updated: " + key + SEPERATOR + value); 
 		}
 	}
 	
