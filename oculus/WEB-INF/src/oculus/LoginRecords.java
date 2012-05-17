@@ -14,13 +14,10 @@ public class LoginRecords {
 	public static Settings settings = new Settings();
 	private static Application app = null; 
 	
-	public LoginRecords(){ 
-//		Util.debug("started", this);
-	}
+	public LoginRecords(){ 	}
 	
 	public void setApplication(Application a) {
 		app = a;
-//		Util.debug("set application, called", this);		
 	}
 	
 	public void beDriver() { 
@@ -213,36 +210,17 @@ public class LoginRecords {
 		private long timeout = 0;
 		private String user = null;
 		private String role = null;
-//		private String id = "unkown";
-//		private String ip = null;
-
-		Record(String usr, String role){ //, String id) {
+		Record(String usr, String role){
 			this.user = usr;
 			this.role = role;
-			//this.ip = addr;
-			// this.id = id;
-			
-			if(state.getBoolean(State.developer))
-				Util.log("ceated login: " + toString(), this);
+		//	if(state.getBoolean(State.developer))
+		//		Util.log("ceated login: " + toString(), this);
 		}
 
 		public String getUser() {
 			return user;
 		}
 
-		/*
-		public long inTime() {
-			return timein;
-		}
-
-		public long outTime() {
-			return timeout;
-		}*/
-		
-		
-	//	public String getAddress(){
-	//		return ip;
-	//	}
 		
 		public boolean isActive(){
 			return (timeout==0);
@@ -266,7 +244,7 @@ public class LoginRecords {
 		public void logout() {
 			if(timeout==0){
 				timeout = System.currentTimeMillis();
-				Util.log("logged out : " + toString(), this);
+				///Util.log("logged out : " + toString(), this);
 			} else Util.log("error: trying to logout twice", this);	
 		}
 	}

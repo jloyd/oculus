@@ -13,7 +13,6 @@ import oculus.Observer;
 import oculus.ManualSettings;
 import oculus.PlayerCommands;
 import oculus.Settings;
-import oculus.State;
 import oculus.Updater;
 import oculus.Util;
 
@@ -43,6 +42,10 @@ public class CommandServer implements Observer {
 		private String user, pass;
 		
 		public ConnectionHandler(Socket socket) {
+			
+			if(PlayerCommands.isMultiCommand("chat")){
+				Util.log("chat is.. multi............................", this);
+			}
 		
 			clientSocket = socket;
 			
@@ -153,10 +156,24 @@ public class CommandServer implements Observer {
 		public void doPlayer(final String str){
 			
 			Util.log("doplayer("+str+")", this);	
-			
 			String[] cmd = str.trim().split(" ");
+			
+			/*
+			if(PlayerCommands.isMultiCommand(cmd[0])) {
+				out.println("multiiiiiii: " + cmd[0]);
+				app.playerCallServer(str, null);
+				return;
+			}
+			*/
+			
 			if(cmd.length==1) app.playerCallServer(str, null);		
 			if(cmd.length==2) app.playerCallServer(cmd[0], cmd[1]);
+			if(cmd.length>=3) {	
+				String args = new String();
+				for(int i = 1 ; i < cmd.length ; i++)
+					args += " " + cmd[i];
+					app.playerCallServer(cmd[0], args);
+			}
 		}
 		
 		// close resources

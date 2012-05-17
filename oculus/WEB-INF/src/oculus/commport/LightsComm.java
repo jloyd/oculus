@@ -144,7 +144,7 @@ public class LightsComm implements SerialPortEventListener {
 						str += (char) input[j];
 					}	
 
-				Util.log(read + " bytes in: " + str.trim(), this);
+				/// Util.log(read + " bytes in: " + str.trim(), this);
 				
 				// really, we just care are getting replies.
 				lastRead = System.currentTimeMillis();
@@ -213,8 +213,6 @@ public class LightsComm implements SerialPortEventListener {
 		disconnect();
 		application.message("lights failure, time out!", null, null);
 		Util.debug("lights failure, time out!", this);
-		new SendMail("lights error", "lights failure, time out, disconnecting with command buffer: " 
-				+ " read delta: " + getReadDelta() + " write delta: " + getWriteDelta());
 	}
 	
 	/** @return the time since last write() operation */

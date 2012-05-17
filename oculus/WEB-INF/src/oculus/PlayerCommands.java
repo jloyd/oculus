@@ -14,9 +14,13 @@ public enum PlayerCommands {
 
 	// sub-set that are restricted to "user0"
 	public enum AdminCommands {
-
-		// TODO: CHECK THESE
-		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, showlog, softwareupdate, relaunchgrabber, systemcall
+		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
+		showlog, softwareupdate, relaunchgrabber, systemcall
+	}
+	
+	// sub-set that are require a single long string of commands for cmmd mgr 
+	public enum MultiCommand {
+		chat, new_user_add;
 	}
 
 	/**
@@ -30,6 +34,30 @@ public enum PlayerCommands {
 
 		return false;
 	}
+	
+	/**
+	 * @return true if given command is in the sub-set
+	 */
+	public static boolean isMultiCommand(PlayerCommands cmd) {
+		if(cmd == null) return false;
+		
+		Util.log("is multi: " + cmd.toString());
+		
+		for (MultiCommand admin : MultiCommand.values()) {
+			if (admin.equals(cmd))
+				return true;
+		}
+
+		return false;
+	}
+	
+	/**
+	 * @return true if given command is in the sub-set
+	 */
+	public static boolean isMultiCommand(String str) {
+		return isMultiCommand(PlayerCommands.valueOf(str));
+	}
+
 
 	/**
 	 * @return true if given command is in the sub-set

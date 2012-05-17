@@ -5,7 +5,8 @@ import java.util.Properties;
 /** place extensions to settings here */
 public enum ManualSettings {
 	
-	emailaddress, emailpassword, developer, debugenabled, commandport, stopdelay, vself, offcenter, aboutface, arduinoculus, oculed;
+	emailaddress, emailpassword, developer, debugenabled, commandport, stopdelay, vself,
+	offcenter, aboutface, arduinoculus, oculed;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
