@@ -12,7 +12,7 @@ public enum ManualSettings {
 		Properties config = FactorySettings.createDeaults();
 		config.setProperty(developer.toString(), "false");
 		config.setProperty(debugenabled.toString(), "false");
-		config.setProperty(stopdelay.toString(), "0");
+		config.setProperty(stopdelay.toString(), "500");
 		config.setProperty(commandport.toString(), "4444");
 		config.setProperty(vself.toString(), "320_240_8_85");
 		return config;
