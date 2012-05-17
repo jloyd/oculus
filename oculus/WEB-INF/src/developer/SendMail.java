@@ -9,7 +9,7 @@ import javax.mail.*;
 import javax.mail.internet.*;
 
 import oculus.Application;
-import oculus.OptionalSettings;
+import oculus.ManualSettings;
 import oculus.Settings;
 
 /**
@@ -24,8 +24,8 @@ public class SendMail {
 	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
 
 	private Settings settings = new Settings();;
-	private final String user = settings.readSetting(OptionalSettings.emailaddress.toString()); 
-	private final String pass = settings.readSetting(OptionalSettings.emailpassword.toString()); 
+	private final String user = settings.readSetting(ManualSettings.emailaddress.toString()); 
+	private final String pass = settings.readSetting(ManualSettings.emailpassword.toString()); 
 
 	private String subject = null;
 	private String body = null;

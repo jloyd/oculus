@@ -89,6 +89,32 @@ public class Input extends JTextField implements KeyListener {
 	@Override
 	public void keyTyped(KeyEvent e) {
 		final char c = e.getKeyChar();
+		
+		if(c == '?') {
+			String str = getText();
+		//	str = str.substring(0,  str.length()-1);
+			str = str.trim();
+			
+			//
+			
+			out.println("...tab...: " + str);
+			
+			for (PlayerCommands command : PlayerCommands.values()) {
+				if(command.toString().startsWith(str)){
+					out.println("match: " + str);
+					
+					
+					//setText(command.toString() + " ");
+					//setCaretPosition(getText().length());
+					
+					//return;
+				}
+			}
+			
+			//setText("");
+			//return;
+		}
+		
 		if (c == '\n' || c == '\r') {
 			final String input = getText().trim();
 			if (input.length() > 2) {
@@ -121,18 +147,29 @@ public class Input extends JTextField implements KeyListener {
 			setText(cmds[ptr].toString() + " ");
 
 			setCaretPosition(getText().length());
+			
+		}/* else if (e.getKeyCode() == KeyEvent.VK_TAB) {
 
-		} else if (e.getKeyChar() == '*') {
+			out.println("/...tab...");
+			
+		} */
+		else if (e.getKeyChar() == '*') {
 
 			if (out == null) return;
-			for (PlayerCommands factory : PlayerCommands.values()) {
-				if (!factory.equals(PlayerCommands.restart)) {
-					out.println(factory.toString());
-					Util.log("sending: " + factory.toString());
-					Util.delay(500);
-				}
-			}
-
+			
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+			
+					for (PlayerCommands factory : PlayerCommands.values()) {
+						if (!factory.equals(PlayerCommands.restart)) {
+							out.println(factory.toString());
+							Util.log("sending: " + factory.toString());
+							Util.delay(500);
+						}
+					}
+				}}).start();
+			
 			out.close();
 
 		}

@@ -5,7 +5,7 @@ import static org.junit.Assert.fail;
 import java.io.*;
 import java.net.*;
 
-import oculus.OptionalSettings;
+import oculus.ManualSettings;
 import oculus.Settings;
 
 public class Client {
@@ -39,15 +39,21 @@ public class Client {
 			if (Settings.settingsfile.contains("null"))
 				fail("no settings file found");
 
-		// login on connect
+		// login info from settings
 		String user = settings.readSetting("user0");
 		String pass = settings.readSetting("pass0");
+		int port = settings.getInteger(ManualSettings.commandport);
+		String ip = null; 
 		
+		if(args.length==0) ip = "127.0.0.1";
+		else ip = args[0];
+	
 		// over ride
 		// System.out.println("args: " + args.length);
+		
 		if(args.length==4) user = args[2];
 		if(args.length==4) pass = args[3];
 		
-		new Client(args[0], settings.getInteger(OptionalSettings.commandport), user, pass);
+		new Client(ip, port, user, pass);
 	}
 }

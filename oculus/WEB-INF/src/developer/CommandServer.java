@@ -10,7 +10,7 @@ import oculus.Application;
 import oculus.BatteryLife;
 import oculus.LoginRecords;
 import oculus.Observer;
-import oculus.OptionalSettings;
+import oculus.ManualSettings;
 import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.State;
@@ -96,7 +96,7 @@ public class CommandServer implements Observer {
 			
 			state.set(oculus.State.override, true);
 		
-			Util.beep();
+			// Util.beep();
 			
 			sendToGroup(printers.size() + " tcp connections active");
 			
@@ -183,13 +183,6 @@ public class CommandServer implements Observer {
 		public void manageCommand(final String str){
 			final String[] cmd = str.split(" ");
 			
-			/*
-			if(cmd[0].equals("messages")) {
-				for(int i = 0; i < app.userMessages.size() ;i++){
-					out.println(app.userMessages.get(i));
-				}
-			}*/
-			
 			if(cmd[0].equals("help")) {
 				for (PlayerCommands factory : PlayerCommands.values()) 
 					out.println(factory.toString());
@@ -249,6 +242,8 @@ public class CommandServer implements Observer {
 			}
 			
 			if(cmd[0].equals("bye")) { out.print("bye"); shutDown(); }
+			
+			if(cmd[0].equals("quit")) { out.print("bye"); shutDown(); }
 						
 			if(cmd[0].equals("find")) {
 				
@@ -305,7 +300,7 @@ public class CommandServer implements Observer {
 				
 			if(cmd[0].equals("beep")) Util.beep();
 			
-			if(cmd[0].equals("dump")) state.dump();
+			// note if(cmd[0].equals("dump")) state.dump();
 			
 			//if(cmd[0].equals("email")) new SendMail("image", "body", Settings.framefile);
 			
@@ -413,7 +408,7 @@ public class CommandServer implements Observer {
 	/** do forever */ 
 	public void go(){
 		
-		Integer port = settings.getInteger(OptionalSettings.commandport.toString());
+		Integer port = settings.getInteger(ManualSettings.commandport.toString());
 		if(port==Settings.ERROR) port = 4444; // default on error 
 		
 		try {
