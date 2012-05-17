@@ -230,10 +230,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getBoolean(State.developer)) 
 			openNIRead = new developer.OpenNIRead(this);
 	
-		if (settings.readSetting(OptionalSettings.emailaddress)!=null)
+		if (settings.readSetting(ManualSettings.emailaddress)!=null)
 			new developer.EmailAlerts(this);
 			
-		if (settings.getInteger(OptionalSettings.commandport) > State.ERROR)
+		if (settings.getInteger(ManualSettings.commandport) > State.ERROR)
 			commandServer = new developer.CommandServer(this);
 		
 		if (UpdateFTP.configured()) new developer.UpdateFTP();

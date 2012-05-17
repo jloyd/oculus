@@ -7,7 +7,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import oculus.Application;
-import oculus.OptionalSettings;
+import oculus.ManualSettings;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
@@ -50,8 +50,8 @@ public class Discovery implements SerialPortEventListener {
 	/* constructor makes a list of available ports */
 	public Discovery() {
 		
-		String motors = settings.readSetting(OptionalSettings.arduinoculus);
-		String lights = settings.readSetting(OptionalSettings.oculed);
+		String motors = settings.readSetting(ManualSettings.arduinoculus);
+		String lights = settings.readSetting(ManualSettings.oculed);
 		
 		getAvailableSerialPorts();
 		

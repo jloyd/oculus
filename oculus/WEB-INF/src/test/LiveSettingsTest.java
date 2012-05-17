@@ -11,7 +11,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import oculus.OptionalSettings;
+import oculus.ManualSettings;
 import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.Util;
@@ -35,7 +35,7 @@ public class LiveSettingsTest {
 					fail("no settings file found");
 			
 		try {
-			socket = new Socket("127.0.0.1", settings.getInteger(OptionalSettings.commandport));
+			socket = new Socket("127.0.0.1", settings.getInteger(ManualSettings.commandport));
 		} catch (IOException e) {
 			fail("can NOT connect");
 		}

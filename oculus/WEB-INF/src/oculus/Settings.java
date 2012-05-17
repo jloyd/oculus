@@ -156,10 +156,10 @@ public class Settings {
 			
 		}
 		if (result == null) {
-			OptionalSettings optional = null;
-			Properties oprops = OptionalSettings.createDeaults();
+			ManualSettings optional = null;
+			Properties oprops = ManualSettings.createDeaults();
 			try { 
-				optional = OptionalSettings.valueOf(str); 
+				optional = ManualSettings.valueOf(str); 
 				result = oprops.getProperty(optional.toString());
 			}
 			catch (Exception e) {  }
@@ -197,11 +197,11 @@ public class Settings {
 					result += factory.toString() + " " + val + "\r\n";
 		}
 	
-		for (OptionalSettings ops : OptionalSettings.values()) {
+		for (ManualSettings ops : ManualSettings.values()) {
 			String val = readSetting(ops.toString());
 			if (val != null)
 				if( ! val.equalsIgnoreCase("null"))
-					if( ! ops.equals(OptionalSettings.emailpassword))
+					if( ! ops.equals(ManualSettings.emailpassword))
 						result += ops.toString() + " " + val + "\r\n";
 		}
 		
@@ -240,7 +240,7 @@ public class Settings {
 			
 			// optional
 			fw.append("# manual settings \r\n");
-			for (OptionalSettings ops : OptionalSettings.values()) {
+			for (ManualSettings ops : ManualSettings.values()) {
 
 				// over write with user's settings
 				String val = readSetting(ops.toString());
@@ -521,7 +521,7 @@ public class Settings {
 		}
 	}
 
-	public String readSetting(OptionalSettings key) {
+	public String readSetting(ManualSettings key) {
 		return readSetting(key.toString());
 	}
 	
@@ -533,11 +533,11 @@ public class Settings {
 		return getBoolean(setting.toString());
 	}
 
-	public boolean getBoolean(OptionalSettings setting) {
+	public boolean getBoolean(ManualSettings setting) {
 		return getBoolean(setting.toString());
 	}
 
-	public int getInteger(OptionalSettings settings) {
+	public int getInteger(ManualSettings settings) {
 		return getInteger(settings.toString());
 	}	
 }

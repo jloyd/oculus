@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import java.util.Properties;
 
 import oculus.FactorySettings;
-import oculus.OptionalSettings;
+import oculus.ManualSettings;
 import oculus.PlayerCommands;
 import oculus.Settings;
 
@@ -89,12 +89,12 @@ public class SettingsTest {
 	public void validateOptionalSetting() {
 		
 		// test default example: 320_240_8_85
-		Properties defaults = OptionalSettings.createDeaults();
-		String[] cords = defaults.getProperty(OptionalSettings.vself.toString()).split("_");
+		Properties defaults = ManualSettings.createDeaults();
+		String[] cords = defaults.getProperty(ManualSettings.vself.toString()).split("_");
 		if(cords.length!=4) fail("vself options are invalid: " + cords.length); 
 		
 		// test in current file 
-		cords = settings.readSetting(OptionalSettings.vself.toString()).split("_");
+		cords = settings.readSetting(ManualSettings.vself.toString()).split("_");
 		if(cords.length!=4) fail("vself options are invalid in settings file"); 
 		
 	}

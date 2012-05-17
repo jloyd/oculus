@@ -3,7 +3,7 @@ package oculus;
 import java.util.Properties;
 
 /** place extensions to settings here */
-public enum OptionalSettings {
+public enum ManualSettings {
 	
 	emailaddress, emailpassword, developer, debugenabled, commandport, stopdelay, vself, offcenter, aboutface, arduinoculus, oculed;
 

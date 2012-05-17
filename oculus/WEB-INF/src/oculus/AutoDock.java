@@ -293,7 +293,7 @@ public class AutoDock implements Docker {
 		// System.out.println(dockslopedeg+" "+slopedeg);
 		
 		// optionally set breaking delay longer for fast bots
-		int bd = settings.getInteger(OptionalSettings.stopdelay.toString());
+		int bd = settings.getInteger(ManualSettings.stopdelay.toString());
 		if(bd==Settings.ERROR) bd = 500;
 		final int stopdelay = bd;
 		
