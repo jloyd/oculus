@@ -18,14 +18,24 @@ public enum PlayerCommands {
 		showlog, softwareupdate, relaunchgrabber, systemcall
 	}
 	
-	// sub-set that are require a single long string of commands for cmmd mgr 
-	public enum MultiCommand {
-		chat, new_user_add;
+	// sub-set that are require parameters 
+	public enum RequiresArguments {
+		publish, floodlight, move, nudge, slide, getdrivingsettings, drivingsettingsupdate, cameracommand, 
+		speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
+		streamsettingscustom, playerbroadcast, password_update, 
+		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
+		disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate, 
+		arduinoecho, setsystemvolume, beapassenger, spotlightsetbrightness, 
+	    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle ;
 	}
 
-	/**
-	 * @return true if given command is in the sub-set
-	 */
+	public static boolean requiresArgument(String str) {
+		RequiresArguments command = PlayerCommands.RequiresArguments.valueOf(str);
+		if(command!=null) return true; 
+		return false;
+	}
+	
+	/** @return true if given command is in the sub-set */
 	public static boolean requiresAdmin(PlayerCommands cmd) {
 		for (AdminCommands admin : AdminCommands.values()) {
 			if (admin.equals(cmd))
@@ -35,33 +45,7 @@ public enum PlayerCommands {
 		return false;
 	}
 	
-	/**
-	 * @return true if given command is in the sub-set
-	 */
-	public static boolean isMultiCommand(PlayerCommands cmd) {
-		if(cmd == null) return false;
-		
-		Util.log("is multi: " + cmd.toString());
-		
-		for (MultiCommand admin : MultiCommand.values()) {
-			if (admin.equals(cmd))
-				return true;
-		}
-
-		return false;
-	}
-	
-	/**
-	 * @return true if given command is in the sub-set
-	 */
-	public static boolean isMultiCommand(String str) {
-		return isMultiCommand(PlayerCommands.valueOf(str));
-	}
-
-
-	/**
-	 * @return true if given command is in the sub-set
-	 */
+	/** @return true if given command is in the sub-set */
 	public boolean requiresAdmin() {
 		for (AdminCommands admin : AdminCommands.values()) {
 			if (admin.equals(this))
@@ -70,7 +54,7 @@ public enum PlayerCommands {
 
 		return false;
 	}
-
+/*
 	public static String match(String str) {
 		for (AdminCommands admin : AdminCommands.values()) {
 			if (admin.toString().startsWith(str))
@@ -79,9 +63,7 @@ public enum PlayerCommands {
 
 		return null;
 	}
-
-
-	
+	*/
 	@Override
 	public String toString() {
 		return super.toString();

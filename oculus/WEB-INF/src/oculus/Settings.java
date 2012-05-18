@@ -13,10 +13,9 @@ public class Settings {
 	public static String ftpconfig;
 	
 	// put all constants here
-	// public static final String emailalerts = "emailalerts";
 	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
-	public static final String developer = "developer";
+	// public static final String developer = "developer";
 	public static final String volume = "volume";
 	public static final int ERROR = -1;
 	
@@ -201,7 +200,7 @@ public class Settings {
 			String val = readSetting(ops.toString());
 			if (val != null)
 				if( ! val.equalsIgnoreCase("null"))
-					if( ! ops.equals(ManualSettings.emailpassword))
+					if( ! ops.equals(ManualSettings.emailpassword)) // never send out passwords 
 						result += ops.toString() + " " + val + "\r\n";
 		}
 		
@@ -356,8 +355,7 @@ public class Settings {
 				if(items.length==2){
 					if ((items[0].toUpperCase()).equals(setting.toUpperCase())) {
 						lines[i] = setting + " " + value;
-//						Util.debug(lines[i], this);
-					}
+					} // else Util.log("error wwritting: "+lines[0], this);
 				}
 				i++;
 			}
@@ -537,7 +535,11 @@ public class Settings {
 		return getBoolean(setting.toString());
 	}
 
-	public int getInteger(ManualSettings settings) {
-		return getInteger(settings.toString());
+	public int getInteger(ManualSettings setting) {
+		return getInteger(setting.toString());
+	}
+
+	public boolean getBoolean(GUISettings setting) {
+		return getBoolean(setting.toString());
 	}	
 }

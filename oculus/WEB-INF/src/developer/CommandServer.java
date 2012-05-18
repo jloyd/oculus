@@ -8,6 +8,7 @@ import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 
 import oculus.Application;
 import oculus.BatteryLife;
+import oculus.GUISettings;
 import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.ManualSettings;
@@ -43,10 +44,6 @@ public class CommandServer implements Observer {
 		
 		public ConnectionHandler(Socket socket) {
 			
-			if(PlayerCommands.isMultiCommand("chat")){
-				Util.log("chat is.. multi............................", this);
-			}
-		
 			clientSocket = socket;
 			
 			try {
@@ -97,10 +94,8 @@ public class CommandServer implements Observer {
 		@Override
 		public void run() {
 			
-			state.set(oculus.State.override, true);
-		
-			// Util.beep();
-			
+			state.set(oculus.State.override, true);		
+			if(settings.getBoolean(GUISettings.loginnotify)) Util.beep();
 			sendToGroup(printers.size() + " tcp connections active");
 			
 			// loop on input from the client
@@ -108,7 +103,7 @@ public class CommandServer implements Observer {
 			while (true) {
 
 				// been closed ?
-				if(out!=null) if(out.checkError()) break;			
+				// if(out!=null) if(out.checkError()) break;			
 				
 				// blocking read from the client stream up to a '\n'
 				String str = null;
@@ -129,24 +124,21 @@ public class CommandServer implements Observer {
 				str = str.trim();
 				if(str.length()>2){
 					
-					Util.debug(" address [" + clientSocket + "] message [" + str + "]", this);
-					
+					Util.debug(" address [" + clientSocket + "] message [" + str + "]", this);					
 					out.println("[" + i++ + "] echo: "+str);
 					
-					// do both for now 
-					manageCommand(str);
-					
-					// TODO: COLIN  
-					try {
-						doPlayer(str);
-					} catch (Exception e) {
-						// e.printStackTrace(System.err);
-						// Util.debug("player err: " + e.getLocalizedMessage(), this);
+					// try extra commands first 
+					if( ! manageCommand(str)){
+						try {
+							doPlayer(str);
+						} catch (Exception e) {
+							Util.debug("player err: " + e.getLocalizedMessage(), this);
+						}
 					}
 				}
 			}
 		
-			// 
+			// close up, must have a closed socket  
 			shutDown();
 		}
 
@@ -155,24 +147,20 @@ public class CommandServer implements Observer {
 		 */
 		public void doPlayer(final String str){
 			
-			Util.log("doplayer("+str+")", this);	
 			String[] cmd = str.trim().split(" ");
+			Util.log("doplayer("+str+") split: " + cmd.length, this);	
 			
-			/*
-			if(PlayerCommands.isMultiCommand(cmd[0])) {
-				out.println("multiiiiiii: " + cmd[0]);
-				app.playerCallServer(str, null);
-				return;
-			}
-			*/
-			
-			if(cmd.length==1) app.playerCallServer(str, null);		
-			if(cmd.length==2) app.playerCallServer(cmd[0], cmd[1]);
-			if(cmd.length>=3) {	
-				String args = new String();
-				for(int i = 1 ; i < cmd.length ; i++)
+			if(cmd.length==1) {
+				if( ! PlayerCommands.requiresArgument(cmd[0]))
+					app.playerCallServer(str, null);	
+				
+			} else if(cmd.length>=2) {	// collect all arguments
+				String args = new String(); 		
+				for(int i = 1 ; i < cmd.length ; i++) 
 					args += " " + cmd[i];
-					app.playerCallServer(cmd[0], args);
+				
+				// now send it 
+				app.playerCallServer(cmd[0], args);
 			}
 		}
 		
@@ -196,60 +184,55 @@ public class CommandServer implements Observer {
 			}
 		}
 		
-		/** add extra commands, macros here */ 
-		public void manageCommand(final String str){
+		/** add extra commands, macros here. Return true if the command was found */ 
+		public boolean manageCommand(final String str){
+			
 			final String[] cmd = str.split(" ");
 			
-			if(cmd[0].equals("help")) {
+			if(str.startsWith("help")) {
 				for (PlayerCommands factory : PlayerCommands.values()) 
 					out.println(factory.toString());
+				return true;
 			}
 			
-			if(cmd[0].equals("tail")) {
+			if(str.startsWith("tail")) {
 				int lines = 30; // default if not set 
 				if(cmd.length==2) lines = Integer.parseInt(cmd[1]);
 				String log = Util.tail(new File(oculus.Settings.stdout), lines);
-				
 				if(log!=null)
 					if(log.length() > 1)
 						out.println(log);
+				return true;
 			}
 			
-			if(cmd[0].equals("reboot")) Util.systemCall("shutdown -r -f -t 01");				
+			if(str.startsWith("reboot")) {
+				Util.systemCall("shutdown -r -f -t 01");			
+				return true;
+			}
 					
 			//TODO: TEST 
-			if(cmd[0].equals("home")) 
+			if(str.startsWith("home")){ 
 				Util.systemCall("java -classpath \"./webapps/oculus/WEB-INF/classes/\" developer.terminal.FindHome " 
 						+ state.get(oculus.State.localaddress) + " " + serverSocket.getLocalPort() +  " " + user + " " + pass); 
-	
-			//TODO: TEST 
-			if(cmd[0].equals("script")) 
-				Util.systemCall("java -classpath \"./webapps/oculus/WEB-INF/classes/\" developer.terminal.ScriptServer " 
-						+ state.get(oculus.State.localaddress) + " " + serverSocket.getLocalPort() + " " + user + " " + pass + " " + cmd[1]); 
-			
-			if(cmd[0].equals("restart")) app.restart(); 
-		
-			if(cmd[0].equals("softwareupdate")) app.softwareUpdate("update"); 
-			
-			if(cmd[0].equals("image")) { app.frameGrab(); }
-			
-			/*
-			if(cmd[0].equals("move")){
-				// System.out.println("move.....");
-				if(cmd[1].equals("forward")) port.goForward();
-				else if(cmd[1].equals("backward")) port.goBackward();
-				else if(cmd[1].equals("left")) port.turnLeft();
-				else if(cmd[1].equals("right")) port.turnRight();
+				return true;
 			}
 			
-			if(cmd[0].equals("nudge")) port.nudge(cmd[1]);
+			//TODO: TEST 
+			if(str.startsWith("script")){ 
+				Util.systemCall("java -classpath \"./webapps/oculus/WEB-INF/classes/\" developer.terminal.ScriptServer " 
+						+ state.get(oculus.State.localaddress) + " " + serverSocket.getLocalPort() + " " + user + " " + pass + " " + cmd[1]); 
+				return true;
+			}
 			
-			if(cmd[0].equals("publish")) app.publish(cmd[1]); 
-			*/
+			if(str.startsWith("restart")){ app.restart(); return true;}
+		
+			if(str.startsWith("softwareupdate")) { app.softwareUpdate("update"); return true; }
 			
-			if(cmd[0].equals("cam")){ app.publish("camera"); }
+			if(str.startsWith("image")) { app.frameGrab(); return true; }
 			
-			if(cmd[0].equals("memory")) {		
+			if(str.startsWith("cam")){ app.publish("camera"); return true; }
+			
+			if(str.startsWith("memory")) {		
 				out.println("memory : " +
 						((double)Runtime.getRuntime().freeMemory()
 								/ (double)Runtime.getRuntime().totalMemory()) + " %");
@@ -258,103 +241,96 @@ public class CommandServer implements Observer {
 			    out.println("memoryfree : "+Runtime.getRuntime().freeMemory());
 			}
 			
-			if(cmd[0].equals("bye")) { out.print("bye"); shutDown(); }
+			if(str.startsWith("bye")) { out.print("bye"); shutDown(); }
 			
-			if(cmd[0].equals("quit")) { out.print("bye"); shutDown(); }
+			if(str.startsWith("quit")) { out.print("bye"); shutDown(); }
 						
-			if(cmd[0].equals("find")) {
-				
+			if(str.startsWith("find")) {	
 				if(state.get(PlayerCommands.publish.toString()) == null) {
-				
-					out.println(".. the camera is off, retard.");
-					return;
-					
+					out.println("error: camera is off");
+					return true;
 				} else {
 					if(state.get(PlayerCommands.publish.toString()).equals("stop")){
-						out.println(".. the camera is off, retard.");
-						return;
+						out.println("error: camera is off");
+						return true;
 					}
 				}
 				
 				if(state.getBoolean(oculus.State.dockgrabbusy)){
-					out.println("calling _find_ too often.");
-					Util.log("calling _find_ too often.", this);
-					return;
-					
+					out.println("error: dock grab is busy");
+					return true;
 				} else {
 					
+					// take a new reading, send back result if success
 					state.set(oculus.State.dockgrabbusy, true);
-					
 					new Thread(new Runnable() {
-						
 						@Override
 						public void run() {
-														
-							// System.out.println("wait for grab to end... ");
-							long start = System.currentTimeMillis();
-
-							// are the same thing 
+							long start = System.currentTimeMillis(); 
 							app.dockGrab();
 							if( ! state.block(oculus.State.dockgrabbusy, "false", 45000))
 								Util.log("timed out waiting on dock grab ", this);
-							
-							
+					
 							// put results in state for any that care 
 							state.set(oculus.State.dockgrabtime, (System.currentTimeMillis() - start));
-							
 						}
 					}).start();
+					return true;
 				 }
 			}
 			
-			if(cmd[0].equals("battery")) battery.battStats();
-								
-			//if(cmd[0].equals("dock") && docker!=null) docker.autoDock("go");
+			if(str.startsWith("battery")){
+				battery.battStats();
+				return true;
+			}
 			
-			// if(cmd[0].equals("undock") && docker!=null) docker.dock("undock");
+			//if(str.startsWith("dock") && docker!=null) docker.autoDock("go");
+			
+			// if(str.startsWith("undock") && docker!=null) docker.dock("undock");
 									
-			/// if(cmd[0].equals("stop")) port.stopGoing();
+			/// if(str.startsWith("stop")) port.stopGoing();
 				
-			if(cmd[0].equals("beep")) Util.beep();
+			if(str.startsWith("beep")) {
+				Util.beep(); 
+				return true;
+			}
 			
-			// note if(cmd[0].equals("dump")) state.dump();
+			//if(str.startsWith("email")) new SendMail("image", "body", Settings.framefile);
 			
-			//if(cmd[0].equals("email")) new SendMail("image", "body", Settings.framefile);
-			
-			if(cmd[0].equals("tcp")) out.println("tcp connections : " + printers.size());
+			if(str.startsWith("tcp")) {
+				out.println("tcp connections : " + printers.size());
+				return true;
+			}
 	
-			if(cmd[0].equals("users")){
+			if(str.startsWith("users")){
 				out.println("active users : " + records.getActive());
 				if(records.toString()!=null) out.println(records.toString());
+				return true;
 			}
 
-			if(cmd[0].equals("state")) {
+			if(str.startsWith("state")) {
 				if(cmd.length==3) state.set(cmd[1], cmd[2]);
 				else out.println(state.toString());
+				return true;
 			}		
 			
-			if(cmd[0].equals("settings")){
+			if(str.startsWith("settings")){
 				if(cmd.length==3) { 
+					if(settings.readSetting(cmd[1]) == null) settings.newSetting(cmd[1], cmd[2]);
+					else settings.writeSettings(cmd[1], cmd[2]);
 				
-					// System.out.println(".. write setting: " + str);
-					
-					if(settings.readSetting(cmd[1]) == null) {
-						settings.newSetting(cmd[1], cmd[2]);
-					} else {
-						settings.writeSettings(cmd[1], cmd[2]);
-					}
-					
 					// clean file afterwards 
 					settings.writeFile();
+					return true;
 					
-				} else if(cmd.length==2) {
-					
-					out.println(settings.readSetting(cmd[1])); 
-
-					System.out.println("setting value = " + settings.readSetting(cmd[1])); 
-					
-				} else out.println(settings.toString());
+				} else{
+					out.println(settings.toString());
+					return true;
+				}
 			}	
+			
+			// command not found 
+			return false;
 		}
 	}
 	
@@ -363,7 +339,7 @@ public class CommandServer implements Observer {
 	public void updated(String key) {
 		String value = state.get(key);
 		if(value==null) {
-			sendToGroup("state deleted: " + key + SEPERATOR + value); 
+			sendToGroup("state deleted: " + key); 
 		}
 		else {
 			sendToGroup("state updated: " + key + SEPERATOR + value); 

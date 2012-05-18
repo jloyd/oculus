@@ -56,7 +56,7 @@ public class Input extends JTextField implements KeyListener {
 				}
 
 				// send dummy
-				out.println("\t\t\n");
+				out.println("_\t\t\n");
 			}
 		}
 	}
@@ -92,7 +92,6 @@ public class Input extends JTextField implements KeyListener {
 		
 		if(c == '?') {
 			String str = getText();
-		//	str = str.substring(0,  str.length()-1);
 			str = str.trim();
 			
 			//
@@ -103,16 +102,9 @@ public class Input extends JTextField implements KeyListener {
 				if(command.toString().startsWith(str)){
 					out.println("match: " + str);
 					
-					
-					//setText(command.toString() + " ");
-					//setCaretPosition(getText().length());
-					
-					//return;
 				}
 			}
 			
-			//setText("");
-			//return;
 		}
 		
 		if (c == '\n' || c == '\r') {
@@ -148,12 +140,7 @@ public class Input extends JTextField implements KeyListener {
 
 			setCaretPosition(getText().length());
 			
-		}/* else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-
-			out.println("/...tab...");
-			
-		} */
-		else if (e.getKeyChar() == '*') {
+		} else if (e.getKeyChar() == '*') {
 
 			if (out == null) return;
 			
@@ -161,7 +148,7 @@ public class Input extends JTextField implements KeyListener {
 				@Override
 				public void run() {
 			
-					for (PlayerCommands factory : PlayerCommands.values()) {
+					for (PlayerCommands.RequiresArguments factory : PlayerCommands.RequiresArguments.values()) {
 						if (!factory.equals(PlayerCommands.restart)) {
 							out.println(factory.toString());
 							Util.log("sending: " + factory.toString());

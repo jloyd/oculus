@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Vector;
 
 import oculus.commport.AbstractArduinoComm;
 import oculus.commport.Discovery;
@@ -24,7 +23,6 @@ import developer.UpdateFTP;
 public class Application extends MultiThreadedApplicationAdapter {
 
 	private static final int STREAM_CONNECT_DELAY = 2000;
-	// private static final int MAX_MESSAGES = 20; // buffer user screen for telnet 
 	private ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
 
 	private static String salt;
@@ -113,7 +111,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			loginRecords.signout();
 			Util.log("appDisconnect(): " + loginRecords);
 			
-			if(settings.getBoolean(Settings.developer))
+			if(settings.getBoolean(ManualSettings.developer))
 				if(state.get(State.user) == null)
 					Util.log("OCULUS: user was logged out correctly...");
 			
@@ -178,7 +176,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		str += " stream " + stream;
 		messageGrabber("connected to subsystem", "connection " + str);
-		Util.log("OCULUS: grabber signed in from " + grabber.getRemoteAddress());
+		Util.log("grabber signed in from " + grabber.getRemoteAddress(), this);
 		if (playerstream) {
 			grabberPlayPlayer(1);
 			messageGrabber("playerbroadcast", "1");

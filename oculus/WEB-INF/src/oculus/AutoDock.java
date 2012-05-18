@@ -63,7 +63,7 @@ public class AutoDock implements Docker {
 		this.comport = com;
 		this.light = light;
 		settings = new Settings();
-		if(settings.getBoolean(Settings.developer)){
+		if(settings.getBoolean(ManualSettings.developer)){
 			moves = new LogManager();
 			moves.open(Settings.movesfile);
 		}

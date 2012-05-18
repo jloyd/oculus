@@ -31,39 +31,24 @@ public class LoginRecords {
 				app.speech.mluv("lawg inn " + state.get(State.user));
 				// accessing 'Speech.mluv' directly so doesn't display text in client window on login 
 
-		Util.log("beDriver(): " + this.toString(), this);
+		Util.log("beDriver(): " + state.get(State.user), this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
 	
 	public void bePassenger() {		
 	
-		list.add(new Record(state.get(State.user), PASSENGER)); // "xxx.xxx.xxx.xxx"));
+		list.add(new Record(state.get(State.user), PASSENGER)); 
 		state.set(State.userisconnected, true);
 		
 		if (settings.getBoolean(Settings.loginnotify))
 			if(app!=null)
 				app.saySpeech("lawg inn " + state.get(State.user));
 
-		Util.log("bePassenger(): " + this.toString(), this);
+		Util.log("bePassenger(): " + state.get(State.user), this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
-	
-	/** @return true if this user is already connected from this address
-	public boolean isConnected(final String user, final String ip){
-		for (int i = 0; i < list.size(); i++){
-			Record rec = list.get(i);
-			if (rec.isActive()){
-				if(rec.getAddress().equals(ip))
-					if(rec.getUser().equals(user))
-						return true;
-			}
-		}
-		
-		return false;
-	}*/
-	
 	
 	/** is the current user the admin? */
 	public boolean isAdmin() {

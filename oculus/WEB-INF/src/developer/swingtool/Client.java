@@ -33,26 +33,31 @@ public class Client {
 
 	// driver
 	public static void main(String args[]) throws IOException {
-
-		Settings settings = new Settings();
-		if (Settings.settingsfile != null)
-			if (Settings.settingsfile.contains("null"))
-				fail("no settings file found");
-
-		// login info from settings
-		String user = settings.readSetting("user0");
-		String pass = settings.readSetting("pass0");
-		int port = settings.getInteger(ManualSettings.commandport);
-		String ip = null; 
+		Settings settings = null;
+		String user = null;
+		String pass = null;
+		String ip = "127.0.0.1";
+		int port = 0;
 		
-		if(args.length==0) ip = "127.0.0.1";
-		else ip = args[0];
-	
-		// over ride
-		// System.out.println("args: " + args.length);
+		if(args.length==0) {			
+			settings = new Settings();
+			if (Settings.settingsfile != null)
+				if (Settings.settingsfile.contains("null"))
+					fail("no settings file found");
+			
+			// login info from settings
+			user = settings.readSetting("user0");
+			pass = settings.readSetting("pass0");
+			port = settings.getInteger(ManualSettings.commandport); 
+		}
 		
-		if(args.length==4) user = args[2];
-		if(args.length==4) pass = args[3];
+		// use parms  
+		if(args.length==4){
+			ip = args[0];
+			port = Integer.parseInt(args[1]);
+			user = args[2];
+			pass = args[3];
+		}
 		
 		new Client(ip, port, user, pass);
 	}

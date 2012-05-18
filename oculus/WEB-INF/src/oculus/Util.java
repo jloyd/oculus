@@ -17,7 +17,6 @@ import java.util.Vector;
 
 public class Util {
 
-	private static final String os  = System.getProperty("os.name"); 
 	private static final boolean debug = new Settings().getBoolean(ManualSettings.debugenabled);
 	private static final int PRECISION = 2;
 	
@@ -63,10 +62,6 @@ public class Util {
 		int index2 = date.indexOf(' ', index1 + 1);
 		int index3 = date.indexOf(' ', index2 + 1);
 		int index4 = date.indexOf(' ', index3 + 1);
-
-		// System.out.println("1: " + index1 + " 2: " + index2 + " 3: " + index3
-		// + " 4: " + index4);
-
 		String time = date.substring(index3 + 1, index4);
 
 		return time;
@@ -97,8 +92,6 @@ public class Util {
 		if (start == 0)
 			return text;
 
-		// cut off all digits and the '.'
-		//
 		if (precision == 0) {
 			return text.substring(0, start - 1);
 		}
@@ -155,14 +148,8 @@ public class Util {
 
 		int start = text.indexOf(".") + 1;
 
-		if (start == 0)
-			return text;
+		if (start == 0) return text;
 
-		// System.out.println("format string - found dec point at index = " +
-		// start );
-
-		// cut off all digits and the '.'
-		//
 		if (precision == 0) {
 			return text.substring(0, start - 1);
 		}
@@ -185,9 +172,6 @@ public class Util {
 
 			// Append
 			OutputStream out = new FileOutputStream(f2, true);
-
-			// Overwrite
-			// OutputStream out = new FileOutputStream(f2);
 
 			byte[] buf = new byte[1024];
 			int len;
@@ -356,7 +340,6 @@ public class Util {
 		String str;
 		str = "nircmdc.exe setsysvolume "+ (int) vol; //w in
 		Util.systemCall(str);					
-		//app.message("ROV volume set to "+Integer.toString(percent)+"%", null, null);
 	}
 
 	/**
