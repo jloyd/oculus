@@ -60,7 +60,7 @@ public class Discovery implements SerialPortEventListener {
 			return;
 		}
 		
-		if(motors == null){		
+		if(motors.equalsIgnoreCase("discovery")){		
 			Util.debug("discovery starting on: " + ports.size() + " ports", this);
 			for(int i = ports.size() - 1; i >= 0; i--) 
 				Util.debug("[" + i + "] port name: " + ports.get(i), this);
@@ -72,7 +72,7 @@ public class Discovery implements SerialPortEventListener {
 			state.set(State.firmware, OCULUS_DC);
 		}
 		
-		if(lights == null){
+		if(lights.equalsIgnoreCase("discovery")){		
 			Util.debug("discovery starting on: " + ports.size() + " ports", this);
 			for(int i = ports.size() - 1; i >= 0; i--) 
 				Util.debug("[" + i + "] port name: " + ports.get(i), this);
@@ -132,7 +132,6 @@ public class Discovery implements SerialPortEventListener {
 			
 			if (true) { // rate==115200) {
 				Util.delay(TIMEOUT*2);
-				Util.debug("querying port... ",this);
 				doPortQuery();
 			}
 			else {

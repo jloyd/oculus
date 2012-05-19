@@ -21,10 +21,10 @@ public enum PlayerCommands {
 	// sub-set that are require parameters 
 	public enum RequiresArguments {
 		publish, floodlight, move, nudge, slide, getdrivingsettings, drivingsettingsupdate, cameracommand, 
-		speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
+		speedset, dock, relaunchgrabber, clicksteer, chat, systemcall, streamsettingsset, 
 		streamsettingscustom, playerbroadcast, password_update, 
 		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
-		disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate, 
+		disconnectotherconnections, monitor, assumecontrol, softwareupdate, 
 		arduinoecho, setsystemvolume, beapassenger, spotlightsetbrightness, 
 	    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle ;
 	}

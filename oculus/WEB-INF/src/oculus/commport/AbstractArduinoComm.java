@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import oculus.Application;
-import oculus.FactorySettings;
+import oculus.GUISettings;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
@@ -14,22 +14,26 @@ import gnu.io.SerialPort;
 
 public abstract class AbstractArduinoComm implements ArduioPort {
 
-	protected State state = State.getReference();
-	protected SerialPort serialPort = null;
-	protected InputStream in;
-	protected OutputStream out;
-	protected String version = null;
-	protected byte[] buffer = new byte[32];
-	protected int buffSize = 0;
 	protected long lastSent = System.currentTimeMillis();
 	protected long lastRead = System.currentTimeMillis();
-	protected Settings settings;
+	protected Settings settings = new Settings();
+	protected State state = State.getReference();
+	protected Application application = null;
+	protected volatile boolean isconnected = false;
+	protected SerialPort serialPort = null;	
+	protected String version = null;
+	protected OutputStream out;
+	protected InputStream in;
+
+	// data buffer 
+	protected byte[] buffer = new byte[32];
+	protected int buffSize = 0;
+	
+	// config via settings file 
 	protected int tempspeed = 999;
 	protected int clicknudgedelay = 0;
 	protected String tempstring = null;
 	protected int tempint = 0;
-	protected volatile boolean isconnected = false;
-	protected Application application = null;
 	
 	public int speedslow;
 	public int speedmed;
@@ -58,7 +62,6 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 	public AbstractArduinoComm(Application app) {
 
 		application = app;
-		settings = new Settings();
 		
 		speedslow = settings.getInteger("speedslow");
 		speedmed = settings.getInteger("speedmed");
@@ -71,7 +74,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		maxclickcam = settings.getInteger("maxclickcam");
 		clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 		steeringcomp = settings.getInteger("steeringcomp");
-		holdservo = settings.getBoolean(FactorySettings.holdservo.toString());
+		holdservo = settings.getBoolean(GUISettings.holdservo.toString());
 		
 		if (state.get(State.serialport) != null) {
 			new Thread(new Runnable() {
@@ -96,9 +99,9 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			if (!isconnected){
 			
 				// TAKE IT DOWN! 
-				if(state.get(oculus.State.firmware) == null ){ // .equals(oculus.State.unknown)){
+				if(state.get(oculus.State.firmware) == null ){ 
 					if(state.getBoolean(oculus.State.developer)){
-						System.out.println("OCULUS: AbstractArduinoComm, not connected, rebooting");		
+						Util.log("not connected, rebooting", this);		
 						Util.systemCall("shutdown -r -f -t 01");	
 					}
 				}

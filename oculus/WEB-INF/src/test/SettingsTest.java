@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.Properties;
 
-import oculus.FactorySettings;
+import oculus.GUISettings;
 import oculus.ManualSettings;
 import oculus.PlayerCommands;
 import oculus.Settings;
@@ -21,9 +21,14 @@ public class SettingsTest {
 	public void setUp() {
 		System.out.println(getClass().toString());
 		settings = new Settings();
+		
+		if(settings==null) fail("no settings file found");
+		
 		if(Settings.settingsfile != null)
 			if(Settings.settingsfile.contains("null"))
 				fail("no settings file found");
+		
+		if(settings.readSetting("salt").equals("null")) fail("no salt!"); 
 	}
 
 	@After
@@ -33,11 +38,25 @@ public class SettingsTest {
 	
 	@Test
 	public void testReadSetting() {
-		// read settings file, check against factory settings
-		for (FactorySettings factory : FactorySettings.values()) {
-			String val = settings.readSetting(factory.toString());
-			if (val == null) 
+		
+		for (GUISettings factory : GUISettings.values()){ 
+		
+			if(settings.readSetting(factory.toString())==null)
 				fail("setting missing in file: " + factory.toString());
+			
+			System.out.println("file: " + factory.toString() + " " + settings.readSetting(factory.toString()));
+		
+		
+		}
+		
+		for (ManualSettings factory : ManualSettings.values()) {
+			
+			if(settings.readSetting(factory.toString())==null)
+				fail("setting missing in file: " + factory.toString());
+			
+			System.out.println("file: " + factory.toString() + " " + settings.readSetting(factory.toString()));
+			System.out.println("default: " + factory.toString() + " " + ManualSettings.getDefault(factory));
+
 		}
 	}
 
@@ -57,39 +76,39 @@ public class SettingsTest {
 	
 	@Test
 	public void validateDefaultSetting() {
-		Properties defaults = FactorySettings.createDeaults();
-		for (FactorySettings factory : FactorySettings.values()) {
+		Properties defaults = GUISettings.createDeaults();
+		for (GUISettings factory : GUISettings.values()) {
 			String val = factory.toString();
 			if (!defaults.containsKey(val))
 				fail("default setting missing: " + factory.toString());
 		}
 		
-		if(defaults.getProperty(FactorySettings.vlow.toString()).split("_").length != 4) 
+		if(defaults.getProperty(GUISettings.vlow.toString()).split("_").length != 4) 
 			 fail("vlow default values are invalid");
-		if(defaults.getProperty(FactorySettings.vmed.toString()).split("_").length != 4) 
+		if(defaults.getProperty(GUISettings.vmed.toString()).split("_").length != 4) 
 			 fail("vmed default values are invalid");
-		if(defaults.getProperty(FactorySettings.vhigh.toString()).split("_").length != 4) 
+		if(defaults.getProperty(GUISettings.vhigh.toString()).split("_").length != 4) 
 			 fail("vhigh default values are invalid");
-		if(defaults.getProperty(FactorySettings.vfull.toString()).split("_").length != 4) 
+		if(defaults.getProperty(GUISettings.vfull.toString()).split("_").length != 4) 
 			 fail("vfull default values are invalid");
 		
-		if(settings.readSetting(FactorySettings.vlow.toString()).split("_").length != 4) 
+		if(settings.readSetting(GUISettings.vlow.toString()).split("_").length != 4) 
 			 fail("vlow settings are invalid");
-		if(settings.readSetting(FactorySettings.vmed.toString()).split("_").length != 4) 
+		if(settings.readSetting(GUISettings.vmed.toString()).split("_").length != 4) 
 			 fail("vmed settings are invalid");
-		if(settings.readSetting(FactorySettings.vhigh.toString()).split("_").length != 4) 
+		if(settings.readSetting(GUISettings.vhigh.toString()).split("_").length != 4) 
 			 fail("vhigh settings are invalid");
-		if(settings.readSetting(FactorySettings.vfull.toString()).split("_").length != 4) 
+		if(settings.readSetting(GUISettings.vfull.toString()).split("_").length != 4) 
 			 fail("vfull settings are invalid");
 		
 	}
 
-	
+	/*
 	@Test
 	public void validateOptionalSetting() {
 		
 		// test default example: 320_240_8_85
-		Properties defaults = ManualSettings.createDeaults();
+		Properties defaults = GUISettings.createDeaults();
 		String[] cords = defaults.getProperty(ManualSettings.vself.toString()).split("_");
 		if(cords.length!=4) fail("vself options are invalid: " + cords.length); 
 		
@@ -98,4 +117,6 @@ public class SettingsTest {
 		if(cords.length!=4) fail("vself options are invalid in settings file"); 
 		
 	}
+	*/
+	
 }

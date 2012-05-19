@@ -123,7 +123,7 @@ public class LiveSettingsTest {
 			if( ! factory.equals(PlayerCommands.restart)){
 				out.println(factory.toString());
 				System.out.println(factory.toString());
-				Util.delay(5000);
+				Util.delay(500);
 			}
 		}
 		

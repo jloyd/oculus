@@ -15,7 +15,6 @@ public class Settings {
 	// put all constants here
 	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
-	// public static final String developer = "developer";
 	public static final String volume = "volume";
 	public static final int ERROR = -1;
 	
@@ -30,7 +29,9 @@ public class Settings {
 		
 		// if red5 home lookup fails when using JUnit
 		String redhome = System.getenv("RED5_HOME");
-		if(redhome==null) redhome = /*"." + sep + ".." +sep + */ ".." + sep +".." + sep;
+		if(redhome==null) redhome = ".." + sep +".." + sep;
+		
+		// System.out.println("red5:" + redhome );
 		
 		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
 		
@@ -43,7 +44,8 @@ public class Settings {
 		// be sure of basic configuration 
 		if( ! new File(settingsfile).exists()) {
 			Util.log("warning, settings file created with defaults.", this);
-			FactorySettings.createFile();
+			writeFile();
+			//GUISettings.createFile();
 		}
 	}
 
@@ -145,20 +147,20 @@ public class Settings {
 		
 		// if setting missing due to old config file version, try to create as needed from default on demand
 		if (result == null) {
-			FactorySettings factory = null;
-			Properties fprops = FactorySettings.createDeaults();
+			GUISettings factory = null;
+			Properties fprops = GUISettings.createDeaults();
 			try { 
-				factory = FactorySettings.valueOf(str);
+				factory = GUISettings.valueOf(str);
 				result = fprops.getProperty(factory.toString());
 			}
 			catch (Exception e) {  }
 			
 		}
 		if (result == null) {
-			ManualSettings optional = null;
-			Properties oprops = ManualSettings.createDeaults();
+			GUISettings optional = null;
+			Properties oprops = GUISettings.createDeaults();
 			try { 
-				optional = ManualSettings.valueOf(str); 
+				optional = GUISettings.valueOf(str); 
 				result = oprops.getProperty(optional.toString());
 			}
 			catch (Exception e) {  }
@@ -189,18 +191,18 @@ public class Settings {
 
 	public String toString(){
 		String result = new String();
-		for (FactorySettings factory : FactorySettings.values()) {
+		for (GUISettings factory : GUISettings.values()) {
 			String val = readSetting(factory.toString());
 			if (val != null) 
 				if( ! val.equalsIgnoreCase("null"))
 					result += factory.toString() + " " + val + "\r\n";
 		}
 	
-		for (ManualSettings ops : ManualSettings.values()) {
+		for (GUISettings ops : GUISettings.values()) {
 			String val = readSetting(ops.toString());
-			if (val != null)
+			if (val != null) // never send out passwords 
 				if( ! val.equalsIgnoreCase("null"))
-					if( ! ops.equals(ManualSettings.emailpassword)) // never send out passwords 
+					if( ! ops.equals(ManualSettings.emailpassword)) 
 						result += ops.toString() + " " + val + "\r\n";
 		}
 		
@@ -212,46 +214,44 @@ public class Settings {
 	 */
 	public synchronized void writeFile(String path) {
 		
-		// System.out.println("writeFile(), called...");
+		Util.debug("writeFile() called", this);
 		
 		try {
 			
 			final String temp = System.getenv("RED5_HOME") + sep+"conf"+sep+"oculus_created.txt";
 			FileWriter fw = new FileWriter(new File(temp));
 			
-			fw.append("# required settings \r\n");
-			for (FactorySettings factory : FactorySettings.values()) {
+			fw.append("# GUI settings \r\n");
+			for (GUISettings factory : GUISettings.values()) {
 
 				// over write with user's settings
 				String val = readSetting(factory.toString());
 				if (val != null){
-					if( ! val.equalsIgnoreCase("null")){
-						fw.append(factory.toString() + " " + val + "\r\n");
-					}
+				
+					fw.append(factory.toString() + " " + val + "\r\n");
+	
 				} else {
-		
-					// try reading it commented 
-					if(readSetting("# " + factory.toString()) !=null)
-						fw.append("# " + factory.toString());
-					
+	
+					Util.debug("use default foor: " + factory.toString(), this);
+					fw.append(factory.toString() + " " + GUISettings.getDefault(factory) + "\r\n");
 				}
 			}
 			
-			// optional
 			fw.append("# manual settings \r\n");
 			for (ManualSettings ops : ManualSettings.values()) {
-
-				// over write with user's settings
 				String val = readSetting(ops.toString());
 				if (val != null){
-					if( ! val.equalsIgnoreCase("null")){
-						fw.append(ops.toString() + " " + val + "\r\n");
+					if( val.equalsIgnoreCase("null")){ // TODO: DEFAULT ?? 
+						fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
 					}
+					else 
+					
+					fw.append(ops.toString() + " " + val + "\r\n");
+					
 				} else {
 					
-					// try reading it commented 
-					if(readSetting("# " + ops.toString()) != null)
-						fw.append("# " + ops.toString());
+					Util.debug("use default foor: " + ops.toString(), this);
+					fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
 					
 				}	
 			}
@@ -518,28 +518,28 @@ public class Settings {
 			e.printStackTrace();
 		}
 	}
-
-	public String readSetting(ManualSettings key) {
-		return readSetting(key.toString());
-	}
 	
-	public String readSetting(FactorySettings key) {
-		return readSetting(key.toString());
-	}
-
-	public boolean getBoolean(FactorySettings setting) {
+	public boolean getBoolean(GUISettings setting) {
 		return getBoolean(setting.toString());
 	}
 
 	public boolean getBoolean(ManualSettings setting) {
 		return getBoolean(setting.toString());
 	}
-
+	
+	public String readSetting(ManualSettings setting) {
+		return readSetting(setting.toString());
+	}
+	
+	public String readSetting(GUISettings setting) {
+		return readSetting(setting.toString());
+	}
+	
 	public int getInteger(ManualSettings setting) {
 		return getInteger(setting.toString());
-	}
-
-	public boolean getBoolean(GUISettings setting) {
-		return getBoolean(setting.toString());
 	}	
+	
+	public int getInteger(GUISettings setting) {
+		return getInteger(setting.toString());
+	}
 }

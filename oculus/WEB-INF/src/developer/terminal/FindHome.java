@@ -165,9 +165,9 @@ public class FindHome extends AbstractTerminal {
 			out.println("state " + State.losttarget + " " + false);
 		}
 
-		int nudges = state.getInteger(ManualSettings.offcenter.toString());
-		int aboutface = state.getInteger(ManualSettings.aboutface.toString());
-		System.out.println("...found offest: " + nudges + " aboutface: " + aboutface);
+		//int nudges = state.getInteger(ManualSettings.offcenter.toString());
+		//int aboutface = state.getInteger(ManualSettings.aboutface.toString());
+		//System.out.println("...found offest: " + nudges + " aboutface: " + aboutface);
 
 		out.println("state autodocking false");
 		
@@ -195,7 +195,7 @@ public class FindHome extends AbstractTerminal {
 		}
 
 		int nudges = spinFind();		
-		out.println("settings " + ManualSettings.offcenter.toString() + " " + nudges);
+	//	out.println("settings " + ManualSettings.offcenter.toString() + " " + nudges);
 
 		// hand over control, wait for docking...
 		out.println("dock");

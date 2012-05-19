@@ -212,6 +212,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			Util.log("initialize(), has no salt!", this);
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
+			
+			// TODO: REMOVE USERS? 
+		} else if(salt.equals("null")){
+			Util.log("initialize(), has no salt!", this);
+			salt = UUID.randomUUID().toString();
+			settings.newSetting("salt", salt);
 		}
 
 		// must call this here
@@ -223,7 +229,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		light = discovery.getLights(this);
 		
 		httpPort = settings.readRed5Setting("http.port");
-		muteROVonMove = settings.getBoolean(FactorySettings.muteonrovmove);
+		muteROVonMove = settings.getBoolean(GUISettings.muteonrovmove);
 		
 		if (settings.getBoolean(State.developer)) 
 			openNIRead = new developer.OpenNIRead(this);
@@ -231,7 +237,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.readSetting(ManualSettings.emailaddress)!=null)
 			new developer.EmailAlerts(this);
 			
-		if (settings.getInteger(ManualSettings.commandport) > State.ERROR)
+		if (settings.readSetting(ManualSettings.commandport)!=null)
 			commandServer = new developer.CommandServer(this);
 		
 		if (UpdateFTP.configured()) new developer.UpdateFTP();
@@ -641,7 +647,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case holdservo:
 			if (str.equalsIgnoreCase("true")) comport.holdservo = true;
 			else comport.holdservo = false;
-			settings.writeSettings(FactorySettings.holdservo.toString(), str);
+			settings.writeSettings(GUISettings.holdservo.toString(), str);
 			messageplayer("holdservo " + str, null, null);
 			break;
 		case opennisensor:

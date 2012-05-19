@@ -114,7 +114,7 @@ public class FTP {
         sendLine("STOR " + filename);
         Socket dataSocket = new Socket(ip, port);
         
-        Util.log("ftp connected: " + dataSocket.toString() + " " + filename, this);
+        Util.debug(dataSocket.toString() + " " + filename, this);
         
         response = readLine();
         if (!response.startsWith("150 ")) {

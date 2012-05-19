@@ -1,8 +1,5 @@
 package oculus;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Properties;
 
 public enum GUISettings {
@@ -58,7 +55,7 @@ public enum GUISettings {
 	}
 
 	/** @returns true if all settings are in properties */
-	public static boolean validate(Properties conf){//, Application app) {
+	public static boolean validate(Properties conf) {
 		Settings fromfile = new Settings();
 		String value = null;
 		for (GUISettings settings : GUISettings.values()) {
@@ -72,47 +69,8 @@ public enum GUISettings {
 		return true;
 	}
 
-	/** write to file in the order set in enum */
-	public synchronized static void createFile() {
-
-		// kill if exists
-		
-		FileWriter fw = null;
-		try {
-			fw = new FileWriter(new File(Settings.settingsfile+".tmp"));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			return;
-		}
-		
-		try {
-			
-			fw.append("# FACTORY RESET on: " + new java.util.Date().toString() + "\r\n");
-			final Properties props = createDeaults();
-			for (GUISettings factory : GUISettings.values()) {
-				fw.append(factory.toString() + " "
-						+ props.getProperty(factory.toString()) + "\r\n");
-			}
-
-			fw.close();
-			
-		} catch (IOException e) {
-			try {
-				fw.close();
-			} catch (IOException e2) {
-				e2.printStackTrace();
-			}
-		}
-		
-		if (new File(Settings.settingsfile).exists()) new File(Settings.settingsfile).delete();
-
-		new File(Settings.settingsfile+".tmp").renameTo(new File(Settings.settingsfile));
+	public static String getDefault(GUISettings factory) {
+		Properties defaults = createDeaults();
+		return defaults.getProperty(factory.toString());	
 	}
-/*
-	@Override
-	public String toString() {
-		return super.toString();
-	}
-*/
-	
 }
