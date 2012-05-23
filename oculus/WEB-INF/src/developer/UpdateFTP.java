@@ -55,6 +55,7 @@ public class UpdateFTP { // implements Observer {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				Util.delay(delay);
 				while(true){
 					// state.set(ftpTimer, true);
 					updateServer();

@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.TooManyListenersException;
 
-import developer.SendMail;
-
 import oculus.Application;
 import oculus.PlayerCommands;
 import oculus.State;
@@ -54,7 +52,9 @@ public class LightsComm implements SerialPortEventListener {
 	// track write times
 	private long lastSent = System.currentTimeMillis();
 	private long lastRead = System.currentTimeMillis();
-	private long lastUserCommand = System.currentTimeMillis();
+
+	// TODO: brad, put into state
+	// private long lastUserCommand = System.currentTimeMillis();
 	
 	// make sure all threads know if connected 
 	private boolean isconnected = false;
@@ -136,13 +136,14 @@ public class LightsComm implements SerialPortEventListener {
 			try {
 				byte[] input = new byte[32];
 				int read = in.read(input);
-				String str = new String();
+				
+				//String str = new String();
 				
 				// convert to charaters 
-				for (int j = 0; j < read; j++){
+				//for (int j = 0; j < read; j++){
 					///if((input[j] != 10) && (input[j] != 13)){
-						str += (char) input[j];
-					}	
+				//		str += (char) input[j];
+				//	}	
 
 				/// Util.log(read + " bytes in: " + str.trim(), this);
 				
@@ -165,7 +166,7 @@ public class LightsComm implements SerialPortEventListener {
 		public void run() {
 			Util.delay(SETUP);
 			while (true) {
-				if((System.currentTimeMillis() - lastUserCommand) > USER_TIME_OUT){
+				if((System.currentTimeMillis() - state.getLong(oculus.State.usercommand)) > USER_TIME_OUT){
 					if(state.getBoolean(PlayerCommands.floodlight.toString()) 
 							|| (state.getInteger(PlayerCommands.spotlightsetbrightness.toString())>0)){
 						
@@ -311,7 +312,7 @@ public class LightsComm implements SerialPortEventListener {
 		
 		state.set(PlayerCommands.spotlightsetbrightness.toString(), target);
 		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(target));
-		lastUserCommand = System.currentTimeMillis();	
+		//lastUserCommand = System.currentTimeMillis();	
 	}
 	
 	public synchronized void floodLight(String str){
@@ -330,6 +331,6 @@ public class LightsComm implements SerialPortEventListener {
 		}
 		
 		application.message("floodlight "+str, null, null);
-		lastUserCommand = System.currentTimeMillis();
+		//lastUserCommand = System.currentTimeMillis();
 	}
 }

@@ -12,6 +12,7 @@ public class Settings {
 	public static String stdout;
 	public static String ftpconfig;
 	
+	
 	// put all constants here
 	public static final String loginnotify = "loginnotify";
 	public static final String skipsetup = "skipsetup";
@@ -45,7 +46,6 @@ public class Settings {
 		if( ! new File(settingsfile).exists()) {
 			Util.log("warning, settings file created with defaults.", this);
 			writeFile();
-			//GUISettings.createFile();
 		}
 	}
 
@@ -146,6 +146,8 @@ public class Settings {
 		}
 		
 		// if setting missing due to old config file version, try to create as needed from default on demand
+		//TODO: brad removing 
+		/* 
 		if (result == null) {
 			GUISettings factory = null;
 			Properties fprops = GUISettings.createDeaults();
@@ -153,18 +155,11 @@ public class Settings {
 				factory = GUISettings.valueOf(str);
 				result = fprops.getProperty(factory.toString());
 			}
-			catch (Exception e) {  }
-			
-		}
-		if (result == null) {
-			GUISettings optional = null;
-			Properties oprops = GUISettings.createDeaults();
-			try { 
-				optional = GUISettings.valueOf(str); 
-				result = oprops.getProperty(optional.toString());
-			}
-			catch (Exception e) {  }
-		}
+			catch (Exception e) {  }	
+		} */
+		
+		// don't let string "null" be confused for actually a null, error state  
+		if(result!=null) if(result.equalsIgnoreCase("null")) result = null;
 		
 		return result;
 	}
@@ -193,17 +188,15 @@ public class Settings {
 		String result = new String();
 		for (GUISettings factory : GUISettings.values()) {
 			String val = readSetting(factory.toString());
-			if (val != null) 
-				if( ! val.equalsIgnoreCase("null"))
-					result += factory.toString() + " " + val + "\r\n";
+			if (val != null) // null is ok
+				result += factory.toString() + " " + val + "\r\n";
 		}
 	
 		for (GUISettings ops : GUISettings.values()) {
 			String val = readSetting(ops.toString());
 			if (val != null) // never send out passwords 
-				if( ! val.equalsIgnoreCase("null"))
-					if( ! ops.equals(ManualSettings.emailpassword)) 
-						result += ops.toString() + " " + val + "\r\n";
+				if( ! ops.equals(ManualSettings.emailpassword)) 
+					result += ops.toString() + " " + val + "\r\n";
 		}
 		
 		return result;

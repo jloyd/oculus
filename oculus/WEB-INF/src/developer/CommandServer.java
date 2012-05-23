@@ -15,6 +15,7 @@ import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.Updater;
 import oculus.Util;
+import oculus.commport.Discovery;
 
 /**
  * Start the terminal server. Start new threads for a each connection. 
@@ -381,9 +382,9 @@ public class CommandServer implements Observer {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while(true) {
+				//while(true) {
 					go();
-				}
+				//}
 			}
 		}).start();
 	}
@@ -391,14 +392,11 @@ public class CommandServer implements Observer {
 	/** do forever */ 
 	public void go(){
 		
-	//	if(settings.readSetting(ManualSettings.commandport).
-	//			equals(ManualSettings.getDefault(ManualSettings.commandport))) 
-		
-		// disabled 
-		if(settings.readSetting(ManualSettings.commandport).equals("null")) return; 
+		// disabled configuration 
+		if(settings.readSetting(ManualSettings.commandport).equals(Discovery.params.disabled)) return; 
 		
 		Integer port = settings.getInteger(ManualSettings.commandport.toString());
-		if(port==Settings.ERROR) port = 4444; // default on error 
+		if(port==Settings.ERROR) return; 
 		
 		try {
 			serverSocket = new ServerSocket(port);

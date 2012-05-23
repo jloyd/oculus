@@ -401,7 +401,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (cmd != null) {
 			if (cmd.requiresAdmin())
 				if (loginRecords.isAdmin()){ 
-					// message("must be an admin", null, null);
 					Util.debug("playerCallServer(), must be an admin to do: " + fn, this);
 					return;
 				}
@@ -427,6 +426,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the argument string to pass along
 	 */
 	public void playerCallServer(final PlayerCommands fn, final String str) {
+		
+		//TODO: BRAD added .. track user activity 
+		if(fn != PlayerCommands.statuscheck) 
+			state.set(State.usercommand, System.currentTimeMillis());
 
 		String[] cmd = null;
 		if(str!=null) cmd = str.split(" ");
@@ -436,20 +439,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 				Util.log("playerCallServer(): " + fn + " " + str);
 
 		switch (fn) {
-		case chat:
-			chat(str);
-			return;
-		case beapassenger:
-			beAPassenger(str);
-			return;
-		case assumecontrol:
-			assumeControl(str);
-			return;
+		case chat: chat(str) ;return;
+		case beapassenger: beAPassenger(str);return;
+		case assumecontrol: assumeControl(str); return;
 		}
 
 		 // must be driver/non-passenger for all commands below (or cmdMgr user)
 		
-		// temp 'solution' 
+		// TODO: temp 'solution' 
 		if( ! state.getBoolean(oculus.State.override)){
 		 if (Red5.getConnectionLocal() != player && player != null) {
 			 Util.log("passenger, command dropped: " + fn.toString());
@@ -605,9 +602,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			disconnectOtherConnections();
 			break;
 		case monitor:
-			if (Settings.os.equals("linux"))
+			if (Settings.os.equals("linux")){
 				messageplayer("unsupported in linux",null,null);
-			
+				return;
+			}
 			monitor(str);
 			break;
 		case showlog:
@@ -694,9 +692,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			return;
 		}
 
-		if (cmd == null)
-			return;
-		grabberCallServer(cmd, str);
+		if (cmd == null) return;
+		else grabberCallServer(cmd, str);
 	}
 
 	/**
@@ -708,6 +705,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the parameters to pass on to the function.
 	 */
 	public void grabberCallServer(final grabberCommands cmd, final String str) {
+		
+		//TODO: BRAD added .. track user activity 
+		///state.set(State.usercommand, System.currentTimeMillis());
+		
+		
 		switch (cmd) {
 		case streammode:
 			grabberSetStream(str);

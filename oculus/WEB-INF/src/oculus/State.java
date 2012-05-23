@@ -9,6 +9,7 @@ public class State {
 	public static final String SEPERATOR = " : ";
 	public static final String user = "user";
 	public static final String logintime = "logintime";
+	public static final String usercommand = "usercommand";
 	public static final String userisconnected = "userisconnected";
 	public static final String reboot = "reboot";
 	public static final String developer = "developer";
@@ -45,6 +46,8 @@ public class State {
 	public static final String docked = "docked";
 	public static final String undocked = "undocked";
 	public static final String undock = "undock";
+	public static final String disabled = "disabled";
+	
 		
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;

@@ -35,7 +35,7 @@ public class Downloader {
 
 		// test is really gone
 		if (new File(path).exists()) {
-			System.out.println("OCULUS: can't delete existing file: " + path);
+			Util.log("can't delete existing file: " + path, this);
 			return false;
 		}
 
@@ -54,19 +54,19 @@ public class Downloader {
 				ByteWritten += ByteRead;
 			}
 
-			System.out.println("OCULUS: saved to local file: " + path + " bytes: " + ByteWritten);
-			System.out.println("download took: "+ (System.currentTimeMillis()-start) + " ms");
-			System.out.println("downloaded " + ByteWritten + " bytes to: " + path);
+			Util.log("saved to local file: " + path + " bytes: " + ByteWritten, this);
+			Util.log("download took: "+ (System.currentTimeMillis()-start) + " ms", this);
+			Util.log("downloaded " + ByteWritten + " bytes to: " + path, this);
 
 		} catch (Exception e) {
-			System.out.println("OCULUS: " + e.getMessage());
+			Util.log(e.getMessage(), this);
 			return false;
 		} finally {
 			try {
 				is.close();
 				os.close();
 			} catch (IOException e) {
-				System.out.println("OCULUS: " + e.getMessage());
+				Util.log(e.getMessage(), this);
 				return false;
 			}
 		}
@@ -90,7 +90,7 @@ public class Downloader {
 		
 		// 
 		if( ! new File(zip).exists()){	
-			System.out.println("no zip file found: " + zip);
+			Util.log("no zip file found: " + zip, this);
 			return false;
 		}
 				

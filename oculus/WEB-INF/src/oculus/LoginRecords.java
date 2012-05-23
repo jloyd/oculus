@@ -14,7 +14,7 @@ public class LoginRecords {
 	public static Settings settings = new Settings();
 	private static Application app = null; 
 	
-	public LoginRecords(){ 	}
+	public LoginRecords(){}
 	
 	public void setApplication(Application a) {
 		app = a;
@@ -31,7 +31,7 @@ public class LoginRecords {
 				app.speech.mluv("lawg inn " + state.get(State.user));
 				// accessing 'Speech.mluv' directly so doesn't display text in client window on login 
 
-		Util.log("beDriver(): " + state.get(State.user), this);
+		Util.debug("beDriver(): " + state.get(State.user), this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
@@ -45,7 +45,7 @@ public class LoginRecords {
 			if(app!=null)
 				app.saySpeech("lawg inn " + state.get(State.user));
 
-		Util.log("bePassenger(): " + state.get(State.user), this);
+		Util.debug("bePassenger(): " + state.get(State.user), this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
@@ -147,34 +147,6 @@ public class LoginRecords {
 		return list.size();
 	}
 
-	/** create snap shot of current use to disk 
-	public static boolean save(){
-		
-		if(new File(Settings.loginactivity).exists()) 
-			new File(Settings.loginactivity).delete();
-		
-		FileWriter fw = null;
-		try {
-			fw = new FileWriter(new File(Settings.loginactivity));
-		} catch (IOException e1) {
-			return false;
-		}
-	
-		try {
-			fw.append(new LoginRecords().toString());
-		} catch (IOException e) {
-			return false;
-		}
-		
-		try {
-			fw.close();
-		} catch (IOException e) {
-			return false;
-		}
-		
-		return true;
-	}*/
-
 	public String toString() {
 
 		if (list.isEmpty()) return null;
@@ -187,7 +159,7 @@ public class LoginRecords {
 	}
 
 	/**
-	 * 
+	 * store each record in an object 
 	 */
 	private class Record {
 
@@ -195,18 +167,16 @@ public class LoginRecords {
 		private long timeout = 0;
 		private String user = null;
 		private String role = null;
+		
 		Record(String usr, String role){
 			this.user = usr;
 			this.role = role;
-		//	if(state.getBoolean(State.developer))
-		//		Util.log("ceated login: " + toString(), this);
 		}
 
 		public String getUser() {
 			return user;
 		}
 
-		
 		public boolean isActive(){
 			return (timeout==0);
 		}
@@ -217,8 +187,7 @@ public class LoginRecords {
 		
 		@Override
 		public String toString() {
-			String str = user + " " + role.toUpperCase(); // + " id: " + id;
-			//if(!isPassenger()) str += " address: " + ip;
+			String str = user + " " + role.toUpperCase(); 
 			str += " login: " + new Date(timein).toString();
 			if(isActive()) str += " is ACTIVE";
 			else str += " logout: " + new Date(timeout).toString();
@@ -229,7 +198,7 @@ public class LoginRecords {
 		public void logout() {
 			if(timeout==0){
 				timeout = System.currentTimeMillis();
-				///Util.log("logged out : " + toString(), this);
+				Util.debug("logged out : " + toString(), this);
 			} else Util.log("error: trying to logout twice", this);	
 		}
 	}

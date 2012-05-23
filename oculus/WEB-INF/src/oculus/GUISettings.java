@@ -44,13 +44,6 @@ public enum GUISettings {
 		config.setProperty(reboot.toString(), "false");
 		config.setProperty(pushtotalk.toString(), "false");
 		
-		/*
-		config.setProperty(motordiscovery.toString(), "true");
-		config.setProperty(motorport.toString(), "false");
-		config.setProperty(lightdiscovery.toString(), "true");
-		config.setProperty(lightport.toString(), "false");
-		*/
-		
 		return config;
 	}
 
