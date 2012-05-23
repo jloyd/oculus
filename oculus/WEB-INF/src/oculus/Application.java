@@ -407,6 +407,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			playerCallServer(cmd, str);
 		}
+		Util.debug("playerCallServer: "+fn+" "+str, this);
 	}
 
 	public void dockGrab() {
@@ -780,6 +781,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 								n.invoke("message", new Object[] {
 										"streaming " + stream, "green",
 										"stream", stream });
+								Util.debug("message all players: streaming " + stream +" stream " +stream,this);
 							}
 						}
 					}
@@ -949,6 +951,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			sc.invoke("message", new Object[] { str, "green", status, value });
 		}
+		
+		Util.debug("messageplayer: "+str+" "+status+" "+value, this);
 	}
 
 	private void sendplayerfunction(String fn, String params) {
