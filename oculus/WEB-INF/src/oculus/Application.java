@@ -70,8 +70,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String logininfo[] = ((String) params[0]).split(" ");
 
 		// always accept local grabber
-		if ((connection.getRemoteAddress()).equals("127.0.0.1")
-				&& logininfo[0].equals(""))
+		if ((connection.getRemoteAddress()).equals("127.0.0.1") && logininfo[0].equals(""))
 			return true;
 
 		if (logininfo.length == 1) { // test for cookie auth
@@ -82,8 +81,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		if (logininfo.length > 1) { // test for user/pass/remember
-			String encryptedPassword = (passwordEncryptor
-					.encryptPassword(logininfo[0] + salt + logininfo[1])).trim();
+			String encryptedPassword = (passwordEncryptor.encryptPassword(logininfo[0] + salt + logininfo[1])).trim();
 			if (logintest(logininfo[0], encryptedPassword) != null) {
 				if (logininfo[2].equals("remember")) {
 					remember = encryptedPassword;
@@ -105,15 +103,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 			Util.log("appDisconnect(): " + str); 
 
 			messageGrabber(str, "connection awaiting&nbsp;connection");
-		
-			// admin = false;			
-			// TODO: issue 24
 			loginRecords.signout();
-			Util.log("appDisconnect(): " + loginRecords);
 			
 			if(settings.getBoolean(ManualSettings.developer))
-				if(state.get(State.user) == null)
-					Util.log("OCULUS: user was logged out correctly...");
+				if(state.get(State.user) != null)
+					Util.log("user was NOT logged out correctly!");
 			
 			player = null;
 
@@ -212,12 +206,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			Util.log("initialize(), has no salt!", this);
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
-			
 			// TODO: REMOVE USERS? 
 		} else if(salt.equals("null")){
 			Util.log("initialize(), has no salt!", this);
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
+			// TODO: REMOVE USERS? 
 		}
 
 		// must call this here
@@ -234,10 +228,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getBoolean(State.developer)) 
 			openNIRead = new developer.OpenNIRead(this);
 	
-		if (settings.readSetting(ManualSettings.emailaddress)!=null)
+		if ( ! settings.readSetting(ManualSettings.emailaddress).equals(State.disabled))
 			new developer.EmailAlerts(this);
 			
-		if (settings.readSetting(ManualSettings.commandport)!=null)
+		if ( ! settings.readSetting(ManualSettings.commandport).equals(State.disabled))
 			commandServer = new developer.CommandServer(this);
 		
 		if (UpdateFTP.configured()) new developer.UpdateFTP();
@@ -245,7 +239,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Util.setSystemVolume(settings.getInteger(Settings.volume), this);
 		grabberInitialize();
 		battery = BatteryLife.getReference();
-		new SystemWatchdog(this);
+		new SystemWatchdog();
 		Util.debug("initialize done", this);
 
 	}
@@ -406,7 +400,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			playerCallServer(cmd, str);
 		}
-		Util.debug("playerCallServer: "+fn+" "+str, this);
 	}
 
 	public void dockGrab() {
@@ -436,7 +429,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		if (state.getBoolean(State.developer))
 			if (!fn.equals(PlayerCommands.statuscheck))
-				Util.log("playerCallServer(): " + fn + " " + str);
+				Util.log("_playerCallServer(): " + fn + " " + str, this);
 
 		switch (fn) {
 		case chat: chat(str) ;return;

@@ -4,8 +4,6 @@ import java.io.*;
 import java.net.*;
 import javax.swing.*;
 
-import oculus.Util;
-
 public class Output extends JTextArea implements Runnable {
 
 	private static final long serialVersionUID = 1L;
@@ -23,16 +21,12 @@ public class Output extends JTextArea implements Runnable {
 		}
 
 		// read from sock as a new thread
-		Thread thread = new Thread(this);
-		thread.start();
+		new Thread(this).start();
 	}
 
 	// Manage input coming from server
 	public void run() {
 
-		long last = System.currentTimeMillis();
-		String delta = null;
-		
 		// loop on input from socket
 		String input = null;
 		while (true) {
@@ -45,18 +39,13 @@ public class Output extends JTextArea implements Runnable {
 				
 				input = input.trim();
 				
-				if(input.length()>3){
+				if(input.length()>2){
 				
-					// calc time stamp 
-					delta = Util.formatFloat((double)((System.currentTimeMillis()-last)/(double)1000), 3);
-					
-					append("[" + delta + "] " + input + "\n");
+					append(input + "\n");
 					
 					// move focus to it new line we just added
 					setCaretPosition(getDocument().getLength());
 					
-					last = System.currentTimeMillis();
-
 				}
 			} catch (Exception e) {
 				System.exit(0);

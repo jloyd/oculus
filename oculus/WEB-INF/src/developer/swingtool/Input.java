@@ -2,6 +2,8 @@ package developer.swingtool;
 
 import java.io.*;
 import java.net.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 import javax.swing.*;
 
@@ -93,15 +95,9 @@ public class Input extends JTextField implements KeyListener {
 		if(c == '?') {
 			String str = getText();
 			str = str.trim();
-			
-			//
-			
-			out.println("...tab...: " + str);
-			
 			for (PlayerCommands command : PlayerCommands.values()) {
 				if(command.toString().startsWith(str)){
-					out.println("match: " + str);
-					
+					out.println("match: " + str);	
 				}
 			}
 			
@@ -120,6 +116,7 @@ public class Input extends JTextField implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 
+		if (out == null) return;
 		PlayerCommands[] cmds = PlayerCommands.values();
 
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
@@ -137,13 +134,10 @@ public class Input extends JTextField implements KeyListener {
 				ptr = cmds.length;
 
 			setText(cmds[ptr].toString() + " ");
-
 			setCaretPosition(getText().length());
 			
 		} else if (e.getKeyChar() == '*') {
 
-			if (out == null) return;
-			
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -157,8 +151,62 @@ public class Input extends JTextField implements KeyListener {
 					}
 				}}).start();
 			
-			out.close();
+			//out.close();
 
+		} else if (e.getKeyChar() == 'z') {
+
+			if (out == null) return;
+			
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+
+				      URL u;
+				      InputStream is = null;
+				      DataInputStream dis;
+				      String s;
+
+				      try {
+
+				         u = new URL("http://127.0.0.1:5080/oculus/frameGrabHTTP");
+				         
+				           is = u.openStream();         // throws an IOException
+
+				  
+				         dis = new DataInputStream(new BufferedInputStream(is));
+
+				             while ((s = dis.readLine()) != null) {
+				            System.out.println(s);
+				         }
+
+				      } catch (MalformedURLException mue) {
+
+				         System.out.println("Ouch - a MalformedURLException happened.");
+				         mue.printStackTrace();
+				         System.exit(1);
+
+				      } catch (IOException ioe) {
+
+				         System.out.println("Oops- an IOException happened.");
+				         ioe.printStackTrace();
+				         System.exit(1);
+
+				      } finally {
+
+				         //---------------------------------//
+				         // Step 6:  Close the InputStream  //
+				         //---------------------------------//
+
+				         try {
+				            is.close();
+				         } catch (IOException ioe) {
+				            // just going to ignore this one
+				         }
+
+				      } // end of 'finally' clause
+
+					
+				}}).start();
 		}
 	}
 
