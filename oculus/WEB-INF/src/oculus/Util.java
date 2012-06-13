@@ -5,10 +5,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -206,16 +208,14 @@ public class Util {
 
 			String line = null;
 			System.out.println(proc.hashCode() + "OCULUS: exec():  " + args);
-			while ((line = procReader.readLine()) != null){
+			while ((line = procReader.readLine()) != null)
 				System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
-			}
 			System.out.println("OCULUS: process exit value = " + proc.exitValue());
 			System.out.println("OCULUS: blocking run time = " + (System.currentTimeMillis()-start) + " ms");
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	/**
@@ -431,16 +431,32 @@ public class Util {
 	    }
 	 }
 	
-
+	public static void saveUrl(String filename, String urlString) throws MalformedURLException, IOException {
+        BufferedInputStream in = null;
+        FileOutputStream fout = null;
+        try{
+                in = new BufferedInputStream(new URL(urlString).openStream());
+                fout = new FileOutputStream(filename);
+                byte data[] = new byte[1024];
+                int count;
+                while ((count = in.read(data, 0, 1024)) != -1)
+                	fout.write(data, 0, count);	
+                
+        } finally {    
+        	if (in != null) in.close();
+            if (fout != null) fout.close();
+        }
+    }
+	
 	public static void debug(String str, Object c) {
 		if(debug) System.out.println("DEBUG: " + c.getClass().getName() + ", " +str+", "+getTime());
 	}
 
 	public static void log(String str, Object c) {
-		System.out.println("OCULUS: " + c.getClass().getName() + ", " +str+", "+getTime());
+		System.out.println("OCULUS: " + c.getClass().getName() + ", " +str);
 	}
 
 	public static void log(String str) {
-		System.out.println("OCULUS: Util, " +str+", "+getTime());
+		System.out.println("OCULUS: " +str);
 	}
 }

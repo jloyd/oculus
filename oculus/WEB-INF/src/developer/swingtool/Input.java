@@ -8,6 +8,7 @@ import java.util.zip.InflaterInputStream;
 import javax.swing.*;
 
 import oculus.PlayerCommands;
+import oculus.State;
 import oculus.Util;
 
 import java.awt.event.*;
@@ -151,65 +152,25 @@ public class Input extends JTextField implements KeyListener {
 					}
 				}}).start();
 			
-			//out.close();
-
 		} else if (e.getKeyChar() == 'z') {
 
-			if (out == null) return;
-			
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
 
-				      URL u;
-				      InputStream is = null;
-				      DataInputStream dis;
-				      String s;
-
-				      try {
-
-				         u = new URL("http://127.0.0.1:5080/oculus/frameGrabHTTP");
-				         
-				           is = u.openStream();         // throws an IOException
-
-				  
-				         dis = new DataInputStream(new BufferedInputStream(is));
-
-				             while ((s = dis.readLine()) != null) {
-				            System.out.println(s);
-				         }
-
-				      } catch (MalformedURLException mue) {
-
-				         System.out.println("Ouch - a MalformedURLException happened.");
-				         mue.printStackTrace();
-				         System.exit(1);
-
-				      } catch (IOException ioe) {
-
-				         System.out.println("Oops- an IOException happened.");
-				         ioe.printStackTrace();
-				         System.exit(1);
-
-				      } finally {
-
-				         //---------------------------------//
-				         // Step 6:  Close the InputStream  //
-				         //---------------------------------//
-
-				         try {
-				            is.close();
-				         } catch (IOException ioe) {
-				            // just going to ignore this one
-				         }
-
-				      } // end of 'finally' clause
-
+					String urlString = "http://"+ State.getReference().get(State.externaladdress)+":5080/oculus/frameGrabHTTP";
+					
+					try {
+						Util.saveUrl("_local.jpg", urlString );
+					} catch (Exception e) {
+						System.out.println("can't get image: " + e.getLocalizedMessage());
+					}
 					
 				}}).start();
 		}
 	}
 
+	
 	@Override
 	public void keyReleased(KeyEvent e) {}
 }

@@ -1,7 +1,6 @@
 package oculus;
 
 import java.io.*;
-import java.util.Properties;
 
 public class Settings {
 
@@ -144,19 +143,6 @@ public class Settings {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		// if setting missing due to old config file version, try to create as needed from default on demand
-		//TODO: brad removing 
-		/* 
-		if (result == null) {
-			GUISettings factory = null;
-			Properties fprops = GUISettings.createDeaults();
-			try { 
-				factory = GUISettings.valueOf(str);
-				result = fprops.getProperty(factory.toString());
-			}
-			catch (Exception e) {  }	
-		} */
 		
 		// don't let string "null" be confused for actually a null, error state  
 		if(result!=null) if(result.equalsIgnoreCase("null")) result = null;
@@ -331,12 +317,6 @@ public class Settings {
 	public void writeSettings(String setting, String value) {
 		value = value.trim();
 		FileInputStream filein;
-//		Util.debug("attempting setting of: "+setting+" "+value, this);
-		
-		// TODO: WHOA BAD, USE VECTOR 
-		// what the heck is a Vector, Victor?
-		// Vector<String> lines = new Vector();
-		
 		String[] lines = new String[999];
 		try {
 
@@ -386,8 +366,7 @@ public class Settings {
 		String[] lines = new String[999];
 		try {
 			filein = new FileInputStream(settingsfile);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					filein));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			int i = 0;
 			while ((lines[i] = reader.readLine()) != null) {
 				lines[i] = lines[i].replaceAll("\\s+$", "");

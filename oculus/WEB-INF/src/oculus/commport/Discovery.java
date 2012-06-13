@@ -158,7 +158,7 @@ public class Discovery implements SerialPortEventListener {
 		if (handlingEvent) { return; } // hopefully this is never used
 		
 		if (serialPort != null) {
-			Util.log("close port: " + serialPort.getName() + " baud: " + serialPort.getBaudRate(), this);
+			Util.debug("close port: " + serialPort.getName() + " baud: " + serialPort.getBaudRate(), this);
 			serialPort.removeEventListener();
 			serialPort.close();
 			serialPort = null;

@@ -1,7 +1,5 @@
 package developer.swingtool;
 
-import static org.junit.Assert.fail;
-
 import java.io.*;
 import java.net.*;
 
@@ -32,7 +30,7 @@ public class Client {
 	}
 
 	// driver
-	public static void main(String args[]) throws IOException {
+	public static void main(String args[]) throws Exception {
 		Settings settings = null;
 		String user = null;
 		String pass = null;
@@ -43,7 +41,7 @@ public class Client {
 			settings = new Settings();
 			if (Settings.settingsfile != null)
 				if (Settings.settingsfile.contains("null"))
-					fail("no settings file found");
+					throw(new Exception("no settings file found"));
 			
 			// login info from settings
 			user = settings.readSetting("user0");

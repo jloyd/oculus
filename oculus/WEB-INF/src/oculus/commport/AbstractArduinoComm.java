@@ -128,8 +128,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			while (true) {
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
-					System.out.println("OCULUS: AbstractArduinoComm.WatchDog(), "
-							+"arduino watchdog time out, may be no hardware attached");
+					Util.log("arduino watchdog time out, may be no hardware attached", this);
 					
 					state.set(oculus.State.commwatchdog, true);
 					

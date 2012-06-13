@@ -940,14 +940,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private void messageplayer(String str, String status, String value) {
 		
-		if(str!=null) if(commandServer!=null) commandServer.sendToGroup("message: " + str);
-		
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			sc.invoke("message", new Object[] { str, "green", status, value });
 		}
 		
-		Util.debug("messageplayer: "+str+" "+status+" "+value, this);
+		if(str!=null){
+			if(str.equals(PlayerCommands.statuscheck.toString())){
+				if(commandServer!=null) commandServer.sendToGroup("[messageplayer] " + str);
+				Util.debug("_messageplayer: "+str+" "+status+" "+value, this);
+			}	
+		}
 	}
 
 	private void sendplayerfunction(String fn, String params) {

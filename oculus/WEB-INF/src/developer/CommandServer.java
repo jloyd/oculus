@@ -74,6 +74,7 @@ public class CommandServer implements Observer {
 					
 					if(app.logintest(user, encryptedPassword)==null){
 						out.println("login failure, please drop dead");
+						Util.debug("login failure from: " + user, this);
 						shutDown();
 					}
 				}
@@ -116,17 +117,22 @@ public class CommandServer implements Observer {
 				str = str.trim();
 				if(str.length()>2){
 					
-					Util.debug(clientSocket.getInetAddress().toString() + "input: " + str, this);					
+					Util.debug(clientSocket.getInetAddress().toString() + " : " + str, this);					
 					out.println("[" + i++ + "] echo: "+str);
 					
 					// try extra commands first 
-					if( ! manageCommand(str)){
+					//if( !
+							
+						manageCommand(str); //{
+					
 						try {
 							doPlayer(str);
 						} catch (Exception e) {
 							Util.debug("player err: " + e.getLocalizedMessage(), this);
 						}
-					}
+						
+						
+					//		}
 				}
 			}
 		
@@ -232,7 +238,30 @@ public class CommandServer implements Observer {
 		
 			if(str.startsWith("softwareupdate")) { app.softwareUpdate("update"); return true; }
 			
-			if(str.startsWith("image")) { app.frameGrab(); return true; }
+			if(str.startsWith("image")) { 
+			
+				final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
+						
+				// Util.log("save: " + urlString, this);
+					
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							
+							//int i = 1;
+							//if(cmd.length==2) i = Integer.parseInt(cmd[1]);
+				
+							new File("capture").mkdir();
+							//for(; i >=0 ; i--) 
+								Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
+							
+						} catch (Exception e) {
+							Util.log("can't get image: " + e.getLocalizedMessage(), this);
+						}
+					}}).start();
+				return true; 
+			}
 			
 			if(str.startsWith("cam")){ app.publish("camera"); return true; }
 			
