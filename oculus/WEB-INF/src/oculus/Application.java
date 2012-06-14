@@ -420,7 +420,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final PlayerCommands fn, final String str) {
 		
-		//TODO: BRAD added .. track user activity 
 		if(fn != PlayerCommands.statuscheck) 
 			state.set(State.usercommand, System.currentTimeMillis());
 
@@ -429,7 +428,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		if (state.getBoolean(State.developer))
 			if (!fn.equals(PlayerCommands.statuscheck))
-				Util.log("_playerCallServer(): " + fn + " " + str, this);
+				Util.debug("playerCallServer(): " + fn + " " + str, this);
 
 		switch (fn) {
 		case chat: chat(str) ;return;
@@ -439,14 +438,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		 // must be driver/non-passenger for all commands below (or cmdMgr user)
 		
-		// TODO: temp 'solution' 
+		//TODO: temp 'solution' 
 		if( ! state.getBoolean(oculus.State.override)){
-		 if (Red5.getConnectionLocal() != player && player != null) {
-			 Util.log("passenger, command dropped: " + fn.toString());
-			 return;
-		 }
+			if (Red5.getConnectionLocal() != player && player != null) {
+				Util.log("passenger, command dropped: " + fn.toString(), this);
+				return;
+			}
 		}
-		
 		
 		switch (fn) {
 		case writesetting:
@@ -699,10 +697,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void grabberCallServer(final grabberCommands cmd, final String str) {
 		
-		//TODO: BRAD added .. track user activity 
-		///state.set(State.usercommand, System.currentTimeMillis());
-		
-		
 		switch (cmd) {
 		case streammode:
 			grabberSetStream(str);
@@ -761,7 +755,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		// messageplayer("streaming "+str,"stream",stream);
 		messageGrabber("streaming " + stream, "stream " + stream);
-		Util.log("OCULUS: streaming " + stream);
+		Util.log("streaming " + stream, this);
 		new Thread(new Runnable() {
 			public void run() {
 				try {

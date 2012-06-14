@@ -15,7 +15,6 @@ import oculus.PlayerCommands;
 import oculus.Settings;
 import oculus.Updater;
 import oculus.Util;
-import oculus.commport.Discovery;
 
 /**
  * Start the terminal server. Start new threads for a each connection. 
@@ -23,6 +22,7 @@ import oculus.commport.Discovery;
 public class CommandServer implements Observer {
 	
 	public static final String SEPERATOR = " : ";
+	public static final int FIND_TIMEOUT = 45000;
 	
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static oculus.State state = oculus.State.getReference();
@@ -30,10 +30,12 @@ public class CommandServer implements Observer {
 	private static oculus.Settings settings = new Settings();
 	private static ServerSocket serverSocket = null;  	
 	private static Application app = null;
+	private static boolean running = true;
 	
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread {
 	
+		
 		private Socket clientSocket = null;
 		private BufferedReader in = null;
 		private PrintWriter out = null;
@@ -121,18 +123,13 @@ public class CommandServer implements Observer {
 					out.println("[" + i++ + "] echo: "+str);
 					
 					// try extra commands first 
-					//if( !
-							
-						manageCommand(str); //{
-					
+					if( ! manageCommand(str)) {			
 						try {
 							doPlayer(str);
 						} catch (Exception e) {
 							Util.debug("player err: " + e.getLocalizedMessage(), this);
 						}
-						
-						
-					//		}
+					}
 				}
 			}
 		
@@ -180,7 +177,7 @@ public class CommandServer implements Observer {
 				if(clientSocket!=null) clientSocket.close();
 			
 			} catch (Exception e) {
-				e.printStackTrace();
+				Util.log("shutdown: " + e.getMessage(), this);
 			}
 		}
 		
@@ -238,23 +235,24 @@ public class CommandServer implements Observer {
 		
 			if(str.startsWith("softwareupdate")) { app.softwareUpdate("update"); return true; }
 			
+			//TODO: TEST 
 			if(str.startsWith("image")) { 
 			
 				final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
 						
-				// Util.log("save: " + urlString, this);
-					
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						try {
 							
-							//int i = 1;
-							//if(cmd.length==2) i = Integer.parseInt(cmd[1]);
+							int i = 1;
+							if(cmd.length==2) i = Integer.parseInt(cmd[1]);
 				
 							new File("capture").mkdir();
-							//for(; i >=0 ; i--) 
+							for(; i > 0 ; i--) {
+								Util.log(i + " save: " + urlString, this);
 								Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
+							}
 							
 						} catch (Exception e) {
 							Util.log("can't get image: " + e.getLocalizedMessage(), this);
@@ -274,9 +272,9 @@ public class CommandServer implements Observer {
 			    out.println("memoryfree : "+Runtime.getRuntime().freeMemory());
 			}
 			
-			if(str.startsWith("bye")) { out.print("bye"); shutDown(); }
+			if(str.startsWith("bye")) { shutDown(); }
 			
-			if(str.startsWith("quit")) { out.print("bye"); shutDown(); }
+			if(str.startsWith("quit")) { shutDown(); }
 						
 			if(str.startsWith("find")) {	
 				if(state.get(PlayerCommands.publish.toString()) == null) {
@@ -301,10 +299,9 @@ public class CommandServer implements Observer {
 						public void run() {
 							long start = System.currentTimeMillis(); 
 							app.dockGrab();
-							if( ! state.block(oculus.State.dockgrabbusy, "false", 45000))
+							if( ! state.block(oculus.State.dockgrabbusy, "false", FIND_TIMEOUT))
 								Util.log("timed out waiting on dock grab ", this);
 					
-				
 							// put results in state for any that care 
 							state.set(oculus.State.dockgrabtime, (System.currentTimeMillis() - start));
 						}
@@ -395,25 +392,27 @@ public class CommandServer implements Observer {
 			public void run() {
 				try {
 					
+					running = false;
+					
 					if(serverSocket!=null)
 						serverSocket.close();
 					
 					if(printers!=null) 
 						printers.clear();
 					
+					Util.debug("shutting down..", this);
+					
 				} catch (IOException e) {
-					e.printStackTrace();
+					Util.debug(e.getMessage(), this);
 				}
 			}
 		}));
 		
-		// do long time
+		/** do long time */
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				//while(true) {
-					go();
-				//}
+				while(running) go();
 			}
 		}).start();
 	}
@@ -421,12 +420,10 @@ public class CommandServer implements Observer {
 	/** do forever */ 
 	public void go(){
 		
-		// disabled configuration 
-		if(settings.readSetting(ManualSettings.commandport).equals(Discovery.params.disabled)) return; 
+		Util.delay(1000);
 		
-		Integer port = settings.getInteger(ManualSettings.commandport.toString());
-		if(port==Settings.ERROR) return; 
-		
+		final Integer port = settings.getInteger(ManualSettings.commandport);
+		if(port < 1024) return;
 		try {
 			serverSocket = new ServerSocket(port);
 		} catch (Exception e) {
