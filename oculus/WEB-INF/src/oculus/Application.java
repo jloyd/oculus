@@ -336,8 +336,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 				str += " someonealreadydriving " + state.get(State.user);
 
-				// this has to be last to above variables are already set in
-				// java script
+				// this has to be last to above variables are already set in java script
 				sc.invoke("message", new Object[] { null, "green", "multiple", str });
 				str = pendinguserconnected + " pending connection from: "
 						+ pendingplayer.getRemoteAddress();
@@ -345,7 +344,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 				// log.info(str);
 				Util.log("OCULUS: playersignin(): " + str);
 				messageGrabber(str, null);
-				
 				sc.invoke("videoSoundMode", new Object[] { videosoundmode });
 			}
 		} else {
@@ -372,8 +370,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 
+	public void dockGrab() {
+		if (grabber instanceof IServiceCapableConnection) {
+			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+			sc.invoke("dockgrab", new Object[] { 0, 0, "find" });
+			state.set(oculus.State.dockgrabbusy, true);
+		}
+	}
+
 	/**
-	 * distribute commands from player
+	 * distribute commands from pla
 	 * 
 	 * @param fn
 	 *            is the function to call
@@ -384,7 +390,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void playerCallServer(final String fn, final String str) {
 		if (fn == null) return;
 		if (fn.equals("")) return;
-		
+		Util.debug("playerCallServer() with string: " + fn + ", " + str, this);
 		PlayerCommands cmd = null;
 		try {
 			cmd = PlayerCommands.valueOf(fn);
@@ -393,20 +399,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			return;
 		}
 		if (cmd != null) {
-			if (cmd.requiresAdmin())
-				if (loginRecords.isAdmin()){ 
-					Util.debug("playerCallServer(), must be an admin to do: " + fn, this);
-					return;
-				}
+			//TODO: NNNNNN
+			///if (cmd.requiresAdmin())
+			//	if (loginRecords.isAdmin()){ 
+			//		Util.debug("playerCallServer(), must be an admin to do: " + fn, this);
+			//		return;
+			//	}
 			playerCallServer(cmd, str);
-		}
-	}
-
-	public void dockGrab() {
-		if (grabber instanceof IServiceCapableConnection) {
-			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-			sc.invoke("dockgrab", new Object[] { 0, 0, "find" });
-			state.set(oculus.State.dockgrabbusy, true);
 		}
 	}
 
@@ -430,12 +429,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (!fn.equals(PlayerCommands.statuscheck))
 				Util.debug("playerCallServer(): " + fn + " " + str, this);
 
+		//Util.debug("playerCallServer: " + fn.toString() + " " + str, this);
+		
+		
 		switch (fn) {
 		case chat: chat(str) ;return;
 		case beapassenger: beAPassenger(str);return;
 		case assumecontrol: assumeControl(str); return;
 		}
 
+		
 		 // must be driver/non-passenger for all commands below (or cmdMgr user)
 		
 		//TODO: temp 'solution' 
@@ -497,10 +500,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 
 		case arduinoecho:
-			if (str.equalsIgnoreCase("on"))
-				comport.setEcho(true);
-			else
-				comport.setEcho(false);
+			if (str.equalsIgnoreCase("on"))comport.setEcho(true);
+			else comport.setEcho(false);
 			messageplayer("echo set to: " + str, null, null);
 			break;
 
@@ -509,89 +510,38 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("resetting arduinoculus", null, null);
 			break;
 
-		case move:
-			move(str);
-			break;
-		case nudge:
-			nudge(str);
-			break;
-		case speech:
-			saySpeech(str);
-			break;
-		case dock:
-			docker.dock(str);
-			break;
-		case battstats:
-			battery.battStats();
-			break;
-		case cameracommand:
-			cameraCommand(str);
-			break;
-		case gettiltsettings:
-			getTiltSettings();
-			break;
-		case getdrivingsettings:
-			getDrivingSettings();
-			break;
-		case motionenabletoggle:
-			motionEnableToggle();
-			break;
-		case drivingsettingsupdate:
-			drivingSettingsUpdate(str);
-			break;
-		case tiltsettingsupdate:
-			tiltSettingsUpdate(str);
-			break;
-		case tilttest:
-			tiltTest(str);
-			break;
-		case clicksteer:
-			clickSteer(str);
-			break;
-		case streamsettingscustom:
-			streamSettingsCustom(str);
-			break;
-		case streamsettingsset:
-			streamSettingsSet(str);
-			break;
-		case statuscheck:
-			statusCheck(str);
-			break;
-		case playerexit:
-			appDisconnect(player);
-			break;
-		case playerbroadcast:
-			playerBroadCast(str);
-			break;
-		case password_update:
-			account("password_update", str);
-			break;
-		case new_user_add:
-			account("new_user_add", str);
-			break;
-		case user_list:
-			account("user_list", "");
-			break;
-		case delete_user:
-			account("delete_user", str);
-			break;
-		case framegrab:
-			frameGrab();
-			break;
+		case move:move(str);break;
+		case nudge:nudge(str);break;
+		case speech:saySpeech(str);break;
+		case dock:docker.dock(str);break;
+		case battstats:battery.battStats();break;
+		case cameracommand:cameraCommand(str);break;
+		case gettiltsettings:getTiltSettings();break;
+		case getdrivingsettings:getDrivingSettings();break;
+		case motionenabletoggle:motionEnableToggle();break;
+		case drivingsettingsupdate:drivingSettingsUpdate(str);break;
+		case tiltsettingsupdate:tiltSettingsUpdate(str);break;
+		case tilttest:tiltTest(str);break;
+		case clicksteer:clickSteer(str);break;
+		case streamsettingscustom:streamSettingsCustom(str);break;
+		case streamsettingsset:streamSettingsSet(str);break;
+		case playerexit:appDisconnect(player);break;
+		case playerbroadcast: playerBroadCast(str); break;
+		case password_update: account("password_update", str); break;
+		case new_user_add: account("new_user_add", str); break;
+		case user_list: account("user_list", ""); break;
+		case delete_user: account("delete_user", str); break;
+		case framegrab: frameGrab(); break;
+		case statuscheck: statusCheck(str); break;
+		
 		/*case emailgrab:
 			frameGrab();
 			emailgrab = true;
 			break;*/ 
 		//TODO: disabled currently 
-		case extrauser_password_update:
-			account("extrauser_password_update", str);
-			break;
-		case username_update:
-			account("username_update", str);
-			break;
-		case disconnectotherconnections:
-			disconnectOtherConnections();
-			break;
+		case extrauser_password_update: account("extrauser_password_update", str); break;
+		case username_update: account("username_update", str); break;
+		case disconnectotherconnections: disconnectOtherConnections(); break;
 		case monitor:
 			if (Settings.os.equals("linux")){
 				messageplayer("unsupported in linux",null,null);
@@ -599,45 +549,31 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			monitor(str);
 			break;
-		case showlog:
-			showlog();
-			break;
-		case dockgrab:
-			dockGrab();
-			break;
-		case publish:
-			publish(str);
-			break;
-		case autodock:
-			docker.autoDock(str);
-			break;
-		case autodockcalibrate:
-			docker.autoDock("calibrate " + str);
-			break;
-		case restart:
-			restart();
-			break;
-		case softwareupdate:
-			softwareUpdate(str);
-			break;
+		case showlog: showlog(); break;
+		case dockgrab:dockGrab(); break;
+		case publish: publish(str); break;
+		case autodock: docker.autoDock(str); break;
+		case autodockcalibrate: docker.autoDock("calibrate " + str); break;
+		case restart: restart(); break;
+		case softwareupdate: softwareUpdate(str); break;
+		case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
+		case spotlightsetbrightness: light.setSpotLightBrightness(Integer.parseInt(str)); break;
+		case floodlight: light.floodLight(str); break;
 		case setsystemvolume:
 			Util.setSystemVolume(Integer.parseInt(str), this);
 			if (Settings.os.equals("linux")) { messageplayer("unsupported in linux",null,null); }
 			else { messageplayer("ROV volume set to "+str+"%", null, null); }
 			break;
-		case muterovmiconmovetoggle:
-			muteROVMicOnMoveToggle();
-			break;
-		case spotlightsetbrightness:
-			light.setSpotLightBrightness(Integer.parseInt(str));
-			break;
-		case floodlight:
-			light.floodLight(str);
-			break;
+		
 		case holdservo:
-			if (str.equalsIgnoreCase("true")) comport.holdservo = true;
-			else comport.holdservo = false;
-			settings.writeSettings(GUISettings.holdservo.toString(), str);
+			if (str.equalsIgnoreCase("true")) {
+				comport.holdservo = true;
+				settings.writeSettings(GUISettings.holdservo.toString(), "true");
+			} else {
+				comport.holdservo = false;
+				settings.writeSettings(GUISettings.holdservo.toString(), "false");
+			}	
+			settings.writeFile();
 			messageplayer("holdservo " + str, null, null);
 			break;
 		case opennisensor:
@@ -798,6 +734,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void publish(String str) {
+		
+		Util.debug("publish callling: " + str, this);
 		if (state.getBoolean(State.autodocking)) {
 			messageplayer("command dropped, autodocking", null, null);
 			return;
@@ -940,10 +878,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		if(str!=null){
-			if(str.equals(PlayerCommands.statuscheck.toString())){
-				if(commandServer!=null) commandServer.sendToGroup("[messageplayer] " + str);
-				Util.debug("_messageplayer: "+str+" "+status+" "+value, this);
-			}	
+			if(str.equals(PlayerCommands.statuscheck.toString()))
+				if(commandServer!=null) commandServer.sendToGroup("[messageplayer] " + str);					
 		}
 	}
 
@@ -963,8 +899,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageGrabber("synth voice: " + str, null);
 		//Speech speech = new Speech();   // DONT initialize each time here, takes too long
 		speech.mluv(str);
-		// Util.systemCall("nircmdc.exe speak text \""+str+"\"", true);
-		// log.info("voice synth: '" + str + "'");
 	}
 
 	private void getDrivingSettings() {

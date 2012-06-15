@@ -44,9 +44,7 @@ public class SettingsTest {
 			if(settings.readSetting(factory.toString())==null)
 				fail("setting missing in file: " + factory.toString());
 			
-			System.out.println("file: " + factory.toString() + " " + settings.readSetting(factory.toString()));
-		
-		
+			// System.out.println("file: " + factory.toString() + " " + settings.readSetting(factory.toString()));
 		}
 		
 		for (ManualSettings factory : ManualSettings.values()) {
@@ -54,25 +52,36 @@ public class SettingsTest {
 			if(settings.readSetting(factory.toString())==null)
 				fail("setting missing in file: " + factory.toString());
 			
-			System.out.println("file: " + factory.toString() + " " + settings.readSetting(factory.toString()));
-			System.out.println("default: " + factory.toString() + " " + ManualSettings.getDefault(factory));
+			//System.out.println("file: " + factory.toString() + " " + settings.readSetting(factory.toString()));
+			//System.out.println("default: " + factory.toString() + " " + ManualSettings.getDefault(factory));
 
 		}
 	}
 
 	@Test
 	public void validatePlayerCommands(){
-		
-		/*for(PlayerCommands.AdminCommands cmd : PlayerCommands.AdminCommands.values()){
-			PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
-			if(exists!=null) fail("admin commands in player commands? " + exists);
-		}
-		*/
 		for(PlayerCommands.AdminCommands cmd : PlayerCommands.AdminCommands.values()){
-			PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
+		PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
 			if(exists==null) fail("admin commands in player commands? " + exists);
 		}
 	}
+	
+	
+	@Test
+	public void validate(){
+		System.out.println("-----------------------------------------");
+		for(PlayerCommands cmd : PlayerCommands.values()){
+			
+			//PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
+				
+			//if(PlayerCommands.requiresArgument(cmd.toString()))
+			//if(cmd.requiresArgument())
+			//	System.out.println("_"+cmd.toString());
+			
+			//if(exists==null) fail("admin commands in player commands? " + exists);
+		}
+	}
+	
 	
 	@Test
 	public void validateDefaultSetting() {

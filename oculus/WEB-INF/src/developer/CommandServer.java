@@ -30,12 +30,10 @@ public class CommandServer implements Observer {
 	private static oculus.Settings settings = new Settings();
 	private static ServerSocket serverSocket = null;  	
 	private static Application app = null;
-	private static boolean running = true;
 	
 	/** Threaded client handler */
 	class ConnectionHandler extends Thread {
 	
-		
 		private Socket clientSocket = null;
 		private BufferedReader in = null;
 		private PrintWriter out = null;
@@ -75,7 +73,7 @@ public class CommandServer implements Observer {
 							.encryptPassword(user + settings.readSetting("salt") + pass)).trim();
 					
 					if(app.logintest(user, encryptedPassword)==null){
-						out.println("login failure, please drop dead");
+						out.println("login failure, please drop dead: " + user);
 						Util.debug("login failure from: " + user, this);
 						shutDown();
 					}
@@ -105,7 +103,7 @@ public class CommandServer implements Observer {
 				try {
 					str = in.readLine();
 				} catch (Exception e) {
-					Util.log("readLine(): " + e.getMessage(), this);
+					Util.debug("readLine(): " + e.getMessage(), this);
 					break;
 				}
 
@@ -121,7 +119,6 @@ public class CommandServer implements Observer {
 					
 					Util.debug(clientSocket.getInetAddress().toString() + " : " + str, this);					
 					out.println("[" + i++ + "] echo: "+str);
-					
 					// try extra commands first 
 					if( ! manageCommand(str)) {			
 						try {
@@ -142,22 +139,16 @@ public class CommandServer implements Observer {
 		 */
 		public void doPlayer(final String str){
 			
-			String[] cmd = str.trim().split(" ");
+			final String[] cmd = str.trim().split(" ");
 			Util.debug("doplayer("+str+") split: " + cmd.length, this);	
-			
-			if(cmd.length==1) {
-				if( ! PlayerCommands.requiresArgument(cmd[0]))
-					app.playerCallServer(str, null);	
-				
-			} else if(cmd.length>=2) {	
-				// collect all arguments
-				String args = new String(); 		
+			String args = new String(); 		
 				for(int i = 1 ; i < cmd.length ; i++) 
 					args += " " + cmd[i].trim();
 				
+				
 				// now send it 
-				app.playerCallServer(cmd[0], args);
-			}
+				app.playerCallServer(cmd[0].trim(), args.trim());
+	
 		}
 		
 		// close resources
@@ -231,7 +222,7 @@ public class CommandServer implements Observer {
 				return true;
 			}
 			
-			if(str.startsWith("restart")){ app.restart(); return true;}
+			if(str.startsWith("restart")){ app.restart(); return true; }
 		
 			if(str.startsWith("softwareupdate")) { app.softwareUpdate("update"); return true; }
 			
@@ -247,10 +238,9 @@ public class CommandServer implements Observer {
 							
 							int i = 1;
 							if(cmd.length==2) i = Integer.parseInt(cmd[1]);
-				
 							new File("capture").mkdir();
 							for(; i > 0 ; i--) {
-								Util.log(i + " save: " + urlString, this);
+								Util.debug(i + " save: " + urlString, this);
 								Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
 							}
 							
@@ -392,15 +382,11 @@ public class CommandServer implements Observer {
 			public void run() {
 				try {
 					
-					running = false;
+					if(serverSocket!=null) serverSocket.close();
 					
-					if(serverSocket!=null)
-						serverSocket.close();
-					
-					if(printers!=null) 
-						printers.clear();
-					
-					Util.debug("shutting down..", this);
+					if(printers!=null)
+						for(int i = 0 ; i < printers.size() ; i++)
+							printers.get(i).close();
 					
 				} catch (IOException e) {
 					Util.debug(e.getMessage(), this);
@@ -412,7 +398,7 @@ public class CommandServer implements Observer {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while(running) go();
+				while(true) go();
 			}
 		}).start();
 	}
@@ -420,6 +406,7 @@ public class CommandServer implements Observer {
 	/** do forever */ 
 	public void go(){
 		
+		// wait for system to startup 
 		Util.delay(1000);
 		
 		final Integer port = settings.getInteger(ManualSettings.commandport);

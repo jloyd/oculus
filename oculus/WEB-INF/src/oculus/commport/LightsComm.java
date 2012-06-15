@@ -296,7 +296,7 @@ public class LightsComm implements SerialPortEventListener {
 			return;
 		}
 		
-		Util.log("set spot: " + target, this);
+		Util.debug("set spot: " + target, this);
 		
 		if(target==0) sendCommand((byte) SPOT_OFF);
 		else if(target==10)sendCommand((byte) SPOT_1);
@@ -312,7 +312,6 @@ public class LightsComm implements SerialPortEventListener {
 		
 		state.set(PlayerCommands.spotlightsetbrightness.toString(), target);
 		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(target));
-		//lastUserCommand = System.currentTimeMillis();	
 	}
 	
 	public synchronized void floodLight(String str){
@@ -324,13 +323,11 @@ public class LightsComm implements SerialPortEventListener {
 		if (str.equals("on")) { 
 			sendCommand(DOCK_ON);
 			state.set(PlayerCommands.floodlight.toString(), true);
-		}
-		else { 
+		} else { 
 			sendCommand(DOCK_OFF);
 			state.set(PlayerCommands.floodlight.toString(), false);
 		}
 		
 		application.message("floodlight "+str, null, null);
-		//lastUserCommand = System.currentTimeMillis();
 	}
 }

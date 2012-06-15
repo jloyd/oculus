@@ -150,25 +150,6 @@ public class Settings {
 		return result;
 	}
 
-	/**
-	 * @return the settings file in a parsed list
-	 
-	public synchronized static Properties getProperties() {
-		Properties result = new Properties();
-		try {
-			FileInputStream filein = new FileInputStream(filename);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
-			String line = "";
-			while ((line = reader.readLine()) != null) {
-				String items[] = line.split(" ");
-				result.setProperty(items[0], items[1]);
-			}
-			filein.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return result;
-	} */
 
 	public String toString(){
 		String result = new String();
@@ -178,7 +159,7 @@ public class Settings {
 				result += factory.toString() + " " + val + "\r\n";
 		}
 	
-		for (GUISettings ops : GUISettings.values()) {
+		for (ManualSettings ops : ManualSettings.values()) {
 			String val = readSetting(ops.toString());
 			if (val != null) // never send out passwords 
 				if( ! ops.equals(ManualSettings.emailpassword)) 

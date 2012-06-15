@@ -3,7 +3,7 @@ package oculus;
 public enum PlayerCommands {
 
 	// all valid commands
-	publish, floodlight, move, nudge, slide, dockgrab, framegrab, battstats, docklineposupdate, autodock, autodockcalibrate, 
+	publish, floodlight, move, nudge, slide, dockgrab, framegrab, battstats, docklineposupdate, autodock,  autodockcalibrate, 
 	speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate, 
 	tilttest, speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
 	streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
@@ -24,18 +24,20 @@ public enum PlayerCommands {
 		speedset, dock, relaunchgrabber, clicksteer, chat, systemcall, streamsettingsset, 
 		streamsettingscustom, playerbroadcast, password_update, 
 		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
-		disconnectotherconnections, monitor, assumecontrol, softwareupdate, 
-		arduinoecho, setsystemvolume, beapassenger, spotlightsetbrightness, 
-	    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle ;
+		disconnectotherconnections, monitor, assumecontrol, softwareupdate, uinoecho, 
+		setsystemvolume, beapassenger, spotlightsetbrightness, writesetting, holdservo, 
+		opennisensor, videosoundmode, pushtotalktoggle ;
 	}
 
+	/*
 	public static boolean requiresArgument(String str) {
 		RequiresArguments command = PlayerCommands.RequiresArguments.valueOf(str);
 		if(command!=null) return true; 
 		return false;
 	}
+	*/
 	
-	/** @return true if given command is in the sub-set */
+	/** @return true if given command is in the sub-set 
 	public static boolean requiresAdmin(PlayerCommands cmd) {
 		for (AdminCommands admin : AdminCommands.values()) {
 			if (admin.equals(cmd))
@@ -43,7 +45,7 @@ public enum PlayerCommands {
 		}
 
 		return false;
-	}
+	}*/
 	
 	/** @return true if given command is in the sub-set */
 	public boolean requiresAdmin() {
@@ -54,7 +56,11 @@ public enum PlayerCommands {
 
 		return false;
 	}
-/*
+	/*public boolean requiresArgument() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	public static String match(String str) {
 		for (AdminCommands admin : AdminCommands.values()) {
 			if (admin.toString().startsWith(str))
@@ -68,4 +74,5 @@ public enum PlayerCommands {
 	public String toString() {
 		return super.toString();
 	}
+
 }
