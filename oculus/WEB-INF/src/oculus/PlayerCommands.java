@@ -13,12 +13,15 @@ public enum PlayerCommands {
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart;
 
 	// sub-set that are restricted to "user0"
+	/*
 	public enum AdminCommands {
 		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
 		showlog, softwareupdate, relaunchgrabber, systemcall
 	}
+	*/
 	
 	// sub-set that are require parameters 
+	/*
 	public enum RequiresArguments {
 		publish, floodlight, move, nudge, slide, getdrivingsettings, drivingsettingsupdate, cameracommand, 
 		speedset, dock, relaunchgrabber, clicksteer, chat, systemcall, streamsettingsset, 
@@ -28,7 +31,8 @@ public enum PlayerCommands {
 		setsystemvolume, beapassenger, spotlightsetbrightness, writesetting, holdservo, 
 		opennisensor, videosoundmode, pushtotalktoggle ;
 	}
-
+	*/
+	
 	/*
 	public static boolean requiresArgument(String str) {
 		RequiresArguments command = PlayerCommands.RequiresArguments.valueOf(str);
@@ -40,22 +44,23 @@ public enum PlayerCommands {
 	/** @return true if given command is in the sub-set 
 	public static boolean requiresAdmin(PlayerCommands cmd) {
 		for (AdminCommands admin : AdminCommands.values()) {
-			if (admin.equals(cmd))
+			if (admin.toString().equals(cmd.toString()))
 				return true;
 		}
 
 		return false;
 	}*/
 	
-	/** @return true if given command is in the sub-set */
+	/** @return true if given command is in the sub-set 
 	public boolean requiresAdmin() {
+		
 		for (AdminCommands admin : AdminCommands.values()) {
 			if (admin.equals(this))
 				return true;
 		}
 
 		return false;
-	}
+	}*/
 	/*public boolean requiresArgument() {
 		// TODO Auto-generated method stub
 		return false;
@@ -70,9 +75,11 @@ public enum PlayerCommands {
 		return null;
 	}
 	*/
+	
+	/*
 	@Override
 	public String toString() {
 		return super.toString();
-	}
-
+	}*/
+	
 }

@@ -61,9 +61,14 @@ public class CommandServer implements Observer {
 				
 				// first thing better be user:pass
 				final String inputstr = in.readLine();
+				if(inputstr.indexOf(':')<=0) shutDown();
 				user = inputstr.substring(0, inputstr.indexOf(':')).trim();
 				pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
 								
+				// admin only 
+				if( ! user.equals(settings.readSetting("user0"))) shutDown();
+							
+				// try salted 
 				if(app.logintest(user, pass)==null){
 					
 				    ConfigurablePasswordEncryptor passwordEncryptor = new ConfigurablePasswordEncryptor();
@@ -92,7 +97,8 @@ public class CommandServer implements Observer {
 		@Override
 		public void run() {
 			
-			state.set(oculus.State.override, true);		
+			state.set(oculus.State.override, true);	
+			if(state.get(oculus.State.user)==null) state.set(oculus.State.user, user);
 			if(settings.getBoolean(GUISettings.loginnotify)) Util.beep();
 			sendToGroup(printers.size() + " tcp connections active");
 			
@@ -141,14 +147,12 @@ public class CommandServer implements Observer {
 			
 			final String[] cmd = str.trim().split(" ");
 			Util.debug("doplayer("+str+") split: " + cmd.length, this);	
-			String args = new String(); 		
-				for(int i = 1 ; i < cmd.length ; i++) 
-					args += " " + cmd[i].trim();
+			String args = new String(); 			
+			for(int i = 1 ; i < cmd.length ; i++) 
+				args += " " + cmd[i].trim();
 				
-				
-				// now send it 
-				app.playerCallServer(cmd[0].trim(), args.trim());
-	
+			// now send it 
+			app.playerCallServer(cmd[0].trim(), args.trim());
 		}
 		
 		// close resources
@@ -222,15 +226,12 @@ public class CommandServer implements Observer {
 				return true;
 			}
 			
-			if(str.startsWith("restart")){ app.restart(); return true; }
+			//if(str.startsWith("restart")){ app.restart(); return true; }
 		
-			if(str.startsWith("softwareupdate")) { app.softwareUpdate("update"); return true; }
+			// if(str.startsWith("softwareupdate")) { app.softwareUpdate("update"); return true; }
 			
-			//TODO: TEST 
 			if(str.startsWith("image")) { 
-			
 				final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
-						
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -251,7 +252,7 @@ public class CommandServer implements Observer {
 				return true; 
 			}
 			
-			if(str.startsWith("cam")){ app.publish("camera"); return true; }
+			// if(str.startsWith("cam")){ app.publish("camera"); return true; }
 			
 			if(str.startsWith("memory")) {		
 				out.println("memory : " +

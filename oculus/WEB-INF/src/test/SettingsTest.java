@@ -6,7 +6,6 @@ import java.util.Properties;
 
 import oculus.GUISettings;
 import oculus.ManualSettings;
-import oculus.PlayerCommands;
 import oculus.Settings;
 
 import org.junit.After;
@@ -58,19 +57,19 @@ public class SettingsTest {
 		}
 	}
 
-	@Test
-	public void validatePlayerCommands(){
-		for(PlayerCommands.AdminCommands cmd : PlayerCommands.AdminCommands.values()){
-		PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
-			if(exists==null) fail("admin commands in player commands? " + exists);
-		}
-	}
-	
-	
+
+	/*
 	@Test
 	public void validate(){
 		System.out.println("-----------------------------------------");
+		if(PlayerCommands.requiresAdmin(PlayerCommands.restart)) System.out.println("is admin");
+		System.out.println("-----------------------------------------");
+		
+		
 		for(PlayerCommands cmd : PlayerCommands.values()){
+		
+			if(PlayerCommands.requiresAdmin(cmd)) System.out.println("requires admin: " + cmd.toString());
+			else System.out.println("not: " + cmd.toString());
 			
 			//PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
 				
@@ -80,7 +79,8 @@ public class SettingsTest {
 			
 			//if(exists==null) fail("admin commands in player commands? " + exists);
 		}
-	}
+	}*/
+	
 	
 	
 	@Test

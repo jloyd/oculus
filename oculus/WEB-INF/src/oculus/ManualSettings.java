@@ -37,9 +37,11 @@ public enum ManualSettings {
 		
 		return false;
 	}
-	
+	/*
 	@Override
 	public String toString() {
 		return super.toString();
 	}
+	*/
+	
 }

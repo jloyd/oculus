@@ -143,7 +143,7 @@ public class Input extends JTextField implements KeyListener {
 				@Override
 				public void run() {
 			
-					for (PlayerCommands.RequiresArguments factory : PlayerCommands.RequiresArguments.values()) {
+					for (PlayerCommands factory : PlayerCommands.values()) {
 						if (!factory.equals(PlayerCommands.restart)) {
 							out.println(factory.toString());
 							Util.log("sending: " + factory.toString());

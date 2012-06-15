@@ -117,7 +117,6 @@ public class Settings {
 	}
 
 	/**
-	 * 
 	 * read through whole file line by line, extract result
 	 * 
 	 * @param str
@@ -134,9 +133,12 @@ public class Settings {
 			String line = "";
 			while ((line = reader.readLine()) != null) {
 				String items[] = line.split(" ");
-				if ((items[0].toUpperCase()).equals(str.toUpperCase())) {
-					result = items[1];
-				}
+				// TODO: BRAD .....
+				if(items.length>=2){
+					if ((items[0].toUpperCase()).equals(str.toUpperCase())) {
+						result = items[1];
+					}
+				} else throw new Exception("can NOT readSetting("+str+")");
 			}
 			reader.close();
 			filein.close();
@@ -151,7 +153,11 @@ public class Settings {
 	}
 
 
+	/** 
+	 * Make a copy in order and "cleaned" of anything but vaild settings 
+	 */
 	public String toString(){
+		
 		String result = new String();
 		for (GUISettings factory : GUISettings.values()) {
 			String val = readSetting(factory.toString());

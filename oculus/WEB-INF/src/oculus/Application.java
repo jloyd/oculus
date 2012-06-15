@@ -390,7 +390,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void playerCallServer(final String fn, final String str) {
 		if (fn == null) return;
 		if (fn.equals("")) return;
-		Util.debug("playerCallServer() with string: " + fn + ", " + str, this);
+		
 		PlayerCommands cmd = null;
 		try {
 			cmd = PlayerCommands.valueOf(fn);
@@ -398,15 +398,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 			Util.debug("playerCallServer() command not found:" + fn, this);
 			return;
 		}
-		if (cmd != null) {
-			//TODO: NNNNNN
-			///if (cmd.requiresAdmin())
-			//	if (loginRecords.isAdmin()){ 
+		//if (cmd != null) {
+			
+			//TODO: is this really required? if not given the controls? 
+			//if (PlayerCommands.requiresAdmin(cmd)){
+			//	if ( ! loginRecords.isAdmin()){ 
 			//		Util.debug("playerCallServer(), must be an admin to do: " + fn, this);
 			//		return;
 			//	}
-			playerCallServer(cmd, str);
-		}
+			//}
+			
+					
+		playerCallServer(cmd, str);
+		//}
 	}
 
 	/**
@@ -478,8 +482,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			moveMacroCancel();
 			comport.slide(str);
-			if (moves != null)
-				moves.append("slide " + str);
+			if (moves != null) moves.append("slide " + str);
 			messageplayer("command received: " + fn + str, null, null);
 			break;
 
