@@ -98,6 +98,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	@Override
 	public void appDisconnect(IConnection connection) {
+		if(connection==null)return;
 		if (connection.equals(player)) {
 			String str = state.get(State.user) + " disconnected";
 			Util.log("appDisconnect(): " + str); 
@@ -727,7 +728,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	public void publish(String str) {
 		
-		Util.debug("publish callling: " + str, this);
 		if (state.getBoolean(State.autodocking)) {
 			messageplayer("command dropped, autodocking", null, null);
 			return;
@@ -752,7 +752,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				// messageGrabber("stream "+str);
 				messageplayer("command received: publish " + str, null, null);
 				state.set(PlayerCommands.publish, str);
-				Util.log("PUBLISHED:" + state.get(PlayerCommands.publish));
+				Util.log("publish: " + state.get(PlayerCommands.publish), this);
 			}
 		} catch (NumberFormatException e) {
 			Util.log("publish() " + e.getMessage());
@@ -796,7 +796,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public boolean frameGrab() {
 
 		 if(state.getBoolean(State.framegrabbusy) || !(stream.equals("camera") || stream.equals("camandmic"))) {
-			 Util.log("OCULUS: framegrab busy or unavailable, command dropped");
+			 Util.log("framegrab busy or unavailable, command dropped", this);
 			 return false;
 		 }
 

@@ -105,7 +105,13 @@ public class SettingsTest {
 			if(ply==null) fail(" not a sub-set of RequiresArguments: "+command.toString());
 		}
 		
-		
+		if(PlayerCommands.requiresArgument(PlayerCommands.arduinoecho)){
+			if(PlayerCommands.booleanArgument(PlayerCommands.arduinoecho)){
+				System.out.println("echo: " + PlayerCommands.arduinoecho.toString() + " (true | false)");
+			} else {
+				System.out.println("echo: " + PlayerCommands.arduinoecho.toString() + " (requires arguments)");
+			}
+		} 
 	}
 	
 	
