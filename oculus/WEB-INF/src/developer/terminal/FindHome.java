@@ -3,7 +3,7 @@ package developer.terminal;
 import java.io.*;
 import java.net.*;
 
-import developer.CommandServer;
+import developer.TelnetServer;
 
 import oculus.ManualSettings;
 import oculus.PlayerCommands;
@@ -290,9 +290,9 @@ public class FindHome extends AbstractTerminal {
 
 		// System.out.println("_parse: " + str);
 
-		if (str.indexOf(CommandServer.SEPERATOR) > 0) {
+		if (str.indexOf(TelnetServer.SEPERATOR) > 0) {
 
-			String[] cmd = str.split(CommandServer.SEPERATOR);
+			String[] cmd = str.split(TelnetServer.SEPERATOR);
 			if (cmd.length == 2)
 				state.set(cmd[0], cmd[1]);
 

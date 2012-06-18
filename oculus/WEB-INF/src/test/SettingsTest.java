@@ -6,9 +6,9 @@ import java.util.Properties;
 
 import oculus.GUISettings;
 import oculus.ManualSettings;
+import oculus.PlayerCommands;
 import oculus.Settings;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class SettingsTest {
 
 	@Before
 	public void setUp() {
-		System.out.println(getClass().toString());
+		System.out.println("running: " + getClass().toString());
 		settings = new Settings();
 		
 		if(settings==null) fail("no settings file found");
@@ -30,57 +30,61 @@ public class SettingsTest {
 		if(settings.readSetting("salt").equals("null")) fail("no salt!"); 
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		System.out.println("tearDown(), after.. done");
-	}
+	//@After
+	//public void tearDown() throws Exception {
+	//System.out.println("tearDown(), after.. done");
 	
 	@Test
-	public void testReadSetting() {
-		
+	public void testReadSetting() {	
 		for (GUISettings factory : GUISettings.values()){ 
-		
 			if(settings.readSetting(factory.toString())==null)
 				fail("setting missing in file: " + factory.toString());
-			
-			// System.out.println("file: " + factory.toString() + " " + settings.readSetting(factory.toString()));
 		}
 		
 		for (ManualSettings factory : ManualSettings.values()) {
-			
 			if(settings.readSetting(factory.toString())==null)
 				fail("setting missing in file: " + factory.toString());
-			
-			//System.out.println("file: " + factory.toString() + " " + settings.readSetting(factory.toString()));
-			//System.out.println("default: " + factory.toString() + " " + ManualSettings.getDefault(factory));
-
 		}
 	}
 
-
-	/*
-	@Test
-	public void validate(){
-		System.out.println("-----------------------------------------");
-		if(PlayerCommands.requiresAdmin(PlayerCommands.restart)) System.out.println("is admin");
-		System.out.println("-----------------------------------------");
+	@Test 
+	public void playerCommands(){
 		
-		
-		for(PlayerCommands cmd : PlayerCommands.values()){
-		
-			if(PlayerCommands.requiresAdmin(cmd)) System.out.println("requires admin: " + cmd.toString());
-			else System.out.println("not: " + cmd.toString());
-			
-			//PlayerCommands exists = PlayerCommands.valueOf(cmd.toString());
-				
-			//if(PlayerCommands.requiresArgument(cmd.toString()))
-			//if(cmd.requiresArgument())
-			//	System.out.println("_"+cmd.toString());
-			
-			//if(exists==null) fail("admin commands in player commands? " + exists);
+		// make sure no duplicates A - B
+		for (PlayerCommands factory : PlayerCommands.values()) {
+			String val = factory.toString();
+			for (developer.TelnetServer.Commands cmd : developer.TelnetServer.Commands.values()){
+				if(cmd.toString().equals(val)) 
+					fail("player commands overlap telnet commands: " + val);				
+			}
 		}
-	}*/
-	
+		
+		// make sure no duplicates B - A 
+		for (developer.TelnetServer.Commands factory : developer.TelnetServer.Commands.values()) {
+			String val = factory.toString();
+			for (PlayerCommands cmd : PlayerCommands.values()){
+				if(cmd.toString().equals(val)) 
+					fail("player commands overlap telnet commands: " + val);				
+			}
+		}
+		
+		// make sure is a subset 
+		//for (developer.TelnetServer.Commands factory : developer.TelnetServer.Commands.values()) {
+			
+		//}
+		
+		// list admin or params 
+		/*
+		for (PlayerCommands factory : PlayerCommands.values()) {
+			String val = factory.toString();
+			System.out.print(val);
+			if(PlayerCommands.requiresArgument(val)) System.out.print(val + " - requires Argument");
+			if(PlayerCommands.requiresAdmin(val)) System.out.print(" - requires Admin");
+			System.out.println();
+		}
+		*/
+		
+	}
 	
 	
 	@Test

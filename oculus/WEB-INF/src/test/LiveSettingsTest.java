@@ -121,9 +121,11 @@ public class LiveSettingsTest {
 		// send them all 
 		for (PlayerCommands factory : PlayerCommands.values()) {
 			if( ! factory.equals(PlayerCommands.restart)){
-				out.println(factory.toString());
-				System.out.println(factory.toString());
-				Util.delay(500);
+				if( ! PlayerCommands.requiresArgument(factory.toString())){
+					out.println(factory.toString());
+					System.out.println(factory.toString());
+					Util.delay(500);
+				}
 			}
 		}
 		

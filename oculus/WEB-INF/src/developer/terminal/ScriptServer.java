@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 
-import developer.CommandServer;
+import developer.TelnetServer;
 
 import oculus.Util;
 
@@ -24,7 +24,7 @@ public class ScriptServer extends AbstractTerminal {
 	
 	public void parseInput(final String str){
 		System.out.println(this.getClass().getName() + " parse: " + str);
-		String[] cmd = str.split(CommandServer.SEPERATOR);
+		String[] cmd = str.split(TelnetServer.SEPERATOR);
 		if(cmd.length==2) state.set(cmd[0], cmd[1]);	
 	}
 

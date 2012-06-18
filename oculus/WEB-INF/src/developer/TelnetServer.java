@@ -17,12 +17,13 @@ import oculus.Updater;
 import oculus.Util;
 
 /**
- * Start the terminal server. Start new threads for a each connection. 
+ * Start the terminal server. Start a new thread for a each connection. 
  */
-public class CommandServer implements Observer {
+public class TelnetServer implements Observer {
 	
+	public static enum Commands {message, users, tcp, beep, tail, image, find, memory, state, settings, help, bye, quit};
 	public static final String SEPERATOR = " : ";
-	public static final int FIND_TIMEOUT = 45000;
+	public static final boolean ADMIN_ONLY = true;
 	
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static oculus.State state = oculus.State.getReference();
@@ -48,9 +49,8 @@ public class CommandServer implements Observer {
 				in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 				out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())), true);
 			
-			} catch (IOException e) {				
-				Util.log("fail aquire tcp streams: " + e.getMessage(), this);
-				shutDown();
+			} catch (IOException e) {	
+				shutDown("fail aquire tcp streams: " + e.getMessage());
 				return;
 			}
 	
@@ -61,12 +61,13 @@ public class CommandServer implements Observer {
 				
 				// first thing better be user:pass
 				final String inputstr = in.readLine();
-				if(inputstr.indexOf(':')<=0) shutDown();
+				if(inputstr.indexOf(':')<=0) shutDown("login failure");
 				user = inputstr.substring(0, inputstr.indexOf(':')).trim();
 				pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
 								
-				// admin only 
-				if( ! user.equals(settings.readSetting("user0"))) shutDown();
+				// Admin only 
+				if(ADMIN_ONLY)
+					if( ! user.equals(settings.readSetting("user0"))) shutDown("must be admin for telnet");
 							
 				// try salted 
 				if(app.logintest(user, pass)==null){
@@ -77,15 +78,13 @@ public class CommandServer implements Observer {
 					String encryptedPassword = (passwordEncryptor
 							.encryptPassword(user + settings.readSetting("salt") + pass)).trim();
 					
-					if(app.logintest(user, encryptedPassword)==null){
-						out.println("login failure, please drop dead: " + user);
-						Util.debug("login failure from: " + user, this);
-						shutDown();
-					}
+					// try plain text 
+					if(app.logintest(user, encryptedPassword)==null)
+						shutDown("login failure, please drop dead: " + user);
+			
 				}
 			} catch (Exception ex) {
-				Util.log("command server connection fail: " + ex.getMessage(), this);
-				shutDown();
+				shutDown("command server connection fail: " + ex.getMessage());
 			}
 	
 			// keep track of all other user sockets output streams			
@@ -103,7 +102,6 @@ public class CommandServer implements Observer {
 			sendToGroup(printers.size() + " tcp connections active");
 			
 			// loop on input from the client
-			int i = 0;
 			String str = null;
 			while (true) {
 				try {
@@ -123,9 +121,7 @@ public class CommandServer implements Observer {
 				str = str.trim();
 				if(str.length()>2){
 					
-					Util.debug(clientSocket.getInetAddress().toString() + " : " + str, this);					
-					out.println("[" + i++ + "] echo: "+str);
-					// try extra commands first 
+					Util.debug(clientSocket.getInetAddress().toString() + " : " + str, this);	
 					if( ! manageCommand(str)) {			
 						try {
 							doPlayer(str);
@@ -137,29 +133,35 @@ public class CommandServer implements Observer {
 			}
 		
 			// close up, must have a closed socket  
-			shutDown();
+			shutDown("user disconnected");
 		}
 
 		/**
-		 * @param str a give command string with one or many words 
+		 * @param str is a multi word string of commands to pass to Application. 
 		 */
-		public void doPlayer(final String str){
+		private void doPlayer(final String str){
 			
 			final String[] cmd = str.trim().split(" ");
-			Util.debug("doplayer("+str+") split: " + cmd.length, this);	
+			// Util.debug("doplayer("+str+") split: " + cmd.length, this);	
 			String args = new String(); 			
 			for(int i = 1 ; i < cmd.length ; i++) 
 				args += " " + cmd[i].trim();
 				
+			if(PlayerCommands.requiresArgument(str) && (cmd.length==1)){
+				out.println("error: this command requires arguments");
+				return;
+			}
+			
 			// now send it 
 			app.playerCallServer(cmd[0].trim(), args.trim());
 		}
 		
 		// close resources
-		private void shutDown() {
+		private void shutDown(final String reason) {
 
 			// log to console, and notify other users of leaving
-			Util.log("closing socket [" + clientSocket + "]", this);
+			out.println("shutting down "+reason);
+			Util.debug("closing socket [" + clientSocket + "] " + reason, this);
 			sendToGroup(printers.size() + " tcp connections active");
 			state.delete(oculus.State.override);		
 			
@@ -177,27 +179,47 @@ public class CommandServer implements Observer {
 		}
 		
 		/** add extra commands, macros here. Return true if the command was found */ 
-		public boolean manageCommand(final String str){
+		private boolean manageCommand(final String str){
 			
 			final String[] cmd = str.split(" ");
+			Commands telnet = null;
+			try {
+				telnet = Commands.valueOf(cmd[0]);
+			} catch (Exception e) {
+				///Util.debug("_tel: " + e.getLocalizedMessage(), this);
+				return false;
+			}
 			
-			// send HTML format 
-			if(str.startsWith("chat")){
+			switch (telnet) {
+			
+			case message:
 				String args = new String(); 		
 				for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
 				if(args.length()>1)
 					app.playerCallServer(PlayerCommands.chat, 
 							"<u><i>" + user.toUpperCase() + "</i></u>:" + args);
 				return true;
-			}
-			
-			if(str.startsWith("help")) {
-				for (PlayerCommands factory : PlayerCommands.values()) 
-					out.println(factory.toString());
+
+				
+			case help:
+				for (PlayerCommands factory : PlayerCommands.values()) {
+					if(PlayerCommands.requiresArgument(factory)){
+						if(PlayerCommands.booleanArgument(factory)){
+							out.println(factory.toString() + " (true | false)");
+						} else {
+							out.println(factory.toString() + " (requires arguments)");
+						}
+					} else { 
+						out.println(factory.toString());
+					}
+				}
+				for (TelnetServer.Commands commands : TelnetServer.Commands.values()) {
+					out.println(commands);
+				}
 				return true;
-			}
 			
-			if(str.startsWith("tail")) {
+				
+			case tail:
 				int lines = 30; // default if not set 
 				if(cmd.length==2) lines = Integer.parseInt(cmd[1]);
 				String log = Util.tail(new File(oculus.Settings.stdout), lines);
@@ -205,38 +227,14 @@ public class CommandServer implements Observer {
 					if(log.length() > 1)
 						out.println(log);
 				return true;
-			}
-			
-			if(str.startsWith("reboot")) {
-				Util.systemCall("shutdown -r -f -t 01");			
-				return true;
-			}
-					
-			//TODO: TEST 
-			if(str.startsWith("home")){ 
-				Util.systemCall("java -classpath \"./webapps/oculus/WEB-INF/classes/\" developer.terminal.FindHome " 
-						+ state.get(oculus.State.localaddress) + " " + serverSocket.getLocalPort() +  " " + user + " " + pass); 
-				return true;
-			}
-			
-			//TODO: TEST 
-			if(str.startsWith("script")){ 
-				Util.systemCall("java -classpath \"./webapps/oculus/WEB-INF/classes/\" developer.terminal.ScriptServer " 
-						+ state.get(oculus.State.localaddress) + " " + serverSocket.getLocalPort() + " " + user + " " + pass + " " + cmd[1]); 
-				return true;
-			}
-			
-			//if(str.startsWith("restart")){ app.restart(); return true; }
-		
-			// if(str.startsWith("softwareupdate")) { app.softwareUpdate("update"); return true; }
-			
-			if(str.startsWith("image")) { 
+				
+				
+			case image:
 				final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						try {
-							
+						try {			
 							int i = 1;
 							if(cmd.length==2) i = Integer.parseInt(cmd[1]);
 							new File("capture").mkdir();
@@ -244,87 +242,41 @@ public class CommandServer implements Observer {
 								Util.debug(i + " save: " + urlString, this);
 								Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
 							}
-							
 						} catch (Exception e) {
 							Util.log("can't get image: " + e.getLocalizedMessage(), this);
 						}
 					}}).start();
-				return true; 
-			}
-			
-			// if(str.startsWith("cam")){ app.publish("camera"); return true; }
-			
-			if(str.startsWith("memory")) {		
+					return true;
+				
+					
+			case memory:
 				out.println("memory : " +
 						((double)Runtime.getRuntime().freeMemory()
 								/ (double)Runtime.getRuntime().totalMemory()) + " %");
 				
 				out.println("memorytotal : "+Runtime.getRuntime().totalMemory());    
 			    out.println("memoryfree : "+Runtime.getRuntime().freeMemory());
-			}
-			
-			if(str.startsWith("bye")) { shutDown(); }
-			
-			if(str.startsWith("quit")) { shutDown(); }
-						
-			if(str.startsWith("find")) {	
-				if(state.get(PlayerCommands.publish.toString()) == null) {
-					out.println("error: camera is off");
-					return true;
-				} else {
-					if(state.get(PlayerCommands.publish.toString()).equals("stop")){
-						out.println("error: camera is off");
-						return true;
-					}
-				}
-				
-				if(state.getBoolean(oculus.State.dockgrabbusy)){
-					out.println("error: dock grab is busy");
-					return true;
-				} else {
-					
-					// take a new reading, send back result if success
-					state.set(oculus.State.dockgrabbusy, true);
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							long start = System.currentTimeMillis(); 
-							app.dockGrab();
-							if( ! state.block(oculus.State.dockgrabbusy, "false", FIND_TIMEOUT))
-								Util.log("timed out waiting on dock grab ", this);
-					
-							// put results in state for any that care 
-							state.set(oculus.State.dockgrabtime, (System.currentTimeMillis() - start));
-						}
-					}).start();
-					return true;
-				 }
-			}
-			
-
-			if(str.startsWith("beep")) {
-				Util.beep(); 
 				return true;
-			}
-						
-			if(str.startsWith("tcp")) {
+
+			    
+			case tcp: 
 				out.println("tcp connections : " + printers.size());
 				return true;
-			}
-	
-			if(str.startsWith("users")){
+				
+				
+			case users: 
 				out.println("active users : " + records.getActive());
 				if(records.toString()!=null) out.println(records.toString());
 				return true;
-			}
-
-			if(str.startsWith("state")) {
+		
+				
+			case state:
 				if(cmd.length==3) state.set(cmd[1], cmd[2]);
 				else out.println(state.toString());
 				return true;
-			}		
-			
-			if(str.startsWith("settings")){
+				
+
+			case settings: 
 				if(cmd.length==3) { 
 					if(settings.readSetting(cmd[1]) == null) settings.newSetting(cmd[1], cmd[2]);
 					else settings.writeSettings(cmd[1], cmd[2]);
@@ -337,12 +289,16 @@ public class CommandServer implements Observer {
 					out.println(settings.toString());
 					return true;
 				}
-			}	
 			
-			// command not found 
-			return false;
+			case beep: Util.beep(); return true;
+			case bye: 
+			case quit: shutDown("user quit");
+			}
+			
+			// command was not managed 
+			return false;	
 		}
-	}
+	} // end inner class
 	
 	@Override
 	/** send to socket on state change */ 
@@ -368,8 +324,8 @@ public class CommandServer implements Observer {
 		}
 	}
 	
-	/** */
-	public CommandServer(oculus.Application a) {
+	/** constructor */
+	public TelnetServer(oculus.Application a) {
 		
 		if(app == null) app = a;
 		else return;
@@ -405,7 +361,7 @@ public class CommandServer implements Observer {
 	}
 	
 	/** do forever */ 
-	public void go(){
+	private void go(){
 		
 		// wait for system to startup 
 		Util.delay(1000);

@@ -13,73 +13,99 @@ public enum PlayerCommands {
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart;
 
 	// sub-set that are restricted to "user0"
-	/*
 	public enum AdminCommands {
 		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
 		showlog, softwareupdate, relaunchgrabber, systemcall
 	}
-	*/
+	
+	public enum booleanArguments {
+		arduinoecho, holdservo, opennisensor, videosoundmode, pushtotalktoggle ;
+	}
+	
+	//public enum onoffArgument {
+	//	floodlight, monitor ;
+	//}
 	
 	// sub-set that are require parameters 
-	/*
 	public enum RequiresArguments {
 		publish, floodlight, move, nudge, slide, getdrivingsettings, drivingsettingsupdate, cameracommand, 
 		speedset, dock, relaunchgrabber, clicksteer, chat, systemcall, streamsettingsset, 
 		streamsettingscustom, playerbroadcast, password_update, 
 		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
-		disconnectotherconnections, monitor, assumecontrol, softwareupdate, uinoecho, 
+		disconnectotherconnections, monitor, assumecontrol, softwareupdate, 
 		setsystemvolume, beapassenger, spotlightsetbrightness, writesetting, holdservo, 
 		opennisensor, videosoundmode, pushtotalktoggle ;
 	}
-	*/
 	
-	/*
-	public static boolean requiresArgument(String str) {
-		RequiresArguments command = PlayerCommands.RequiresArguments.valueOf(str);
-		if(command!=null) return true; 
-		return false;
-	}
-	*/
-	
-	/** @return true if given command is in the sub-set 
-	public static boolean requiresAdmin(PlayerCommands cmd) {
-		for (AdminCommands admin : AdminCommands.values()) {
-			if (admin.toString().equals(cmd.toString()))
-				return true;
-		}
-
-		return false;
-	}*/
-	
-	/** @return true if given command is in the sub-set 
-	public boolean requiresAdmin() {
+	/** */
+	public static boolean booleanArgument(final String str) {
+		booleanArguments command = null;
+		try {
+			command = booleanArguments.valueOf(str);
+		} catch (Exception e) {}
 		
-		for (AdminCommands admin : AdminCommands.values()) {
-			if (admin.equals(this))
-				return true;
-		}
-
-		return false;
-	}*/
-	/*public boolean requiresArgument() {
-		// TODO Auto-generated method stub
-		return false;
+		if(command==null) return false;
+			
+		return true; 
 	}
-
-	public static String match(String str) {
-		for (AdminCommands admin : AdminCommands.values()) {
-			if (admin.toString().startsWith(str))
-				return admin.toString();
-		}
-
-		return null;
+	
+	/** */
+	public static boolean booleanArgument(final PlayerCommands str) {
+		booleanArguments command = null;
+		try {
+			command = booleanArguments.valueOf(str.toString());
+		} catch (Exception e) {}
+		
+		if(command==null) return false;
+			
+		return true; 
 	}
-	*/
 	
-	/*
-	@Override
-	public String toString() {
-		return super.toString();
-	}*/
+	/** */
+	public static boolean requiresArgument(final String str) {
+		RequiresArguments command = null;
+		try {
+			command = RequiresArguments.valueOf(str);
+		} catch (Exception e) {}
+		
+		if(command==null) return false;
+			
+		return true; 
+	}
 	
+	/** */
+	public static boolean requiresArgument(final PlayerCommands str) {
+		RequiresArguments command = null;
+		try {
+			command = RequiresArguments.valueOf(str.toString());
+		} catch (Exception e) {}
+		
+		if(command==null) return false;
+			
+		return true; 
+	}
+	
+	/** @return true if given command is in the sub-set */
+	public static boolean requiresAdmin(final String str) {
+		AdminCommands command = null;
+		try {
+			command = AdminCommands.valueOf(str);
+		} catch (Exception e) {}
+		
+		if(command==null) return false;
+			
+		return true; 
+	}
+	
+	/** @return true if given command is in the sub-set */
+	public static boolean requiresAdmin(final PlayerCommands cmd) {
+		AdminCommands command = null;
+		try {
+			command = AdminCommands.valueOf(cmd.toString());
+		} catch (Exception e) {}
+		
+		if(command==null) return false;
+			
+		return true; 
+	}
 }

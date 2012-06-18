@@ -44,7 +44,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private LoginRecords loginRecords = new LoginRecords();
 	
 	//dev stuff
-	private developer.CommandServer commandServer = null;
+	private developer.TelnetServer commandServer = null;
 	private developer.LogManager moves = new developer.LogManager();
 	public developer.OpenNIRead openNIRead = null;
 	
@@ -232,7 +232,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			new developer.EmailAlerts(this);
 			
 		if ( ! settings.readSetting(ManualSettings.commandport).equals(State.disabled))
-			commandServer = new developer.CommandServer(this);
+			commandServer = new developer.TelnetServer(this);
 		
 		if (UpdateFTP.configured()) new developer.UpdateFTP();
 
@@ -395,22 +395,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		try {
 			cmd = PlayerCommands.valueOf(fn);
 		} catch (Exception e) {
-			Util.debug("playerCallServer() command not found:" + fn, this);
+			// Util.debug("playerCallServer() command not found:" + fn, this);
 			return;
 		}
-		//if (cmd != null) {
-			
-			//TODO: is this really required? if not given the controls? 
-			//if (PlayerCommands.requiresAdmin(cmd)){
-			//	if ( ! loginRecords.isAdmin()){ 
-			//		Util.debug("playerCallServer(), must be an admin to do: " + fn, this);
-			//		return;
-			//	}
-			//}
-			
-					
-		playerCallServer(cmd, str);
-		//}
+		if (cmd != null) playerCallServer(cmd, str);	
 	}
 
 	/**
@@ -423,6 +411,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final PlayerCommands fn, final String str) {
 		
+		if (PlayerCommands.requiresAdmin(fn.toString())){
+			if ( ! loginRecords.isAdmin()){ 
+				Util.debug("playerCallServer(), must be an admin to do: " + fn, this);
+				return;
+			}
+		}
+		
 		if(fn != PlayerCommands.statuscheck) 
 			state.set(State.usercommand, System.currentTimeMillis());
 
@@ -431,21 +426,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		if (state.getBoolean(State.developer))
 			if (!fn.equals(PlayerCommands.statuscheck))
-				Util.debug("playerCallServer(): " + fn + " " + str, this);
-
-		//Util.debug("playerCallServer: " + fn.toString() + " " + str, this);
-		
+				Util.debug("playerCallServer(" + fn + ", " + str + ")", this);
 		
 		switch (fn) {
 		case chat: chat(str) ;return;
 		case beapassenger: beAPassenger(str);return;
 		case assumecontrol: assumeControl(str); return;
 		}
-
 		
-		 // must be driver/non-passenger for all commands below (or cmdMgr user)
-		
-		//TODO: temp 'solution' 
+		// must be driver/non-passenger for all commands below 
 		if( ! state.getBoolean(oculus.State.override)){
 			if (Red5.getConnectionLocal() != player && player != null) {
 				Util.log("passenger, command dropped: " + fn.toString(), this);
