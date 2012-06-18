@@ -7,7 +7,9 @@ import java.util.Properties;
 import oculus.GUISettings;
 import oculus.ManualSettings;
 import oculus.PlayerCommands;
+import oculus.PlayerCommands.RequiresArguments;
 import oculus.Settings;
+import oculus.PlayerCommands;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +52,7 @@ public class SettingsTest {
 	@Test 
 	public void playerCommands(){
 		
-		// make sure no duplicates A - B
+		// make sure no duplicates in Telnet and Player Commands 
 		for (PlayerCommands factory : PlayerCommands.values()) {
 			String val = factory.toString();
 			for (developer.TelnetServer.Commands cmd : developer.TelnetServer.Commands.values()){
@@ -59,7 +61,7 @@ public class SettingsTest {
 			}
 		}
 		
-		// make sure no duplicates B - A 
+		// make sure no duplicates in Telnet and Player Commands 
 		for (developer.TelnetServer.Commands factory : developer.TelnetServer.Commands.values()) {
 			String val = factory.toString();
 			for (PlayerCommands cmd : PlayerCommands.values()){
@@ -68,21 +70,41 @@ public class SettingsTest {
 			}
 		}
 		
-		// make sure is a subset 
-		//for (developer.TelnetServer.Commands factory : developer.TelnetServer.Commands.values()) {
-			
-		//}
-		
-		// list admin or params 
-		/*
-		for (PlayerCommands factory : PlayerCommands.values()) {
-			String val = factory.toString();
-			System.out.print(val);
-			if(PlayerCommands.requiresArgument(val)) System.out.print(val + " - requires Argument");
-			if(PlayerCommands.requiresAdmin(val)) System.out.print(" - requires Admin");
-			System.out.println();
+		// make sure is a subset of player commands
+		for (PlayerCommands.RequiresArguments command : PlayerCommands.RequiresArguments.values()) {
+			PlayerCommands ply = null;
+			try {
+				ply = PlayerCommands.valueOf(command.toString());
+			} catch (Exception e) {}
+			if(ply==null) fail(" not a sub-set of playerCommands: "+command.toString());
 		}
-		*/
+		
+		// make sure is a subset of player commands
+		for (PlayerCommands.BooleanArguments command : PlayerCommands.BooleanArguments.values()) {
+			PlayerCommands ply = null;
+			try {
+				ply = PlayerCommands.valueOf(command.toString());
+			} catch (Exception e) {}
+			if(ply==null) fail(" not a sub-set of playerCommands: "+command.toString());
+		}
+		
+		for (PlayerCommands.AdminCommands command : PlayerCommands.AdminCommands.values()) {
+			PlayerCommands ply = null;
+			try {
+				ply = PlayerCommands.valueOf(command.toString());
+			} catch (Exception e) {}
+			if(ply==null) fail(" not a sub-set of PlayerCommand: "+command.toString());
+		}
+		
+		// make sure is a subset RequiresArguments
+		for (PlayerCommands.BooleanArguments command : PlayerCommands.BooleanArguments.values()) {
+			RequiresArguments ply = null;
+			try {
+				ply = PlayerCommands.RequiresArguments.valueOf(command.toString());
+			} catch (Exception e) {}
+			if(ply==null) fail(" not a sub-set of RequiresArguments: "+command.toString());
+		}
+		
 		
 	}
 	
@@ -116,20 +138,4 @@ public class SettingsTest {
 		
 	}
 
-	/*
-	@Test
-	public void validateOptionalSetting() {
-		
-		// test default example: 320_240_8_85
-		Properties defaults = GUISettings.createDeaults();
-		String[] cords = defaults.getProperty(ManualSettings.vself.toString()).split("_");
-		if(cords.length!=4) fail("vself options are invalid: " + cords.length); 
-		
-		// test in current file 
-		cords = settings.readSetting(ManualSettings.vself.toString()).split("_");
-		if(cords.length!=4) fail("vself options are invalid in settings file"); 
-		
-	}
-	*/
-	
 }

@@ -21,7 +21,7 @@ import oculus.Util;
  */
 public class TelnetServer implements Observer {
 	
-	public static enum Commands {message, users, tcp, beep, tail, image, find, memory, state, settings, help, bye, quit};
+	public static enum Commands {message, users, tcp, beep, tail, image, memory, state, settings, help, bye, quit};
 	public static final String SEPERATOR = " : ";
 	public static final boolean ADMIN_ONLY = true;
 	
@@ -123,11 +123,9 @@ public class TelnetServer implements Observer {
 					
 					Util.debug(clientSocket.getInetAddress().toString() + " : " + str, this);	
 					if( ! manageCommand(str)) {			
-						try {
-							doPlayer(str);
-						} catch (Exception e) {
-							Util.debug("player err: " + e.getLocalizedMessage(), this);
-						}
+						
+						doPlayer(str);
+						
 					}
 				}
 			}
@@ -142,13 +140,15 @@ public class TelnetServer implements Observer {
 		private void doPlayer(final String str){
 			
 			final String[] cmd = str.trim().split(" ");
-			// Util.debug("doplayer("+str+") split: " + cmd.length, this);	
 			String args = new String(); 			
-			for(int i = 1 ; i < cmd.length ; i++) 
-				args += " " + cmd[i].trim();
+			for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
 				
-			if(PlayerCommands.requiresArgument(str) && (cmd.length==1)){
-				out.println("error: this command requires arguments");
+			if(PlayerCommands.requiresArgument(cmd[0]) && (cmd.length==1)){
+				if(PlayerCommands.booleanArgument(cmd[0])){
+					out.println("error: requires true or false argument");
+				} else {
+					out.println("error: this command requires arguments");
+				}
 				return;
 			}
 			

@@ -18,7 +18,19 @@ public enum PlayerCommands {
 		showlog, softwareupdate, relaunchgrabber, systemcall
 	}
 	
-	public enum booleanArguments {
+	// sub-set that are require parameters 
+	public enum RequiresArguments {
+		publish, floodlight, move, nudge, slide, getdrivingsettings, drivingsettingsupdate, cameracommand, 
+		speedset, dock, relaunchgrabber, clicksteer, chat, systemcall, streamsettingsset, 
+		streamsettingscustom, playerbroadcast, password_update, 
+		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
+		disconnectotherconnections, monitor, assumecontrol, softwareupdate, arduinoecho,
+		setsystemvolume, beapassenger, spotlightsetbrightness, writesetting, holdservo, 
+		opennisensor, videosoundmode, pushtotalktoggle ;
+	}
+	
+	// sub-set of requires arguments 
+	public enum BooleanArguments {
 		arduinoecho, holdservo, opennisensor, videosoundmode, pushtotalktoggle ;
 	}
 	
@@ -26,22 +38,11 @@ public enum PlayerCommands {
 	//	floodlight, monitor ;
 	//}
 	
-	// sub-set that are require parameters 
-	public enum RequiresArguments {
-		publish, floodlight, move, nudge, slide, getdrivingsettings, drivingsettingsupdate, cameracommand, 
-		speedset, dock, relaunchgrabber, clicksteer, chat, systemcall, streamsettingsset, 
-		streamsettingscustom, playerbroadcast, password_update, 
-		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
-		disconnectotherconnections, monitor, assumecontrol, softwareupdate, 
-		setsystemvolume, beapassenger, spotlightsetbrightness, writesetting, holdservo, 
-		opennisensor, videosoundmode, pushtotalktoggle ;
-	}
-	
 	/** */
 	public static boolean booleanArgument(final String str) {
-		booleanArguments command = null;
+		BooleanArguments command = null;
 		try {
-			command = booleanArguments.valueOf(str);
+			command = BooleanArguments.valueOf(str);
 		} catch (Exception e) {}
 		
 		if(command==null) return false;
@@ -51,9 +52,9 @@ public enum PlayerCommands {
 	
 	/** */
 	public static boolean booleanArgument(final PlayerCommands str) {
-		booleanArguments command = null;
+		BooleanArguments command = null;
 		try {
-			command = booleanArguments.valueOf(str.toString());
+			command = BooleanArguments.valueOf(str.toString());
 		} catch (Exception e) {}
 		
 		if(command==null) return false;
