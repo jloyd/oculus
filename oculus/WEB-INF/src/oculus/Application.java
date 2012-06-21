@@ -783,11 +783,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void muteROVMicOnMoveToggle() {
 		if (muteROVonMove) {
 			muteROVonMove = false;
-			settings.writeSettings("mute_rov_on_move", "no");
+			settings.writeSettings("muteonrovmove", "no");
 			messageplayer("mute ROV onmove off", null, null);
 		} else {
 			muteROVonMove = true;
-			settings.writeSettings("mute_rov_on_move", "yes");
+			settings.writeSettings("muteonrovmove", "yes");
 			messageplayer("mute ROV onmove on", null, null);
 		}
 	}
