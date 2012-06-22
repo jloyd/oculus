@@ -6,11 +6,12 @@ var steeringmode;
 var xmlhttp=null;
 
 function loaded() {
-	
+//	alert("loaded");
 }
 
 function flashloaded() {
 	openxmlhttp("rtmpPortRequest",rtmpPortReturned);
+//	alert("flashloaded");
 }
 
 function openxmlhttp(theurl, functionname) {
@@ -34,18 +35,17 @@ function rtmpPortReturned() { //xmlhttp event handler
 	if (xmlhttp.readyState==4) {// 4 = "loaded"
 		if (xmlhttp.status==200) {// 200 = OK
 			getFlashMovie("oculus_android3").setRtmpPort(xmlhttp.responseText);
-//			var user = window.OCULUSANDROID.getUser();
-//			var pass = window.OCULUSANDROID.getPass();
-//			loginsend(user,pass);
-			loginsend("colin","asdfds");
-			setTimeout("publish('camera');",2000);
+			var user = window.OCULUSANDROID.getUser();
+			var pass = window.OCULUSANDROID.getPass();
+			loginsend(user,pass);
+//			setTimeout("publish('camera');",2000);
 		}
 	}
 }
 
 
 function messageAndroid(str) {
-	window.OCULUSANDROID.message(str);
+	 window.OCULUSANDROID.message(str);
 }
 
 

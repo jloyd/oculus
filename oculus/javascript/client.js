@@ -330,41 +330,37 @@ function message(message, colour, status, value) {
 function setstatus(status, value) {
 	var a;
 	if (a= document.getElementById(status+"_status")) {
-		if (true) { // (a.innerHTML.toUpperCase() != value.toUpperCase() || status == "lag") { //if value is changing from what it was, continue...
-		// if (status != "keyboard" || (status == "keyboard" && a.innerHTML.toUpperCase() != value.toUpperCase())) {
-			// if (status == "cameratilt" || status=="lag") { a.innerHTML = value; } // has &deg;    !
-			// else { a.innerHTML = value.toUpperCase(); }
-			if (status=="dock" && value == "docking") { 
-				value += " <img src='images/ajax-loader.gif' style='vertical-align: bottom;'>";
-			}
-			a.innerHTML = value;
-			if (status == "connection" && value == "closed") { 
-				a.style.color = "red";
-				connected = false;
-				setstatusunknown();
-				videologo("on");
-			}
-			var clr = a.style.color;
-			var bclr = a.style.backgroundColor;
-			b=document.getElementById(status+"_title");
-			var tclr = b.style.color;
-			var tbclr = "#1b1b1b";
-			if (statusflashingarray[status]==null) {
-				statusflashingarray[status]="flashing";
-				a.style.color = bclr;
-				a.style.backgroundColor = clr;
-				b.style.color = "#ffffff";
-				b.style.backgroundColor = tbclr;
-				var str1 = "document.getElementById('"+status+"_status').style.color='"+clr+"'; ";
-				str1 += "document.getElementById('"+status+"_status').style.backgroundColor='"+bclr+"';";
-				str1 += "document.getElementById('"+status+"_title').style.backgroundColor='"+bclr+"';";
-				var str2 = "document.getElementById('"+status+"_status').style.color='"+bclr+"'; ";
-				str2 += "document.getElementById('"+status+"_status').style.backgroundColor='"+clr+"';";
-				str2 += "document.getElementById('"+status+"_title').style.color='"+tclr+"';";
-				setTimeout(str1, 100);
-				setTimeout(str2, 150);
-				setTimeout(str1+"statusflashingarray['"+status+"']=null;", 250);
-			}
+		if (status=="dock" && value == "docking") { 
+			value += " <img src='images/ajax-loader.gif' style='vertical-align: bottom;'>";
+		}
+		if (status=="cameratilt") { value += "&deg;"; }
+		a.innerHTML = value;
+		if (status == "connection" && value == "closed") { 
+			a.style.color = "red";
+			connected = false;
+			setstatusunknown();
+			videologo("on");
+		}
+		var clr = a.style.color;
+		var bclr = a.style.backgroundColor;
+		b=document.getElementById(status+"_title");
+		var tclr = b.style.color;
+		var tbclr = "#1b1b1b";
+		if (statusflashingarray[status]==null) {
+			statusflashingarray[status]="flashing";
+			a.style.color = bclr;
+			a.style.backgroundColor = clr;
+			b.style.color = "#ffffff";
+			b.style.backgroundColor = tbclr;
+			var str1 = "document.getElementById('"+status+"_status').style.color='"+clr+"'; ";
+			str1 += "document.getElementById('"+status+"_status').style.backgroundColor='"+bclr+"';";
+			str1 += "document.getElementById('"+status+"_title').style.backgroundColor='"+bclr+"';";
+			var str2 = "document.getElementById('"+status+"_status').style.color='"+bclr+"'; ";
+			str2 += "document.getElementById('"+status+"_status').style.backgroundColor='"+clr+"';";
+			str2 += "document.getElementById('"+status+"_title').style.color='"+tclr+"';";
+			setTimeout(str1, 100);
+			setTimeout(str2, 150);
+			setTimeout(str1+"statusflashingarray['"+status+"']=null;", 250);
 		}
 	}
 	if (status=="vidctroffset") { ctroffset = parseInt(value); }

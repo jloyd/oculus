@@ -1008,7 +1008,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer(null, "cameratilt", camTiltPos());
 		}
 		if (str.equals("horiz")) {
-			messageplayer(null, "cameratilt", "0&deg;");
+			messageplayer(null, "cameratilt", "0");
 		}
 	}
 
@@ -1019,7 +1019,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (n > 0) {
 			s = "+";
 		}
-		return s + Integer.toString(n) + "&deg;";
+		return s + Integer.toString(n);// + "&deg;";
 	}
 
 	private void statusCheck(String s) {
@@ -1055,6 +1055,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str += " dock " + state.get(State.dockstatus);
 			if (light.isConnected()) {
 				str += " light " + light.spotLightBrightness();
+				str += " floodlight " + state.get(State.floodlight).toString();
 			}
 			if (settings.getBoolean(State.developer) == true) {
 				str += " developer true";
@@ -1384,6 +1385,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 						playerstream = true;
 					}
 				}).start();
+				if (str.equals("camera") || str.equals("camandmic")) {
+					monitor("on");
+					Util.debug("monitor on", this);
+				}
 				Util.log("OCULUS: player broadcast start", this);
 			} else {
 				sc.invoke("publish", new Object[] { "stop", null, null, null,null,null });

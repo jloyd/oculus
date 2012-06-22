@@ -47,15 +47,14 @@ public class State {
 	public static final String undocked = "undocked";
 	public static final String undock = "undock";
 	public static final String disabled = "disabled";
+	public static final String floodlight = "floodlight";
 	
-		
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
 	public static final long TWO_MINUTES = 60000;
 	public static final long FIVE_MINUTES = 300000;
 	public static final long TEN_MINUTES = 600000;
 	public static final int ERROR = -1;
-
 
 
 	/** notify these on change events */
