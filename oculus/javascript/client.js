@@ -1311,6 +1311,29 @@ function usersyscommanddivShow() {
 	popupmenu('menu','resize');
 }
 
+function oculuscommanddivHide() {
+	document.getElementById('oculuscommanddiv').style.display='none';
+	popupmenu('menu','resize');
+}
+
+function oculuscommanddivShow() {
+	document.getElementById('oculuscommanddiv').style.display='';
+	document.getElementById('oculuscommand').value='';
+	document.getElementById('oculuscommand').focus();
+	popupmenu('menu','resize');
+}
+
+function oculuscommandgo() {
+	var str = document.getElementById('oculuscommand').value;
+	str = str.replace(/^\s+|\s+$/g, ''); // strip
+	var cmd = str.split(" ",1);
+	var val = str.substring(cmd[0].length+1);
+	//debug("str = *"+str+"*<br>cmd = *"+cmd[0]+"*<br>val = *"+val+"*<br>cmd length = "+cmd[0].length);
+	callServer(cmd[0], val);
+	message("sending: "+cmd[0]+" "+val,"orange");
+	lagtimer = new Date().getTime(); // has to be *after* message()
+}
+
 function arduinoReset() {
 	message("resetting arduinoculus ",sentcmdcolor);
 	callServer("arduinoreset","");

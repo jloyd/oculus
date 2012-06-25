@@ -848,6 +848,17 @@ reboot every 48 hrs <span style="font-size: 11px">(requires server restart)</spa
 <table><tr><td style="height: 10px"></td></tr></table>
 Advanced menu:<br>
 <table><tr><td style="height: 7px"></td></tr></table>
+
+<a class="blackbg" href="javascript: oculuscommanddivShow();">oculus text command</a><span 
+id="oculuscommanddiv" style="display: none">:<br>&nbsp;
+<input id="oculuscommand" class="inputbox" type="text" size="30" 
+onfocus="keyboard('disable'); this.style.backgroundColor='#000000';" 
+onblur="keyboard('enable'); this.style.backgroundColor='#262626'; oculuscommanddivHide();"
+onKeyPress="if (keypress(event)==13) { oculuscommandgo(); }">
+<a class="cancelbox" href="javascript: oculuscommanddivHide();">X</a>
+<a class="cancelbox" href="javascript: oculuscommandgo();" onmousedown="oculuscommandgo();">&radic;</a>
+</span><br/>
+
 firmware echo <a class="blackbg" href="javascript: arduinoEcho('on');">on</a> / 
 <a class="blackbg" href="javascript: arduinoEcho('off');">off</a><br> 
 <a class="blackbg" href="javascript: arduinoReset();">reset arduinoculus board</a><br>
