@@ -170,6 +170,8 @@ public class State {
 	
 	/** Put a name/value pair into the configuration */
 	public synchronized void set(final String key, final String value) {
+		if(key==null) return;
+		if(value==null) return;
 		try {
 			props.put(key.trim(), value.trim());
 		} catch (Exception e) {

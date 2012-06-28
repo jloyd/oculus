@@ -144,11 +144,9 @@ public class TelnetServer implements Observer {
 			for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
 				
 			if(PlayerCommands.requiresArgument(cmd[0]) && (cmd.length==1)){
-				if(PlayerCommands.booleanArgument(cmd[0])){
-					out.println("error: requires true or false argument");
-				} else {
-					out.println("error: this command requires arguments");
-				}
+				out.println("error: this command requires arguments " 
+						+ PlayerCommands.RequiresArguments.valueOf(str).getValues());
+			
 				return;
 			}
 			
@@ -186,7 +184,7 @@ public class TelnetServer implements Observer {
 			try {
 				telnet = Commands.valueOf(cmd[0]);
 			} catch (Exception e) {
-				///Util.debug("_tel: " + e.getLocalizedMessage(), this);
+				Util.debug("_tel: " + e.getLocalizedMessage(), this);
 				return false;
 			}
 			
@@ -201,21 +199,22 @@ public class TelnetServer implements Observer {
 				return true;
 
 				
-			case help:
+			case help: // print details 
 				for (PlayerCommands factory : PlayerCommands.values()) {
-					if(PlayerCommands.requiresArgument(factory)){
-						if(PlayerCommands.booleanArgument(factory)){
-							out.println(factory.toString() + " (true | false)");
-						} else {
-							out.println(factory.toString() + " (requires arguments)");
-						}
-					} else { 
-						out.println(factory.toString());
-					}
+					out.print(factory.toString());
+					
+					if(PlayerCommands.requiresArgument(factory.name())) 
+						out.print(" " + PlayerCommands.RequiresArguments.valueOf(factory.name()).getValues());
+					
+					if(PlayerCommands.requiresAdmin(factory)) 
+						out.print(" (admin only)");
+				
+					out.println();
 				}
-				for (TelnetServer.Commands commands : TelnetServer.Commands.values()) {
-					out.println(commands);
-				}
+					
+				for (TelnetServer.Commands commands : TelnetServer.Commands.values()) 
+					out.println(commands + " (telnet only)");
+				
 				return true;
 			
 				

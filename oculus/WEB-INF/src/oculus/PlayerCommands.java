@@ -1,5 +1,8 @@
 package oculus;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum PlayerCommands {
 
 	// all valid commands
@@ -8,7 +11,7 @@ public enum PlayerCommands {
 	tilttest, speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
 	streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
-	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate, 
+	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart;
 
@@ -20,65 +23,93 @@ public enum PlayerCommands {
 	
 	// sub-set that are require parameters 
 	public enum RequiresArguments {
-		publish, floodlight, move, nudge, slide, getdrivingsettings, drivingsettingsupdate, cameracommand, 
-		speedset, dock, relaunchgrabber, clicksteer, chat, systemcall, streamsettingsset, 
-		streamsettingscustom, playerbroadcast, password_update, 
-		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
-		disconnectotherconnections, monitor, assumecontrol, softwareupdate, arduinoecho,
-		setsystemvolume, beapassenger, spotlightsetbrightness, writesetting, holdservo, 
-		opennisensor, videosoundmode, pushtotalktoggle ;
+	
+		publish("camera", "camadnmic", "stop"), 
+		floodlight("on", "off"), 
+		move("left", "right", "forward", "backward"),
+		nudge("left", "right", "forward", "backward"),
+		slide("left", "right", "forward", "backward"), 
+		getdrivingsettings, 
+		drivingsettingsupdate, 
+		cameracommand, 
+		speedset("slow", "med", "fast"), 
+		dock("dock", "undock"), 
+		relaunchgrabber, 
+		clicksteer, 
+		chat, 
+		systemcall, 
+		streamsettingsset, 
+		streamsettingscustom, 
+		playerbroadcast, 
+		password_update, 
+		new_user_add, 
+		user_list, 
+		delete_user, 
+		extrauser_password_update, 
+		username_update, 
+		disconnectotherconnections, 
+		monitor("on", "off"), 
+		assumecontrol("*"), 
+		softwareupdate("version", "update"),
+		arduinoecho("true", "false"),
+		setsystemvolume, 
+		beapassenger("*"), 
+		spotlightsetbrightness, writesetting, holdservo ("true", "false"), 
+		opennisensor, 
+		videosoundmode("true", "false"), 
+		pushtotalktoggle("true", "false") ;
+	
+		private final List<String> values;
+
+		RequiresArguments(String ...values) {
+			this.values = Arrays.asList(values);
+		}
+
+		public List<String> getValues() {
+			return values;
+		}
+
+		/*
+		public static boolean RequiresArguments(final String cmd, final String target){
+			RequiresArguments arg = null;
+			try{
+				arg = RequiresArguments.valueOf(cmd);
+			} catch (Exception e) { return false; }
+			 
+			return arg.getValues().contains(target);
+		}
+		 */
+		
+		/*
+		public static RequiresArguments find(String name) {
+		    for (RequiresArguments lang : RequiresArguments.values()) {
+		        if (lang.getValues().contains(name)) {
+		            return lang;
+		        }
+		    }
+		    return null;
+		}*/
+		
 	}
 	
-	// sub-set of requires arguments 
-	public enum BooleanArguments {
-		arduinoecho, holdservo, opennisensor, videosoundmode, pushtotalktoggle ;
-	}
-	
-	//public enum onoffArgument {
-	//	floodlight, monitor ;
-	//}
-	
-	/** */
+	/** 
 	public static boolean booleanArgument(final String str) {
-		BooleanArguments command = null;
+		RequiresArguments command = null;
 		try {
-			command = BooleanArguments.valueOf(str);
-		} catch (Exception e) {}
+			command = RequiresArguments.valueOf(str);
+		} catch (Exception e) {return false;}
 		
-		if(command==null) return false;
-			
-		return true; 
-	}
-	
-	/** */
-	public static boolean booleanArgument(final PlayerCommands str) {
-		BooleanArguments command = null;
-		try {
-			command = BooleanArguments.valueOf(str.toString());
-		} catch (Exception e) {}
+		if(command.getValues().contains("true")) return true;
+		if(command.getValues().contains("false")) return true;
 		
-		if(command==null) return false;
-			
-		return true; 
-	}
+		return false; 
+	}*/
 	
 	/** */
 	public static boolean requiresArgument(final String str) {
 		RequiresArguments command = null;
 		try {
 			command = RequiresArguments.valueOf(str);
-		} catch (Exception e) {}
-		
-		if(command==null) return false;
-			
-		return true; 
-	}
-	
-	/** */
-	public static boolean requiresArgument(final PlayerCommands str) {
-		RequiresArguments command = null;
-		try {
-			command = RequiresArguments.valueOf(str.toString());
 		} catch (Exception e) {}
 		
 		if(command==null) return false;

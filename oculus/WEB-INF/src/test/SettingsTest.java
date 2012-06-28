@@ -78,40 +78,15 @@ public class SettingsTest {
 			} catch (Exception e) {}
 			if(ply==null) fail(" not a sub-set of playerCommands: "+command.toString());
 		}
-		
-		// make sure is a subset of player commands
-		for (PlayerCommands.BooleanArguments command : PlayerCommands.BooleanArguments.values()) {
-			PlayerCommands ply = null;
-			try {
-				ply = PlayerCommands.valueOf(command.toString());
-			} catch (Exception e) {}
-			if(ply==null) fail(" not a sub-set of playerCommands: "+command.toString());
-		}
-		
+	
+		//
 		for (PlayerCommands.AdminCommands command : PlayerCommands.AdminCommands.values()) {
 			PlayerCommands ply = null;
 			try {
 				ply = PlayerCommands.valueOf(command.toString());
 			} catch (Exception e) {}
 			if(ply==null) fail(" not a sub-set of PlayerCommand: "+command.toString());
-		}
-		
-		// make sure is a subset RequiresArguments
-		for (PlayerCommands.BooleanArguments command : PlayerCommands.BooleanArguments.values()) {
-			RequiresArguments ply = null;
-			try {
-				ply = PlayerCommands.RequiresArguments.valueOf(command.toString());
-			} catch (Exception e) {}
-			if(ply==null) fail(" not a sub-set of RequiresArguments: "+command.toString());
-		}
-		
-		if(PlayerCommands.requiresArgument(PlayerCommands.arduinoecho)){
-			if(PlayerCommands.booleanArgument(PlayerCommands.arduinoecho)){
-				System.out.println("echo: " + PlayerCommands.arduinoecho.toString() + " (true | false)");
-			} else {
-				System.out.println("echo: " + PlayerCommands.arduinoecho.toString() + " (requires arguments)");
-			}
-		} 
+		}	
 	}
 	
 	
