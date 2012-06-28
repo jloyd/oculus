@@ -142,16 +142,33 @@ public class TelnetServer implements Observer {
 			final String[] cmd = str.trim().split(" ");
 			String args = new String(); 			
 			for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
-				
-			if(PlayerCommands.requiresArgument(cmd[0]) && (cmd.length==1)){
-				out.println("error: this command requires arguments " 
-						+ PlayerCommands.RequiresArguments.valueOf(str).getValues());
 			
+			PlayerCommands.RequiresArguments player = null; 
+			try {
+				player = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
+			} catch (Exception e) {}
+			
+			// test if valid 
+			if(PlayerCommands.requiresArgument(cmd[0]) && (cmd.length==1)){	
+				out.println("error: this command requires arguments " + player.getValues());
 				return;
 			}
 			
+			// test if the argument is in enum 
+			if((player!= null) && (cmd.length>1)){
+				
+				// not listed in the enum 
+				if( ! player.getValues().contains(cmd[1])){
+				
+					// TODO: make this an error if player commands filled in 
+					out.println("[" + cmd[1] + "] not found -- [" + player.name() + "] requires " + player.getValues().toString());
+					Util.debug("[" + cmd[1] + "] not found -- [" + player.name() + "] requires  " + player.getValues().toString(), this);
+			
+				}
+			}
+			
 			// now send it 
-			app.playerCallServer(cmd[0].trim(), args.trim());
+			app.playerCallServer(cmd[0], args.trim());
 		}
 		
 		// close resources
@@ -184,7 +201,7 @@ public class TelnetServer implements Observer {
 			try {
 				telnet = Commands.valueOf(cmd[0]);
 			} catch (Exception e) {
-				Util.debug("_tel: " + e.getLocalizedMessage(), this);
+				//Util.debug("invalid command: " + e.getLocalizedMessage(), this);
 				return false;
 			}
 			

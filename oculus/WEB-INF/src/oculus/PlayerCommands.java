@@ -3,6 +3,11 @@ package oculus;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * JUnit tests will validate the sub-sets for admin and player commands  
+ *
+ *
+ */
 public enum PlayerCommands {
 
 	// all valid commands
