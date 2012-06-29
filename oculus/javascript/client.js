@@ -1343,8 +1343,8 @@ function arduinoReset() {
 function arduinoEcho(value){
 	message("firmware command echo " + value, sentcmdcolor);
 	
-	if(value=='on')	callServer("arduinoecho", "on");
-	if(value=='off') callServer("arduinoecho", "off");
+	if(value=='on')	callServer("arduinoecho", "true");
+	if(value=='off') callServer("arduinoecho", "false");
 //	overlay('off');
 }
 

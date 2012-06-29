@@ -493,7 +493,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 
 		case arduinoecho:
-			if (str.equalsIgnoreCase("on"))comport.setEcho(true);
+			if (str.equalsIgnoreCase("true"))comport.setEcho(true);
 			else comport.setEcho(false);
 			messageplayer("echo set to: " + str, null, null);
 			break;
@@ -1089,6 +1089,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void streamSettingsSet(String str) {
+		Util.debug("streamSettingsSet: "+str, this);
 		settings.writeSettings("vset", "v" + str);
 		String s = "stream set to: " + str;
 		if (!stream.equals("stop") && !state.getBoolean(State.autodocking)) {
