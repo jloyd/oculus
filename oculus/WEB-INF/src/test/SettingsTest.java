@@ -79,7 +79,7 @@ public class SettingsTest {
 			if(ply==null) fail(" not a sub-set of playerCommands: "+command.toString());
 		}
 	
-		//
+		// make sure is a subset of player commands
 		for (PlayerCommands.AdminCommands command : PlayerCommands.AdminCommands.values()) {
 			PlayerCommands ply = null;
 			try {
@@ -87,6 +87,15 @@ public class SettingsTest {
 			} catch (Exception e) {}
 			if(ply==null) fail(" not a sub-set of PlayerCommand: "+command.toString());
 		}	
+		
+		// make sure is a subset of player commands
+		for (PlayerCommands.HelpText command : PlayerCommands.HelpText.values()) {
+			PlayerCommands ply = null;
+			try {
+				ply = PlayerCommands.valueOf(command.toString());
+			} catch (Exception e) {}
+			if(ply==null) fail(" not a sub-set of playerCommands: "+command.toString());
+		}
 	}
 	
 	

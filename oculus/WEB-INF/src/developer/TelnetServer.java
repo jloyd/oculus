@@ -140,6 +140,9 @@ public class TelnetServer implements Observer {
 		private void doPlayer(final String str){
 			
 			final String[] cmd = str.trim().split(" ");
+			
+			if(cmd==null) return;
+			
 			String args = new String(); 			
 			for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
 			
@@ -148,24 +151,37 @@ public class TelnetServer implements Observer {
 				player = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
 			} catch (Exception e) {}
 			
+			// sanity test
+			if(player==null) return;
+			
 			// test if valid 
 			if(PlayerCommands.requiresArgument(cmd[0]) && (cmd.length==1)){	
 				out.println("error: this command requires arguments " + player.getValues());
 				return;
 			}
 			
-			// test if the argument is in enum 
-			if((player!= null) && (cmd.length>1)){
-				
-				// not listed in the enum 
-				if( ! player.getValues().contains(cmd[1])){
-				
-					// TODO: make this an error if player commands filled in 
-					out.println("[" + cmd[1] + "] not found -- [" + player.name() + "] requires " + player.getValues().toString());
-					Util.debug("[" + cmd[1] + "] not found -- [" + player.name() + "] requires  " + player.getValues().toString(), this);
-			
+			//TODO: ACTIVE WORK --------------- test if the argument is in enum 
+			if(cmd.length>1){
+				if( ! PlayerCommands.listedArgument(player, cmd[1])){
+		
+					// parse special laterz 
+					if(cmd[1].contains("{") || cmd[1].contains("[")){
+					
+						// TODO: make this an error if player commands filled in 
+						out.println("[" + cmd[1] + "] not found, sent anyway [" + player.name() + "] requires " + player.getValues().toString());
+						Util.debug("[" + cmd[1] + "] not found, sent anyway [" + player.name() + "] requires  " + player.getValues().toString(), this);
+						
+					} else {
+					
+						out.println("[" + cmd[1] + "] not found, dropped [" + player.name() + "] requires " + player.getValues().toString());
+						Util.debug("[" + cmd[1] + "] not found, dropped [" + player.name() + "] requires  " + player.getValues().toString(), this);
+					
+						//return;
+						
+					}
 				}
 			}
+			
 			
 			// now send it 
 			app.playerCallServer(cmd[0], args.trim());
@@ -216,27 +232,31 @@ public class TelnetServer implements Observer {
 				return true;
 
 				
-			case help: // print details 
-				for (PlayerCommands factory : PlayerCommands.values()) {
-					out.print(factory.toString());
-					
-					if(PlayerCommands.requiresArgument(factory.name())) 
-						out.print(" " + PlayerCommands.RequiresArguments.valueOf(factory.name()).getValues());
-					
-					if(PlayerCommands.requiresAdmin(factory)) 
-						out.print(" (admin only)");
+			case help: 
 				
-					out.println();
-				}
+				if(cmd.length==2){
+					try {
+						
+						// give help, they are doing something wrong 
+						out.println("requires argument: " + PlayerCommands.RequiresArguments.valueOf(cmd[1]).getValues());
+						out.println("description: " + PlayerCommands.HelpText.valueOf(cmd[1]).getText());
+						
+					} catch (Exception e) {} 	
+				} else {
+				
+					// print all commands 
+					out.println(PlayerCommands.getCommands());
 					
-				for (TelnetServer.Commands commands : TelnetServer.Commands.values()) 
-					out.println(commands + " (telnet only)");
+					for (TelnetServer.Commands commands : TelnetServer.Commands.values()) 
+						out.println(commands + " (telnet only)");
+					
+				}
 				
 				return true;
 			
 				
 			case tail:
-				int lines = 30; // default if not set 
+				int lines = 30; // default amount to return if not set 
 				if(cmd.length==2) lines = Integer.parseInt(cmd[1]);
 				String log = Util.tail(new File(oculus.Settings.stdout), lines);
 				if(log!=null)

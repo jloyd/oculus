@@ -559,6 +559,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		
 		case holdservo:
+			//Util.debug("holdservo: " + str,this);
 			if (str.equalsIgnoreCase("true")) {
 				comport.holdservo = true;
 				settings.writeSettings(GUISettings.holdservo.toString(), "true");
@@ -1323,8 +1324,32 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	/** */
-	private void assumeControl(String user) {
+	private void assumeControl(String user) { 
 		messageplayer("controls hijacked", "hijacked", user);
+		
+		// TODO: BRAD... telnet calls this and pukes ..
+		if(player==null){
+			
+			Util.debug(user + " assume control, null player", this);
+			player = Red5.getConnectionLocal();
+			// telnet does this part 
+			//state.set(State.user, settings.readSetting("user0"));
+			String str = "connection connected user " + state.get(State.user);
+			messageplayer(state.get(State.user) + " connected to OCULUS", "multiple", str);
+			initialstatuscalled = false;
+			
+			str = state.get(State.user) + " connected from: telnet server"; // + player.getRemoteAddress();
+			messageGrabber(str, "connection " + state.get(State.user) + "&nbsp;connected");
+			Util.log("playersignin(), " + str, this);
+			loginRecords.beDriver();
+			
+			//IServiceCapableConnection sc = (IServiceCapableConnection) player;
+			//sc.invoke("videoSoundMode", new Object[] { "low" });			
+			
+			// call it twice, second time is ok ... 
+			return;
+		}
+		
 		IConnection tmp = player;
 		player = pendingplayer;
 		pendingplayer = tmp;

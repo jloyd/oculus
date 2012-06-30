@@ -2,14 +2,13 @@ package oculus;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 
 /**
- * JUnit tests will validate the sub-sets for admin and player commands  
- *
- *
+ * JUnit tests will validate the sub-sets player commands and the sub-sets. 
  */
 public enum PlayerCommands {
-
+	
 	// all valid commands
 	publish, floodlight, move, nudge, slide, dockgrab, framegrab, battstats, docklineposupdate, autodock,  autodockcalibrate, 
 	speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate, 
@@ -30,57 +29,56 @@ public enum PlayerCommands {
 	public enum RequiresArguments {
 	
 		publish("camera", "camadnmic", "mic", "stop"), 
-		floodlight("on", "off"), 
+		floodlight("on", "off", "test"), 
 		move("left", "right", "forward", "backward", "stop"),
 		nudge("left", "right", "forward", "backward"),
 		slide("left", "right"), 
-		dockgrab,
-		framegrab,
-		battstats,
+		//dockgrab,
+		//framegrab,
+		//battstats,
 		docklineposupdate("{INT}"),
 		autodock("cancel", "go", "dockgrabbed", "dockgrabbed {STRING}", "calibrate", "getdocktarget"),
 		autodockcalibrate("{INT} {INT}"),
 		speech("{STRING}"),
-		getdrivingsettings, 
+		//getdrivingsettings, 
 		drivingsettingsupdate("[0-255] [0-255] {INT} {INT} {DOUBLE} {INT}"),
-		gettiltsettings,
+		//gettiltsettings,
 		cameracommand("stop", "up", "down", "horiz", "downabit", "upabit"),
 		tiltsettingsupdate("[0-255] [0-255] [0-255] {INT} {INT}"),
 		tilttest("[0-255]"),
 		speedset("slow", "med", "fast"), 
 		dock("dock", "undock"), 
-		relaunchgrabber, 
+		//relaunchgrabber, 
 		clicksteer("{INT} {INT}"), 
 		chat("{STRING}"), 
-		statuscheck("", "battstats"),
+		statuscheck(/*"", TODO:///// ......... why? */ "battstats"),
 		systemcall("{STRING}"), 
 		streamsettingsset("low","med","high","full","custom"), 
 		streamsettingscustom("{INT}_{INT}_{INT}_[0-100]"), 
-		motionenabletoggle,
-		playerexit,
+		//motionenabletoggle,
+		//playerexit,
 		playerbroadcast("camera", "camadnmic", "mic", "stop"), 
 		password_update("{STRING}"), 
 		new_user_add("{STRING} {STRING}"), 
-		user_list, 
+		//user_list, 
 		delete_user("{STRING}"), 
 		extrauser_password_update("{STRING} {STRING}"), 
 		username_update("{STRING} {STRING}"), 
-		disconnectotherconnections, 
+		//disconnectotherconnections, 
 		monitor("on", "off"), 
 		assumecontrol("{STRING}"), 
 		softwareupdate("check", "download","versiononly"),
 		arduinoecho("{BOOLEAN}"),
-		arduinoreset,
+		//arduinoreset,
 		setsystemvolume("[0-100]"), 
 		beapassenger("{STRING}"), 
-		muterovmiconmovetoggle,
+		//muterovmiconmovetoggle,
 		spotlightsetbrightness("0","10","20","30","40","50","60","70","80","90","100"), 
 		writesetting("{STRING} {STRING}"), 
 		holdservo ("{BOOLEAN}"), 
 		opennisensor("on", "off"), 
 		videosoundmode("low", "high"), 
-		pushtotalktoggle("{BOOLEAN}"),
-		restart;
+		pushtotalktoggle("{BOOLEAN}");
 			
 		private final List<String> values;
 
@@ -92,30 +90,23 @@ public enum PlayerCommands {
 			return values;
 		}
 
-		/*
-		public static boolean RequiresArguments(final String cmd, final String target){
-			RequiresArguments arg = null;
-			try{
-				arg = RequiresArguments.valueOf(cmd);
-			} catch (Exception e) { return false; }
-			 
-			return arg.getValues().contains(target);
-		}
-		 */
+	//	public static boolean vaildArguments(final RequiresArguments cmd, final String target){
+	//		return cmd.getValues().contains(target);
+	//	}
 		
-		/*
-		public static RequiresArguments find(String name) {
-		    for (RequiresArguments lang : RequiresArguments.values()) {
-		        if (lang.getValues().contains(name)) {
-		            return lang;
-		        }
-		    }
-		    return null;
-		}*/
+		/* get all the commands that require the given argument */
+		public static Vector<String> find(String name) {
+			Vector<String> match = new Vector<String>();
+		    for (RequiresArguments lang : RequiresArguments.values())
+		        if (lang.getValues().contains(name)) 
+		            match.add(lang.name());
+		        
+		    return match;
+		}
 		
 	}
 	
-	public enum helpText{ 
+	public enum HelpText{ 
 		
 		publish("Robot video/audio control"), 
 		floodlight("Controls wide angle light"), 
@@ -172,27 +163,107 @@ public enum PlayerCommands {
 
         private final String message;
 
-        helpText(String msg) {
-                this.message = msg;
+        HelpText(String msg) {
+        	this.message = msg;
         }
         
-        public String help(){
-                return message;
+        public String getText(){
+        	return message;
         }
 	}
 	
-	/** 
-	public static boolean booleanArgument(final String str) {
-		RequiresArguments command = null;
+	/** is the target in the argument list? */
+	public static boolean listedArgument(final RequiresArguments cmd, final String target){
+		return cmd.getValues().contains(target);
+	}
+	
+	/**
+	 
+	 cameracommand("stop", "up", "down", "horiz", "downabit", "upabit"),
+	tiltsettingsupdate("[0-255] [0-255] [0-255] {INT} {INT}"),
+
+
+	 */
+	
+	// "tiltsettingsupdate 77 66 55 1 2"
+	
+	public static boolean vaildArguments(final String data){
+		
+		final String[] input = data.split(" ");
+		
+		RequiresArguments cmd = null;
 		try {
-			command = RequiresArguments.valueOf(str);
-		} catch (Exception e) {return false;}
+			cmd = RequiresArguments.valueOf(input[0]);
+		} catch (Exception e) {}
 		
-		if(command.getValues().contains("true")) return true;
-		if(command.getValues().contains("false")) return true;
+		// sanity check 
+		if(cmd==null) return false;
 		
-		return false; 
-	}*/
+		// sanity check
+		if( ! requiresArgument(cmd.name())) return false;
+		
+		// sanity check... command and single argument 
+		if(input.length==2){
+		
+			// first check if matches the list. 
+			if( ! listedArgument(cmd, input[1])){
+				
+		
+				System.out.println("cmd: " + cmd.name());
+				System.out.println("arg: " + input);
+				
+				return true; 
+				
+				
+			}
+		
+		}
+		
+		return false;
+	}
+	
+	public static boolean isRange(final String arg){
+		return (arg.trim().startsWith("[") && arg.trim().endsWith("]"));
+	}
+	
+	public static boolean isBoolean(final String arg){
+		return arg.trim().equals("{BOOLEAN}");
+	}
+	
+	public static boolean isInt(final String arg){
+		return arg.trim().equals("{INT}");
+	}
+	
+	public static boolean isDouble(final String arg){
+		return arg.trim().equals("{DOUBLE}");
+	}
+			
+	/**
+	 * 
+	 * @param arg is "[xxx yyy]" 
+	 * @param target 
+	 * @return
+	 */
+	public static boolean validRange(final String arg, final String target){
+		
+		///if(arg)
+		
+		return true;
+		
+	}
+	
+	public static boolean validBoolean(final String arg){
+		return arg.trim().equals("{BOOLEAN}");
+	}
+	
+	public static boolean validInt(final String arg){
+		return arg.trim().equals("{INT}");
+	}
+	
+	public static boolean validDouble(final String arg){
+		return arg.trim().equals("{DOUBLE}");
+	}
+			
 	
 	/** */
 	public static boolean requiresArgument(final String str) {
@@ -201,7 +272,7 @@ public enum PlayerCommands {
 			command = RequiresArguments.valueOf(str);
 		} catch (Exception e) {}
 		
-		if(command==null) return false;
+		if(command==null) return false; // TODO: safe to assume?
 			
 		return true; 
 	}
@@ -213,7 +284,7 @@ public enum PlayerCommands {
 			command = AdminCommands.valueOf(str);
 		} catch (Exception e) {}
 		
-		if(command==null) return false;
+		if(command==null) return true; // TODO: safe to assume?
 			
 		return true; 
 	}
@@ -222,11 +293,34 @@ public enum PlayerCommands {
 	public static boolean requiresAdmin(final PlayerCommands cmd) {
 		AdminCommands command = null;
 		try {
-			command = AdminCommands.valueOf(cmd.toString());
+			command = AdminCommands.valueOf(cmd.name());
 		} catch (Exception e) {}
 		
 		if(command==null) return false;
 			
 		return true; 
+	}
+	
+	/** 
+	 * @return a formated list of the commands 
+	 */
+	public static String getCommands(){
+		
+		String help = new String();
+	
+		// print the full list 
+		for (PlayerCommands factory : PlayerCommands.values()) {
+			
+			help += factory.name();
+			if(PlayerCommands.requiresArgument(factory.name())) 
+				help += " " + PlayerCommands.RequiresArguments.valueOf(factory.name()).getValues();
+			else help += (" (no arguments)");
+				
+			if(PlayerCommands.requiresAdmin(factory)) help +=(" (admin only)");
+			help += "\n\r";
+		}
+	
+		
+		return help;
 	}
 }
