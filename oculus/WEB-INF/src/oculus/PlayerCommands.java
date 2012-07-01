@@ -313,7 +313,7 @@ public enum PlayerCommands {
 			
 			help += factory.name();
 			if(PlayerCommands.requiresArgument(factory.name())) 
-				help += " " + PlayerCommands.RequiresArguments.valueOf(factory.name()).getValues();
+				help += " " + PlayerCommands.RequiresArguments.valueOf(factory.name()).getValues().toString().replace(",", " | ");
 			else help += (" (no arguments)");
 				
 			if(PlayerCommands.requiresAdmin(factory)) help +=(" (admin only)");

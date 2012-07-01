@@ -425,8 +425,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String[] cmd = null;
 		if(str!=null) cmd = str.split(" ");
 
-		if (state.getBoolean(State.developer))
-			if (!fn.equals(PlayerCommands.statuscheck))
+		//if (state.getBoolean(State.developer))
+		//	if (!fn.equals(PlayerCommands.statuscheck))
 				Util.debug("playerCallServer(" + fn + ", " + str + ")", this);
 		
 		switch (fn) {
@@ -559,7 +559,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		
 		case holdservo:
-			//Util.debug("holdservo: " + str,this);
+			Util.debug("holdservo: " + str,this);
 			if (str.equalsIgnoreCase("true")) {
 				comport.holdservo = true;
 				settings.writeSettings(GUISettings.holdservo.toString(), "true");
@@ -583,6 +583,27 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("pushtotalk", str);
 			messageplayer("self mic push T to talk "+str, null, null);
 			break;
+			
+		/*	
+		case bkz:
+			Util.debug("test...  take image", this);
+			final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {			
+						int i = Integer.parseInt(str);
+						new File("capture").mkdir();
+						for(; i > 0 ; i--) {
+							Util.debug(i + " save: " + urlString, this);
+							Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
+						}
+					} catch (Exception e) {
+						Util.log("can't get image: " + e.getLocalizedMessage(), this);
+					}
+				}}).start();	
+				
+			*/
 			
 		}
 	}
@@ -1131,7 +1152,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// }
 	}
 
 	public void monitor(String str) {
@@ -1154,12 +1174,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	/**
-	 * Move the bot in given direction if not busy docking
-	 * 
-	 * @param str
-	 *            parameter is the direction
-	 */
 	public void move(String str) {
 
 		if (str == null)
@@ -1204,14 +1218,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	}
 
-	/**
-	 * 
-	 * @param str
-	 *            is the direction to move.
-	 * 
-	 *            Valid choices are: "right", "left", "backward", "forward"
-	 * 
-	 */
 	public void nudge(String str) {
 
 		if (str == null) return;
@@ -1243,10 +1249,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	/**
-	 * 
-	 * @param str
-	 */
+	
 	private void clickSteer(String str) {
 
 		if (str == null)
@@ -1306,7 +1309,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			i = 0;
 			while (true) {
 				value = settings.readSetting("user" + i);
-				// System.out.println(value);
 				if (value == null) {
 					break;
 				} else {
@@ -1328,28 +1330,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageplayer("controls hijacked", "hijacked", user);
 		
 		// TODO: BRAD... telnet calls this and pukes ..
-		if(player==null){
+		if(player==null) return;
 			
-			Util.debug(user + " assume control, null player", this);
-			player = Red5.getConnectionLocal();
-			// telnet does this part 
-			//state.set(State.user, settings.readSetting("user0"));
-			String str = "connection connected user " + state.get(State.user);
-			messageplayer(state.get(State.user) + " connected to OCULUS", "multiple", str);
-			initialstatuscalled = false;
-			
-			str = state.get(State.user) + " connected from: telnet server"; // + player.getRemoteAddress();
-			messageGrabber(str, "connection " + state.get(State.user) + "&nbsp;connected");
-			Util.log("playersignin(), " + str, this);
-			loginRecords.beDriver();
-			
-			//IServiceCapableConnection sc = (IServiceCapableConnection) player;
-			//sc.invoke("videoSoundMode", new Object[] { "low" });			
-			
-			// call it twice, second time is ok ... 
-			return;
-		}
-		
 		IConnection tmp = player;
 		player = pendingplayer;
 		pendingplayer = tmp;

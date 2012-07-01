@@ -12,6 +12,7 @@ import oculus.LoginRecords;
 import oculus.Observer;
 import oculus.ManualSettings;
 import oculus.PlayerCommands;
+import oculus.PlayerCommands.RequiresArguments;
 import oculus.Settings;
 import oculus.Updater;
 import oculus.Util;
@@ -55,7 +56,7 @@ public class TelnetServer implements Observer {
 			}
 	
 			// send banner 
-			out.println("oculus version " + new Updater().getCurrentVersion() + " ready for login."); 
+			out.println("oculus version " + new Updater().getCurrentVersion() + " ready for admin login."); 
 			
 			try {
 				
@@ -87,6 +88,10 @@ public class TelnetServer implements Observer {
 				shutDown("command server connection fail: " + ex.getMessage());
 			}
 	
+			// TODO: log in 
+			state.set(oculus.State.user, user);
+			new LoginRecords().beDriver();
+			
 			// keep track of all other user sockets output streams			
 			printers.add(out);	
 			this.start();
@@ -124,6 +129,7 @@ public class TelnetServer implements Observer {
 					Util.debug(clientSocket.getInetAddress().toString() + " : " + str, this);	
 					if( ! manageCommand(str)) {			
 						
+						Util.debug("doPlayer(" + str + ")", this);	
 						doPlayer(str);
 						
 					}
@@ -146,21 +152,38 @@ public class TelnetServer implements Observer {
 			String args = new String(); 			
 			for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
 			
-			PlayerCommands.RequiresArguments player = null; 
+			PlayerCommands player = null; 
+		
 			try {
-				player = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
-			} catch (Exception e) {}
-			
-			// sanity test
-			if(player==null) return;
-			
-			// test if valid 
-			if(PlayerCommands.requiresArgument(cmd[0]) && (cmd.length==1)){	
-				out.println("error: this command requires arguments " + player.getValues());
+				player = PlayerCommands.valueOf(cmd[0]);
+			} catch (Exception e1) {
+				out.println("error: bad command, " + cmd[0]);
 				return;
 			}
 			
+			// test if needs an argument, but is missing. 
+			if(PlayerCommands.requiresArgument(cmd[0])){
+				RequiresArguments req = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
+				if(cmd.length==1){
+					out.println("error: this command requires arguments " + req.getValues());
+					return;
+				}
+			
+
+				// now send it 
+				Util.debug(str, this);
+				app.playerCallServer(player, args.trim());
+				return;
+				
+			}
+			
+			// now send it 
+			Util.debug(str, this);
+			app.playerCallServer(player, null);
+			
+			
 			//TODO: ACTIVE WORK --------------- test if the argument is in enum 
+			/*
 			if(cmd.length>1){
 				if( ! PlayerCommands.listedArgument(player, cmd[1])){
 		
@@ -182,9 +205,10 @@ public class TelnetServer implements Observer {
 				}
 			}
 			
+			*/
 			
-			// now send it 
-			app.playerCallServer(cmd[0], args.trim());
+			
+			
 		}
 		
 		// close resources
@@ -234,15 +258,18 @@ public class TelnetServer implements Observer {
 				
 			case help: 
 				
-				if(cmd.length==2){
-					try {
+				if(cmd.length==2){ // look something up
+					
+						if(PlayerCommands.requiresArgument(cmd[1])){
+							out.println("requires argument: " + PlayerCommands.RequiresArguments.valueOf(cmd[1]).getValues().toString().replace(",", " | "));	
+						}else{
+							out.println("requires no argument(s)");
+						}
 						
 						// give help, they are doing something wrong 
-						out.println("requires argument: " + PlayerCommands.RequiresArguments.valueOf(cmd[1]).getValues());
 						out.println("description: " + PlayerCommands.HelpText.valueOf(cmd[1]).getText());
 						
-					} catch (Exception e) {} 	
-				} else {
+				} else { // just puke the list
 				
 					// print all commands 
 					out.println(PlayerCommands.getCommands());
@@ -251,7 +278,6 @@ public class TelnetServer implements Observer {
 						out.println(commands + " (telnet only)");
 					
 				}
-				
 				return true;
 			
 				
@@ -263,7 +289,8 @@ public class TelnetServer implements Observer {
 					if(log.length() > 1)
 						out.println(log);
 				return true;
-				
+		
+				/**/
 				
 			case image:
 				final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
@@ -281,8 +308,10 @@ public class TelnetServer implements Observer {
 						} catch (Exception e) {
 							Util.log("can't get image: " + e.getLocalizedMessage(), this);
 						}
-					}}).start();
-					return true;
+					}
+				}).start();	
+				return true;
+				
 				
 					
 			case memory:
