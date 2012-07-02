@@ -67,8 +67,7 @@ public class TelnetServer implements Observer {
 				pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
 								
 				// Admin only 
-				if(ADMIN_ONLY)
-					if( ! user.equals(settings.readSetting("user0"))) shutDown("must be admin for telnet");
+				if(ADMIN_ONLY) if( ! user.equals(settings.readSetting("user0"))) shutDown("must be admin for telnet");
 							
 				// try salted 
 				if(app.logintest(user, pass)==null){
@@ -145,15 +144,17 @@ public class TelnetServer implements Observer {
 		 */
 		private void doPlayer(final String str){
 			
-			final String[] cmd = str.trim().split(" ");
+			final String[] cmd = str.split(" ");
 			
+			// sanity test 
 			if(cmd==null) return;
 			
 			String args = new String(); 			
 			for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
 			
 			PlayerCommands player = null; 
-		
+			RequiresArguments req = null;
+			
 			try {
 				player = PlayerCommands.valueOf(cmd[0]);
 			} catch (Exception e1) {
@@ -163,52 +164,47 @@ public class TelnetServer implements Observer {
 			
 			// test if needs an argument, but is missing. 
 			if(PlayerCommands.requiresArgument(cmd[0])){
-				RequiresArguments req = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
+				req = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
 				if(cmd.length==1){
-					out.println("error: this command requires arguments " + req.getValues());
+					out.println("error: this command requires arguments " + req.getValues().toString());
 					return;
 				}
-			
-
-				// now send it 
-				Util.debug(str, this);
-				app.playerCallServer(player, args.trim());
-				return;
-				
 			}
-			
-			// now send it 
-			Util.debug(str, this);
-			app.playerCallServer(player, null);
-			
-			
-			//TODO: ACTIVE WORK --------------- test if the argument is in enum 
-			/*
+				
 			if(cmd.length>1){
-				if( ! PlayerCommands.listedArgument(player, cmd[1])){
-		
-					// parse special laterz 
-					if(cmd[1].contains("{") || cmd[1].contains("[")){
+				if( ! PlayerCommands.listedArgument(req, cmd[1])){
 					
-						// TODO: make this an error if player commands filled in 
-						out.println("[" + cmd[1] + "] not found, sent anyway [" + player.name() + "] requires " + player.getValues().toString());
-						Util.debug("[" + cmd[1] + "] not found, sent anyway [" + player.name() + "] requires  " + player.getValues().toString(), this);
+					String list = req.getValues().toString();
+					list = list.substring(1, list.length()-1);
+					list = list.replace(",", " | ");
+					
+					// Util.debug(".." + list, this);
+		
+					// parse special 
+					if(list.contains("{") || list.contains("[")){
+					
+						// TODO: ACTIVE WORK
+						
+						// out.println("[" + cmd[1] + "] not found, sent anyway [" + player.name() + "] requires " + list);
+						Util.debug("TODO_[" + cmd[1] + "] not found, sent anyway [" + player.name() + "] requires " + list, this);
 						
 					} else {
 					
-						out.println("[" + cmd[1] + "] not found, dropped [" + player.name() + "] requires " + player.getValues().toString());
-						Util.debug("[" + cmd[1] + "] not found, dropped [" + player.name() + "] requires  " + player.getValues().toString(), this);
-					
-						//return;
+						out.println("[" + cmd[1] + "] not found, requires " + list);
+						Util.debug("[" + cmd[1] + "] not found, requires  " + list, this);
+						return;
 						
 					}
 				}
 			}
 			
-			*/
+			// check for null vs string("")
+			args = args.trim();
+			if(args.length()==0) args = null;
 			
-			
-			
+			// now send it 
+			Util.debug(str, this);
+			app.playerCallServer(player, args);
 		}
 		
 		// close resources
@@ -241,7 +237,6 @@ public class TelnetServer implements Observer {
 			try {
 				telnet = Commands.valueOf(cmd[0]);
 			} catch (Exception e) {
-				//Util.debug("invalid command: " + e.getLocalizedMessage(), this);
 				return false;
 			}
 			
@@ -290,7 +285,6 @@ public class TelnetServer implements Observer {
 						out.println(log);
 				return true;
 		
-				/**/
 				
 			case image:
 				final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";

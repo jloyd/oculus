@@ -41,7 +41,7 @@ public enum PlayerCommands {
 		autodockcalibrate("{INT} {INT}"),
 		speech("{STRING}"),
 		//getdrivingsettings, 
-		drivingsettingsupdate("[0-255] [0-255] {INT} {INT} {DOUBLE} {INT}"),
+		drivingsettingsupdate( /** maybe {Byte) instead*/"[0-255] [0-255] {INT} {INT} {DOUBLE} {INT}"),
 		//gettiltsettings,
 		cameracommand("stop", "up", "down", "horiz", "downabit", "upabit"),
 		tiltsettingsupdate("[0-255] [0-255] [0-255] {INT} {INT}"),
