@@ -89,8 +89,8 @@ public class TelnetServer implements Observer {
 			}
 	
 			// TODO: log in 
-			state.set(oculus.State.user, user);
-			new LoginRecords().beDriver();
+			// state.set(oculus.State.user, user);
+			// new LoginRecords().beDriver();
 			
 			// keep track of all other user sockets output streams			
 			printers.add(out);	
@@ -146,16 +146,10 @@ public class TelnetServer implements Observer {
 		private void doPlayer(final String str){
 			
 			final String[] cmd = str.split(" ");
-			
-			// sanity test 
-			if(cmd==null) return;
-			
 			String args = new String(); 			
 			for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
 			
 			PlayerCommands player = null; 
-			RequiresArguments req = null;
-			
 			try { // create command from input 
 				player = PlayerCommands.valueOf(cmd[0]);
 			} catch (Exception e) {
@@ -166,7 +160,7 @@ public class TelnetServer implements Observer {
 			// test if needs an argument, but is missing. 
 			if(player.requiresArgument()){
 				
-				req = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
+				RequiresArguments req = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
 			
 				if(cmd.length==1){
 					out.println("error: this command requires arguments " + req.getArguments());
@@ -182,14 +176,21 @@ public class TelnetServer implements Observer {
 					
 				if(req.usesBoolean()){
 					if( ! PlayerCommands.validBoolean(cmd[1])){
-						out.println("error: isBoolean [" + cmd[1] + "] " + req.getArguments());
+						out.println("error: requires {BOOLEAN}");
 						return;
 					}	
 				}
 				
 				if(req.usesInt()){
 					if( ! PlayerCommands.validInt(cmd[1])){
-						out.println("error: isInt [" + cmd[1] + "] " + req.getArguments());
+						out.println("error: requires {INT}");
+						return;
+					}
+				}
+				
+				if(req.usesDouble()){
+					if( ! PlayerCommands.validDouble(cmd[1])){
+						out.println("error: requires {DOUBLE}");
 						return;
 					}
 				}
@@ -199,6 +200,16 @@ public class TelnetServer implements Observer {
 						out.println("error: not in range " + req.getArguments());
 						return;
 					}
+				}
+				
+				if(req.requiresParse()){
+					
+					// do min test, check for the same number of arguments 
+					String[] list = req.getArgumentList()[0].split(" ");
+					if(list.length != (cmd.length-1)){
+						out.println("error: wrong number args, rquires [" + list.length + "]");
+						return;
+					}		
 				}
 			}
 		

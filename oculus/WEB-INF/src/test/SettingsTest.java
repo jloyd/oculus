@@ -112,6 +112,13 @@ public class SettingsTest {
 			System.out.println("tilttest -100 is NOT in range");
 		else fail("RANGE TEST ERROR");
 		
+		/*
+		if( PlayerCommands.RequiresArguments.drivingsettingsupdate.usesDouble() ){
+			if(PlayerCommands.RequiresArguments.drivingsettingsupdate.matchesArgument("1.4")){
+				System.out.println("drivingsettingsupdate requires double");
+			} else fail("can't detect double argument");
+		}*/
+		
 	}
 	
 	

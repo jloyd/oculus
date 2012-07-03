@@ -39,16 +39,11 @@ public enum PlayerCommands {
 		move("left", "right", "forward", "backward", "stop"),
 		nudge("left", "right", "forward", "backward"),
 		slide("left", "right"), 
-		//dockgrab,
-		//framegrab,
-		//battstats,
 		docklineposupdate("{INT}"),
 		autodock("cancel", "go", "dockgrabbed", "dockgrabbed {STRING}", "calibrate", "getdocktarget"),
 		autodockcalibrate("{INT} {INT}"),
 		speech("{STRING}"),
-		//getdrivingsettings, 
-		drivingsettingsupdate( /** maybe {Byte) instead*/"[0-255] [0-255] {INT} {INT} {DOUBLE} {INT}"),
-		//gettiltsettings,
+		drivingsettingsupdate("[0-255] [0-255] {INT} {INT} {DOUBLE} {INT}"),
 		cameracommand("stop", "up", "down", "horiz", "downabit", "upabit"),
 		tiltsettingsupdate("[0-255] [0-255] [0-255] {INT} {INT}"),
 		tilttest("[0-255]"),
@@ -60,25 +55,21 @@ public enum PlayerCommands {
 		statuscheck(/*"", TODO:///// ......... why? */ "battstats"),
 		systemcall("{STRING}"), 
 		streamsettingsset("low","med","high","full","custom"), 
-		streamsettingscustom("{INT}_{INT}_{INT}_[0-100]"), 
-		//motionenabletoggle,
-		//playerexit,
+		streamsettingscustom("{STRING}"), //"{INT}_{INT}_{INT}_[0-100]"), 
+		//TODO: TRICKY UNDERSCORE
+		
 		playerbroadcast("camera", "camadnmic", "mic", "stop"), 
 		password_update("{STRING}"), 
 		new_user_add("{STRING} {STRING}"), 
-		//user_list, 
 		delete_user("{STRING}"), 
 		extrauser_password_update("{STRING} {STRING}"), 
 		username_update("{STRING} {STRING}"), 
-		//disconnectotherconnections, 
 		monitor("on", "off"), 
 		assumecontrol("{STRING}"), 
 		softwareupdate("check", "download","versiononly"),
 		arduinoecho("{BOOLEAN}"),
-		//arduinoreset,
 		setsystemvolume("[0-100]"), 
 		beapassenger("{STRING}"), 
-		//muterovmiconmovetoggle,
 		spotlightsetbrightness("0","10","20","30","40","50","60","70","80","90","100"), 
 		writesetting("{STRING} {STRING}"), 
 		holdservo ("{BOOLEAN}"), 
@@ -111,9 +102,6 @@ public enum PlayerCommands {
 				// range check 
 				if(((s <= t) && (t <= e))) return true;
 				
-				// debug only 
-				// else System.out.println(this.name() + " validRange() not in range: " + s + " <= " + t + " <= " + e);
-			
 			} catch (Exception e) {
 				Util.log("PlayerCommands.validRange() :" + e.getLocalizedMessage());
 			}
@@ -234,7 +222,6 @@ public enum PlayerCommands {
 		        if (lang.usesRange()) 
 		            match.add(lang.name());
 		    
-		    	
 		    return match;
 		}
 
@@ -323,108 +310,6 @@ public enum PlayerCommands {
         }
 	}
 	
-	
-	
-	
-	/** is the target in the argument list? 
-	public static boolean listedArgument(final RequiresArguments cmd, final String target){
-		return cmd.getValues().contains(target);
-	}*/
-	
-	/**
-	 
-	 cameracommand("stop", "up", "down", "horiz", "downabit", "upabit"),
-	tiltsettingsupdate("[0-255] [0-255] [0-255] {INT} {INT}"),
-
-
-	 */
-	
-	// "tiltsettingsupdate 77 66 55 1 2"
-	/*
-	public static boolean vaildArguments(final String data){
-		
-		final String[] input = data.split(" ");
-		
-		RequiresArguments cmd = null;
-		try {
-			cmd = RequiresArguments.valueOf(input[0]);
-		} catch (Exception e) {}
-		
-		// sanity check 
-		if(cmd==null) return false;
-		
-		// sanity check
-		if( ! requiresArgument(cmd.name())) return false;
-		
-		// sanity check... command and single argument 
-		if(input.length==2){
-		
-			// first check if matches the list. 
-			if( ! listedArgument(cmd, input[1])){
-				
-		
-				System.out.println("cmd: " + cmd.name());
-				System.out.println("arg: " + input);
-				
-				return true; 
-				
-				
-			}
-		
-		}
-		
-		return false;
-	}
-	
-	
-	public static boolean isRange(String arg){
-		arg = arg.trim();
-		return (arg.startsWith("[") && arg.endsWith("]"));
-	}*/
-	
-	public static boolean isBoolean(final String arg){
-		return arg.trim().equals("{BOOLEAN}");
-	}
-	
-	public static boolean isInt(final String arg){
-		return arg.trim().equals("{INT}");
-	}
-	
-	public static boolean isDouble(final String arg){
-		return arg.trim().equals("{DOUBLE}");
-	}
-	
-	public static boolean isString(final String arg){
-		return arg.trim().equals("{STRING}");
-	}
-			
-	/** @return true if the target is in the given range 
-	public static boolean validRange(final RequiresArguments req, final String target){
-		try {
-		
-			String list = req.getValues().toString();
-			list = list.substring(list.lastIndexOf("[")+1, list.indexOf("]"));
-		
-			System.out.println("_range: "+list);
-		
-			String start = list.substring(0, list.indexOf("-"));
-			String end = list.substring(list.indexOf("-")+1, list.length());
-			int s = Integer.parseInt(start);
-			int e = Integer.parseInt(end);
-			int t = Integer.parseInt(target);
-			
-			// range check 
-			if(((s <= t) && (t <= e))) return true;
-			
-			else Util.log(req.name() + " validRange() not in range: " + s + " <= " + t + " <= " + e);
-		
-		} catch (Exception e1) {
-			Util.log("PlayerCommands.validRange() :" + e1.getLocalizedMessage());
-		}
-		
-		return false;
-	}*/
-	
 	/** */
 	public static boolean validBoolean(final String arg){
 		if(arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("false")) return true;
@@ -434,27 +319,24 @@ public enum PlayerCommands {
 	
 	/** */
 	public static boolean validInt(final String arg){
-		
-		Integer test = null;;
-		
 		try {
-			test = new Integer(arg);
-		} catch (NumberFormatException e) {}
-		
-		if(test == null) return false;
-		
+			Integer.parseInt(arg);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 		return true;
 	}
 	
-	/** 
+	/** */
 	public static boolean validDouble(final String arg){
-		return arg.trim().equals("{DOUBLE}");
-	}*/
-	
-	/** 
-	public static boolean validString(final String arg){
-		return true; // TODO: 
-	}	*/
+		try {
+			Double.parseDouble(arg);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		
+		return true;
+	}
 	
 	/** */
 	public boolean requiresArgument() {
@@ -516,7 +398,7 @@ public enum PlayerCommands {
 				RequiresArguments req = PlayerCommands.RequiresArguments.valueOf(factory.name());
 				help += " " + req.getArguments();
 				
-				if(req.requiresParse()) help += " _parse_";
+				if(req.requiresParse()) help += " (parse required)";
 			
 			} else help += (" (no arguments)");
 				
