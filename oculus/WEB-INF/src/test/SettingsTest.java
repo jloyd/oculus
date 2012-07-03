@@ -7,10 +7,7 @@ import java.util.Properties;
 import oculus.GUISettings;
 import oculus.ManualSettings;
 import oculus.PlayerCommands;
-import oculus.PlayerCommands.RequiresArguments;
 import oculus.Settings;
-import oculus.PlayerCommands;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -96,6 +93,25 @@ public class SettingsTest {
 			} catch (Exception e) {}
 			if(ply==null) fail(" not a sub-set of playerCommands: "+command.toString());
 		}
+	
+		System.out.println("BOOLEAN: " + PlayerCommands.RequiresArguments.find("{BOOLEAN}"));
+		System.out.println("INT: " + PlayerCommands.RequiresArguments.find("{INT}"));
+		System.out.println("STRING: " + PlayerCommands.RequiresArguments.find("{STRING}"));
+		System.out.println("DOUBLE: " + PlayerCommands.RequiresArguments.find("{DOUBLE}"));
+		System.out.println("[0-100]: " + PlayerCommands.RequiresArguments.find("[0-100]"));
+		System.out.println("[0-255]: " + PlayerCommands.RequiresArguments.find("[0-255]"));
+		System.out.println("USE RANGE: " + PlayerCommands.RequiresArguments.rangeList());
+		System.out.println("NEEDS PARSE: " + PlayerCommands.RequiresArguments.parseList());
+		System.out.println("USE STRING: " + PlayerCommands.RequiresArguments.stringList());
+		
+		if(PlayerCommands.RequiresArguments.tilttest.vaildRange("100"))
+			System.out.println("tiltest is 100 in range");
+		else fail("RANGE TEST ERROR");
+		
+		if( ! PlayerCommands.RequiresArguments.tilttest.vaildRange("-100"))
+			System.out.println("tilttest -100 is NOT in range");
+		else fail("RANGE TEST ERROR");
+		
 	}
 	
 	

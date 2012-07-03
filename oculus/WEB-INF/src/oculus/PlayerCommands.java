@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
+
 /**
  * JUnit tests will validate the sub-sets player commands and the sub-sets. 
  */
@@ -18,7 +19,12 @@ public enum PlayerCommands {
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart;
-
+	
+	/** get text for any player command */
+	public String getHelp(){
+		return HelpText.valueOf(this.name()).getText();
+	}
+	
 	// sub-set that are restricted to "user0"
 	public enum AdminCommands {
 		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
@@ -89,10 +95,122 @@ public enum PlayerCommands {
 		public List<String> getValues() {
 			return values;
 		}
-
-	//	public static boolean vaildArguments(final RequiresArguments cmd, final String target){
-	//		return cmd.getValues().contains(target);
-	//	}
+			
+		public boolean vaildRange(final String target){
+			try {
+				
+				String list = this.getValues().toString();
+				list = list.substring(list.lastIndexOf("[")+1, list.indexOf("]"));
+			
+				String start = list.substring(0, list.indexOf("-"));
+				String end = list.substring(list.indexOf("-")+1, list.length());
+				int s = Integer.parseInt(start);
+				int e = Integer.parseInt(end);
+				int t = Integer.parseInt(target);
+				
+				// range check 
+				if(((s <= t) && (t <= e))) return true;
+				
+				// debug only 
+				// else System.out.println(this.name() + " validRange() not in range: " + s + " <= " + t + " <= " + e);
+			
+			} catch (Exception e) {
+				Util.log("PlayerCommands.validRange() :" + e.getLocalizedMessage());
+			}
+			
+			return false;
+		}
+		
+	
+		/** check if this command has complex formating */
+		public boolean requiresParse(){
+			String[] args = this.getArgumentList();
+			if(args.length == 1){
+				
+				String[] params = args[0].split(" "); 
+				if(params.length == 1){
+					
+					// System.out.println("requiresParse: only one: " + this.name() + " " + args[0]);
+					
+					if(this.usesString()){
+						return false;
+					} else if(this.usesBoolean()){
+						return false;
+					} else if(this.usesInt()){
+						return false;
+					} else if(this.usesRange()){
+						return false;
+					} else if(this.usesDouble()){
+						return false;
+					}
+				} 	
+			
+				// parse me! 
+				return true;	
+			}
+			
+			return false;
+		}
+		
+		public boolean usesRange(){
+			Object[] list = this.getValues().toArray();
+			for(int i = 0 ; i < list.length ; i++)
+				if(list[i].toString().contains("["))
+					return true;
+			
+			return false;
+		}
+		
+		public boolean usesBoolean(){
+			Object[] list = this.getValues().toArray();
+			for(int i = 0 ; i < list.length ; i++)
+				if(list[i].toString().contains("{BOOLEAN}"))
+					return true;
+			
+			return false;
+		}
+			
+		public boolean usesInt(){
+			Object[] list = this.getValues().toArray();
+			for(int i = 0 ; i < list.length ; i++)
+				if(list[i].toString().contains("{INT}"))
+					return true;
+			
+			return false;
+		}
+		
+		public boolean usesDouble(){
+			Object[] list = this.getValues().toArray();
+			for(int i = 0 ; i < list.length ; i++)
+				if(list[i].toString().contains("{DOUBLE}"))
+					return true;
+			
+			return false;
+		}
+		
+		public boolean usesString(){
+			Object[] list = this.getValues().toArray();
+			for(int i = 0 ; i < list.length ; i++)
+				if(list[i].toString().contains("{STRING}"))
+					return true;
+			
+			return false;
+		}
+		
+		public boolean matchesArgument(String target) {
+			return this.getValues().contains(target);
+		}
+		
+		public String getArguments(){
+			String list = this.getValues().toString();
+			list = list.substring(1, list.length()-1);
+			list = list.replace(",", " | ");
+			return list.trim();
+		}
+		
+		public String[] getArgumentList(){
+			return (String[]) this.getValues().toArray(); 
+		}	
 		
 		/* get all the commands that require the given argument */
 		public static Vector<String> find(String name) {
@@ -101,9 +219,42 @@ public enum PlayerCommands {
 		        if (lang.getValues().contains(name)) 
 		            match.add(lang.name());
 		        
+		    // more matches
+		    for (RequiresArguments lang : RequiresArguments.values())
+		    	if (lang.getArgumentList()[0].contains(name))
+		    		match.add(lang.name());
+		    	
 		    return match;
 		}
 		
+		/* get all that use range */
+		public static Vector<String> rangeList() {
+			Vector<String> match = new Vector<String>();
+		    for (RequiresArguments lang : RequiresArguments.values())
+		        if (lang.usesRange()) 
+		            match.add(lang.name());
+		    
+		    	
+		    return match;
+		}
+
+		public static Vector<String> stringList() {
+			Vector<String> match = new Vector<String>();
+		    for (RequiresArguments lang : RequiresArguments.values())
+		        if (lang.usesString()) 
+		            match.add(lang.name());
+		        
+		    return match;
+		}
+		
+		public static Vector<String> parseList() {
+			Vector<String> match = new Vector<String>();
+		    for (RequiresArguments lang : RequiresArguments.values())
+		        if (lang.requiresParse()) 
+		            match.add(lang.name());
+		        
+		    return match;
+		}
 	}
 	
 	public enum HelpText{ 
@@ -172,10 +323,13 @@ public enum PlayerCommands {
         }
 	}
 	
-	/** is the target in the argument list? */
+	
+	
+	
+	/** is the target in the argument list? 
 	public static boolean listedArgument(final RequiresArguments cmd, final String target){
 		return cmd.getValues().contains(target);
-	}
+	}*/
 	
 	/**
 	 
@@ -186,7 +340,7 @@ public enum PlayerCommands {
 	 */
 	
 	// "tiltsettingsupdate 77 66 55 1 2"
-	
+	/*
 	public static boolean vaildArguments(final String data){
 		
 		final String[] input = data.split(" ");
@@ -222,9 +376,11 @@ public enum PlayerCommands {
 		return false;
 	}
 	
-	public static boolean isRange(final String arg){
-		return (arg.trim().startsWith("[") && arg.trim().endsWith("]"));
-	}
+	
+	public static boolean isRange(String arg){
+		arg = arg.trim();
+		return (arg.startsWith("[") && arg.endsWith("]"));
+	}*/
 	
 	public static boolean isBoolean(final String arg){
 		return arg.trim().equals("{BOOLEAN}");
@@ -237,43 +393,88 @@ public enum PlayerCommands {
 	public static boolean isDouble(final String arg){
 		return arg.trim().equals("{DOUBLE}");
 	}
-			
-	/**
-	 * 
-	 * @param arg is "[xxx yyy]" 
-	 * @param target 
-	 * @return
-	 */
-	public static boolean validRange(final String arg, final String target){
-		
-		///if(arg)
-		
-		return true;
-		
-	}
 	
-	public static boolean validBoolean(final String arg){
-		return arg.trim().equals("{BOOLEAN}");
-	}
-	
-	public static boolean validInt(final String arg){
-		return arg.trim().equals("{INT}");
-	}
-	
-	public static boolean validDouble(final String arg){
-		return arg.trim().equals("{DOUBLE}");
+	public static boolean isString(final String arg){
+		return arg.trim().equals("{STRING}");
 	}
 			
+	/** @return true if the target is in the given range 
+	public static boolean validRange(final RequiresArguments req, final String target){
+		try {
+		
+			String list = req.getValues().toString();
+			list = list.substring(list.lastIndexOf("[")+1, list.indexOf("]"));
+		
+			System.out.println("_range: "+list);
+		
+			String start = list.substring(0, list.indexOf("-"));
+			String end = list.substring(list.indexOf("-")+1, list.length());
+			int s = Integer.parseInt(start);
+			int e = Integer.parseInt(end);
+			int t = Integer.parseInt(target);
+			
+			// range check 
+			if(((s <= t) && (t <= e))) return true;
+			
+			else Util.log(req.name() + " validRange() not in range: " + s + " <= " + t + " <= " + e);
+		
+		} catch (Exception e1) {
+			Util.log("PlayerCommands.validRange() :" + e1.getLocalizedMessage());
+		}
+		
+		return false;
+	}*/
 	
 	/** */
-	public static boolean requiresArgument(final String str) {
-		RequiresArguments command = null;
-		try {
-			command = RequiresArguments.valueOf(str);
-		} catch (Exception e) {}
+	public static boolean validBoolean(final String arg){
+		if(arg.equalsIgnoreCase("true") || arg.equalsIgnoreCase("false")) return true;
 		
-		if(command==null) return false; // TODO: safe to assume?
-			
+		return false;
+	}
+	
+	/** */
+	public static boolean validInt(final String arg){
+		
+		Integer test = null;;
+		
+		try {
+			test = new Integer(arg);
+		} catch (NumberFormatException e) {}
+		
+		if(test == null) return false;
+		
+		return true;
+	}
+	
+	/** 
+	public static boolean validDouble(final String arg){
+		return arg.trim().equals("{DOUBLE}");
+	}*/
+	
+	/** 
+	public static boolean validString(final String arg){
+		return true; // TODO: 
+	}	*/
+	
+	/** */
+	public boolean requiresArgument() {
+		try {
+			RequiresArguments.valueOf(this.name());
+		} catch (Exception e) {
+			return false;
+		}
+		
+		return true; 
+	}
+	
+	/** */
+	public static boolean requiresArgument(final String cmd) {
+		try {
+			RequiresArguments.valueOf(cmd);
+		} catch (Exception e) {
+			return false;
+		}
+		
 		return true; 
 	}
 	
@@ -301,9 +502,7 @@ public enum PlayerCommands {
 		return true; 
 	}
 	
-	/** 
-	 * @return a formated list of the commands 
-	 */
+	/** @return a formated list of the commands */
 	public static String getCommands(){
 		
 		String help = new String();
@@ -312,15 +511,19 @@ public enum PlayerCommands {
 		for (PlayerCommands factory : PlayerCommands.values()) {
 			
 			help += factory.name();
-			if(PlayerCommands.requiresArgument(factory.name())) 
-				help += " " + PlayerCommands.RequiresArguments.valueOf(factory.name()).getValues().toString().replace(",", " | ");
-			else help += (" (no arguments)");
+			if(factory.requiresArgument()) {
+				
+				RequiresArguments req = PlayerCommands.RequiresArguments.valueOf(factory.name());
+				help += " " + req.getArguments();
+				
+				if(req.requiresParse()) help += " _parse_";
+			
+			} else help += (" (no arguments)");
 				
 			if(PlayerCommands.requiresAdmin(factory)) help +=(" (admin only)");
 			help += "\n\r";
 		}
 	
-		
 		return help;
 	}
 }

@@ -25,6 +25,7 @@ public class TelnetServer implements Observer {
 	public static enum Commands {message, users, tcp, beep, tail, image, memory, state, settings, help, bye, quit};
 	public static final String SEPERATOR = " : ";
 	public static final boolean ADMIN_ONLY = true;
+	public static final int MIN_LENGTH = 2;
 	
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static oculus.State state = oculus.State.getReference();
@@ -123,7 +124,7 @@ public class TelnetServer implements Observer {
 						
 				// parse and run it 
 				str = str.trim();
-				if(str.length()>2){
+				if(str.length()>=MIN_LENGTH){
 					
 					Util.debug(clientSocket.getInetAddress().toString() + " : " + str, this);	
 					if( ! manageCommand(str)) {			
@@ -155,49 +156,52 @@ public class TelnetServer implements Observer {
 			PlayerCommands player = null; 
 			RequiresArguments req = null;
 			
-			try {
+			try { // create command from input 
 				player = PlayerCommands.valueOf(cmd[0]);
-			} catch (Exception e1) {
+			} catch (Exception e) {
 				out.println("error: bad command, " + cmd[0]);
 				return;
 			}
 			
 			// test if needs an argument, but is missing. 
-			if(PlayerCommands.requiresArgument(cmd[0])){
+			if(player.requiresArgument()){
+				
 				req = PlayerCommands.RequiresArguments.valueOf(cmd[0]);
+			
 				if(cmd.length==1){
-					out.println("error: this command requires arguments " + req.getValues().toString());
+					out.println("error: this command requires arguments " + req.getArguments());
 					return;
 				}
-			}
-				
-			if(cmd.length>1){
-				if( ! PlayerCommands.listedArgument(req, cmd[1])){
-					
-					String list = req.getValues().toString();
-					list = list.substring(1, list.length()-1);
-					list = list.replace(",", " | ");
-					
-					// Util.debug(".." + list, this);
-		
-					// parse special 
-					if(list.contains("{") || list.contains("[")){
-					
-						// TODO: ACTIVE WORK
-						
-						// out.println("[" + cmd[1] + "] not found, sent anyway [" + player.name() + "] requires " + list);
-						Util.debug("TODO_[" + cmd[1] + "] not found, sent anyway [" + player.name() + "] requires " + list, this);
-						
-					} else {
-					
-						out.println("[" + cmd[1] + "] not found, requires " + list);
-						Util.debug("[" + cmd[1] + "] not found, requires  " + list, this);
+			
+				if(req.getValues().size() > 1){
+					if( ! req.matchesArgument(cmd[1])){
+						out.println("error: this command requires arguments " + req.getArguments());
 						return;
-						
+					}
+				}
+					
+				if(req.usesBoolean()){
+					if( ! PlayerCommands.validBoolean(cmd[1])){
+						out.println("error: isBoolean [" + cmd[1] + "] " + req.getArguments());
+						return;
+					}	
+				}
+				
+				if(req.usesInt()){
+					if( ! PlayerCommands.validInt(cmd[1])){
+						out.println("error: isInt [" + cmd[1] + "] " + req.getArguments());
+						return;
+					}
+				}
+				
+				if(req.usesRange()){
+					if( ! req.vaildRange(cmd[1])){
+						out.println("error: not in range " + req.getArguments());
+						return;
 					}
 				}
 			}
-			
+		
 			// check for null vs string("")
 			args = args.trim();
 			if(args.length()==0) args = null;
@@ -256,8 +260,21 @@ public class TelnetServer implements Observer {
 				if(cmd.length==2){ // look something up
 					
 						if(PlayerCommands.requiresArgument(cmd[1])){
-							out.println("requires argument: " + PlayerCommands.RequiresArguments.valueOf(cmd[1]).getValues().toString().replace(",", " | "));	
+							
+							out.println("requires argument: " + PlayerCommands.RequiresArguments.valueOf(cmd[1]).getValues().toString().replace(",", " | "));
+							
 						}else{
+							
+							String help = null;
+							try {
+								help = PlayerCommands.HelpText.valueOf(cmd[1]).getText();
+							} catch (Exception e) {}
+							
+							if(help==null) {
+								out.println("no match for: " + (cmd[1]));
+								return true;
+							}
+							
 							out.println("requires no argument(s)");
 						}
 						

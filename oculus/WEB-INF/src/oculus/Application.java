@@ -425,8 +425,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String[] cmd = null;
 		if(str!=null) cmd = str.split(" ");
 
-		//if (state.getBoolean(State.developer))
-		//	if (!fn.equals(PlayerCommands.statuscheck))
+		if (state.getBoolean(State.developer))
+			if (!fn.equals(PlayerCommands.statuscheck))
 				Util.debug("playerCallServer(" + fn + ", " + str + ")", this);
 		
 		switch (fn) {
