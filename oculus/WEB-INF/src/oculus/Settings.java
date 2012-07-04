@@ -13,18 +13,12 @@ public class Settings {
 	public static String stdout = redhome+sep+"log"+sep+"jvm.stdout";
 	public static String ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
 	
-	
-	// put all constants here
-	public static final String loginnotify = "loginnotify";
-	public static final String skipsetup = "skipsetup";
-	public static final String volume = "volume";
 	public static final int ERROR = -1;
 	
 	public static boolean configuredUsers = false;
-	
 	public static int i = 0;
 	
-	public static final String pushtotalk = "pushtotalk";
+	//public static final String pushtotalk = "pushtotalk";
 	public static String os = "windows" ;  //  "linux" or "windows" 
 	
 	/** create new file if missing */
@@ -34,28 +28,13 @@ public class Settings {
 		
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
-		// if red5 home lookup fails when using JUnit
-		// String redhome = System.getenv("RED5_HOME");
-		
-		//if(redhome==null) redhome = ".." + sep +".." + sep;
-		
-		// System.out.println("red5:" + redhome );
-		
-		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
-		/*
-		ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
-		loginactivity = redhome+sep+"log"+sep+"loginactivity.txt";
-		settingsfile = redhome+sep+"conf"+sep+"oculus_settings.txt";
-		movesfile = redhome+sep+"log"+sep+"moves.txt";
-		stdout = redhome+sep+"log"+sep+"jvm.stdout";
-		*/
-		
 		// be sure of basic configuration 
 		synchronized(this){
 		if(! new File(settingsfile).exists()) {
 			createFile(settingsfile);
 		}}
 		
+		// test if users exist 
 		if(readSetting("user0")!=null) configuredUsers = true;
 	}
 

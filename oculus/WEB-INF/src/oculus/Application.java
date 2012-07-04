@@ -237,7 +237,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		if (UpdateFTP.configured()) new developer.UpdateFTP();
 
-		Util.setSystemVolume(settings.getInteger(Settings.volume), this);
+		Util.setSystemVolume(settings.getInteger(GUISettings.volume), this);
 		grabberInitialize();
 		battery = BatteryLife.getReference();
 		new SystemWatchdog();
@@ -268,7 +268,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void grabberInitialize() {
-		if (settings.getBoolean(Settings.skipsetup)) {
+		if (settings.getBoolean(GUISettings.skipsetup)) {
 			grabber_launch();
 		} else {
 			initialize_launch();
@@ -1068,7 +1068,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 
 			str += " vidctroffset " + settings.readSetting("vidctroffset");
-			str += " rovvolume " + settings.readSetting(Settings.volume);
+			str += " rovvolume " + settings.readSetting(GUISettings.volume);
 			str += " stream " + stream + " selfstream stop";
 			str += " pushtotalk " + settings.readSetting("pushtotalk");
 			if (loginRecords.isAdmin())
@@ -1378,7 +1378,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				int height = Integer.parseInt(vals[1]);
 				int fps = Integer.parseInt(vals[2]);
 				int quality = Integer.parseInt(vals[3]);
-				boolean pushtotalk = settings.getBoolean(Settings.pushtotalk);
+				boolean pushtotalk = settings.getBoolean(GUISettings.pushtotalk);
 				sc.invoke("publish", new Object[] { str, width, height, fps,
 						quality, pushtotalk });
 				// sc.invoke("publish", new Object[] { str, 160, 120, 8, 85 });

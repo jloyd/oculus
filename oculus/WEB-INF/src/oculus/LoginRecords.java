@@ -26,7 +26,7 @@ public class LoginRecords {
 		state.set(State.userisconnected, true);
 		state.set(State.logintime, System.currentTimeMillis());
 		
-		if (settings.getBoolean(Settings.loginnotify))
+		if (settings.getBoolean(GUISettings.loginnotify))
 			if(app!=null)
 				app.speech.mluv("lawg inn " + state.get(State.user));
 				// accessing 'Speech.mluv' directly so doesn't display text in client window on login 
@@ -41,7 +41,7 @@ public class LoginRecords {
 		list.add(new Record(state.get(State.user), PASSENGER)); 
 		state.set(State.userisconnected, true);
 		
-		if (settings.getBoolean(Settings.loginnotify))
+		if (settings.getBoolean(GUISettings.loginnotify))
 			if(app!=null)
 				app.saySpeech("lawg inn " + state.get(State.user));
 

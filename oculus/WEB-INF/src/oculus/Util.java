@@ -335,7 +335,7 @@ public class Util {
 		if (Settings.os.equals("linux")) {
 			return; // TODO: linux set system volume
 		}
-		new Settings().writeSettings(Settings.volume, percent);
+		new Settings().writeSettings(GUISettings.volume.name(), percent);
 		float vol = (float) percent / 100 * 65535;
 		String str;
 		str = "nircmdc.exe setsysvolume "+ (int) vol; //w in
