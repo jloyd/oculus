@@ -3,13 +3,15 @@ package oculus;
 import java.io.*;
 
 public class Settings {
-
-	public static String framefile;
-	public static String loginactivity;
-	public static String settingsfile;
-	public static String movesfile;
-	public static String stdout;
-	public static String ftpconfig;
+	
+	public final static String sep = System.getProperty("file.separator");
+	public static String redhome = System.getenv("RED5_HOME");
+	public static String framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg";
+	public static String loginactivity = redhome+sep+"log"+sep+"loginactivity.txt";
+	public static String settingsfile = redhome+sep+"conf"+sep+"oculus_settings.txt";
+	public static String movesfile = redhome+sep+"log"+sep+"moves.txt";
+	public static String stdout = redhome+sep+"log"+sep+"jvm.stdout";
+	public static String ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
 	
 	
 	// put all constants here
@@ -18,34 +20,43 @@ public class Settings {
 	public static final String volume = "volume";
 	public static final int ERROR = -1;
 	
-	public final static String sep = System.getProperty("file.separator");
+	public static boolean configuredUsers = false;
+	
+	public static int i = 0;
+	
 	public static final String pushtotalk = "pushtotalk";
 	public static String os = "windows" ;  //  "linux" or "windows" 
 	
 	/** create new file if missing */
-	public Settings(){
+	public  Settings(){
+		
+		System.out.println(i++ + " settings constructed");
 		
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
 		// if red5 home lookup fails when using JUnit
-		String redhome = System.getenv("RED5_HOME");
-		if(redhome==null) redhome = ".." + sep +".." + sep;
+		// String redhome = System.getenv("RED5_HOME");
+		
+		//if(redhome==null) redhome = ".." + sep +".." + sep;
 		
 		// System.out.println("red5:" + redhome );
 		
 		// framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg"; 
-		
+		/*
 		ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
 		loginactivity = redhome+sep+"log"+sep+"loginactivity.txt";
 		settingsfile = redhome+sep+"conf"+sep+"oculus_settings.txt";
 		movesfile = redhome+sep+"log"+sep+"moves.txt";
 		stdout = redhome+sep+"log"+sep+"jvm.stdout";
+		*/
 		
 		// be sure of basic configuration 
-		if( ! new File(settingsfile).exists()) {
-			Util.log("warning, settings file created with defaults.", this);
-			writeFile();
-		}
+		synchronized(this){
+		if(! new File(settingsfile).exists()) {
+			createFile(settingsfile);
+		}}
+		
+		if(readSetting("user0")!=null) configuredUsers = true;
 	}
 
 	/**
@@ -143,7 +154,12 @@ public class Settings {
 			reader.close();
 			filein.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			
+			//e.printStackTrace();
+			System.out.println(str + " _readSetting: " + e.getMessage());
+			
+			return null; //GUISettings.getDefault(GUISettings.valueOf(str));
+			
 		}
 		
 		// don't let string "null" be confused for actually a null, error state  
@@ -175,12 +191,39 @@ public class Settings {
 		return result;
 	}
 	
+	public synchronized void createFile(String path) {
+		System.out.println("... create file.");
+		try {
+			
+			final String temp = System.getenv("RED5_HOME") + sep+"conf"+sep+"oculus_created.txt";
+			FileWriter fw = new FileWriter(new File(temp));
+			
+			fw.append("# GUI settings \r\n");
+			for (GUISettings factory : GUISettings.values()) 
+				fw.append(factory.toString() + " " + GUISettings.getDefault(factory) + "\r\n");
+				
+			fw.append("# manual settings \r\n");
+			for (ManualSettings ops : ManualSettings.values()) 
+				fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
+				
+			fw.append("salt null");
+			
+			fw.close();
+			
+			// now swap temp for real file
+			new File(path).delete();
+			new File(temp).renameTo(new File(settingsfile));
+			new File(temp).delete();
+
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+		}
+	}
+	
 	/**
-	 * Organize the settings file into 3 sections. Use Enums's to order the file
+	 * Organise the settings file into 3 sections. Use Enums's to order the file
 	 */
 	public synchronized void writeFile(String path) {
-		
-		Util.debug("writeFile() called", this);
 		
 		try {
 			
@@ -196,11 +239,12 @@ public class Settings {
 				
 					fw.append(factory.toString() + " " + val + "\r\n");
 	
-				} else {
+				} /*else {
 	
-					Util.debug("use default foor: " + factory.toString(), this);
+					Util.debug("writeFile(): use default for: " + factory.toString(), this);
 					fw.append(factory.toString() + " " + GUISettings.getDefault(factory) + "\r\n");
-				}
+				} */
+				
 			}
 			
 			fw.append("# manual settings \r\n");
@@ -214,23 +258,25 @@ public class Settings {
 					
 					fw.append(ops.toString() + " " + val + "\r\n");
 					
-				} else {
+				} /*else {
 					
-					Util.debug("use default foor: " + ops.toString(), this);
+					Util.debug("writeFile(): use default for: " + ops.toString(), this);
 					fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
 					
-				}	
+				}	*/
 			}
 
-			fw.append("# user list \r\n");
-			fw.append("salt " + readSetting("salt") + "\r\n");
-
-			String[][] users = getUsers();
-			for (int j = 0; j < users.length; j++) {
-				fw.append("user" + j + " " + users[j][0] + "\r\n");
-				fw.append("pass" + j + " " + users[j][1] + "\r\n");
-			}
-
+			if(configuredUsers){
+				fw.append("# user list \r\n");
+				fw.append("salt " + readSetting("salt") + "\r\n");
+	
+				String[][] users = getUsers();
+				for (int j = 0; j < users.length; j++) {
+					fw.append("user" + j + " " + users[j][0] + "\r\n");
+					fw.append("pass" + j + " " + users[j][1] + "\r\n");
+				}
+			} else fw.append("salt null");
+			
 			fw.close();
 			
 			// now swap temp for real file
@@ -239,7 +285,8 @@ public class Settings {
 			new File(temp).delete();
 
 		} catch (Exception e) {
-			e.printStackTrace(System.out);
+			// e.printStackTrace(System.out);
+			Util.debug("writeFile: " + e.getMessage(), this);
 		}
 	}
 
