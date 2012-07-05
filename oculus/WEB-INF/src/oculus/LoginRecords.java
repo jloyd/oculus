@@ -22,37 +22,37 @@ public class LoginRecords {
 	
 	public void beDriver() { 
 		
-		list.add(new Record(state.get(State.user), DRIVER)); 
-		state.set(State.userisconnected, true);
-		state.set(State.logintime, System.currentTimeMillis());
+		list.add(new Record(state.get(State.values.user), DRIVER)); 
+		state.set(State.values.userisconnected, true);
+		state.set(State.values.logintime, System.currentTimeMillis());
 		
 		if (settings.getBoolean(GUISettings.loginnotify))
 			if(app!=null)
-				app.speech.mluv("lawg inn " + state.get(State.user));
+				app.speech.mluv("lawg inn " + state.get(State.values.user));
 				// accessing 'Speech.mluv' directly so doesn't display text in client window on login 
 
-		Util.debug("beDriver(): " + state.get(State.user), this);
+		Util.debug("beDriver(): " + state.get(State.values.user), this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
 	
 	public void bePassenger() {		
 	
-		list.add(new Record(state.get(State.user), PASSENGER)); 
-		state.set(State.userisconnected, true);
+		list.add(new Record(state.get(State.values.user), PASSENGER)); 
+		state.set(State.values.userisconnected, true);
 		
 		if (settings.getBoolean(GUISettings.loginnotify))
 			if(app!=null)
-				app.saySpeech("lawg inn " + state.get(State.user));
+				app.saySpeech("lawg inn " + state.get(State.values.user));
 
-		Util.debug("bePassenger(): " + state.get(State.user), this);
+		Util.debug("bePassenger(): " + state.get(State.values.user), this);
 		
 		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
 	
 	/** is the current user the admin? */
 	public boolean isAdmin() {
-		String user = state.get(State.user);
+		String user = state.get(State.values.user);
 		if (user == null) return false;
 		if (user.equals("")) return false;
 		Settings settings = new Settings();
@@ -63,8 +63,8 @@ public class LoginRecords {
 	
 	public void signout() {
 		
-		if(state.getBoolean(State.developer)){
-			System.out.println("+_logging out: " + state.get(State.user));
+		if(state.getBoolean(State.values.developer)){
+			System.out.println("+_logging out: " + state.get(State.values.user));
 			System.out.println("+_waiting now:" + getPassengers());
 			System.out.println(toString());
 		}
@@ -74,21 +74,21 @@ public class LoginRecords {
 		for (int i = 0; i < list.size(); i++){
 			Record rec = list.get(i);
 			if (rec.isActive()){
-				if (rec.getUser().equals(state.get(State.user))){
+				if (rec.getUser().equals(state.get(State.values.user))){
 					list.get(i).logout();
 				}
 			}
 		}
 		
 		// assume this gets reset as new user logs in 
-		state.set(State.userisconnected, false);
-		state.delete(State.user);
+		state.set(State.values.userisconnected, false);
+		state.delete(State.values.user);
 		
 		// maintain size limit 
 		if(list.size() > MAX_RECORDS) list.remove(0);
 		
-		if(state.getBoolean(State.developer)){
-			System.out.println("OCULUS: -_logging out: " + state.get(State.user));
+		if(state.getBoolean(State.values.developer)){
+			System.out.println("OCULUS: -_logging out: " + state.get(State.values.user));
 			System.out.println("OCULUS: _waiting now:" + getPassengers());
 			System.out.println(toString());
 		}

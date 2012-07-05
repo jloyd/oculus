@@ -1,7 +1,6 @@
 package oculus.commport;
 
 import oculus.Application;
-import oculus.Settings;
 import oculus.State;
 import oculus.Util;
 
@@ -23,7 +22,7 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 		try {
 
 			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
-					state.get(State.serialport)).open(
+					state.get(State.values.serialport)).open(
 					AbstractArduinoComm.class.getName(), SETUP);
 			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
@@ -39,7 +38,7 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 //			if (Settings.os == "linux") { Util.delay(SETUP); }
 
 		} catch (Exception e) {
-			Util.log("could NOT connect to the motors on: " + state.get(State.serialport), this);
+			Util.log("could NOT connect to the motors on: " + state.get(State.values.serialport), this);
 			return;
 		}
 	}

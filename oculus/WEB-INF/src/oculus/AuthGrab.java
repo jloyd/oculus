@@ -103,7 +103,7 @@ public class AuthGrab extends HttpServlet {
 		
 		// wait for result
 		if (app.frameGrab()) {
-			if( ! state.block(State.framegrabbusy, "false", 700)){
+			if( ! state.block(oculus.State.values.framegrabbusy.name(), "false", 700)){
 				Util.debug("getImage(), timeout ", this);
 				return;
 			}

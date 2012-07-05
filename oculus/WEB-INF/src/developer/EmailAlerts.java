@@ -30,31 +30,25 @@ public class EmailAlerts implements Observer {
 	@Override
 	public void updated(String key) {
 		
-		if( ! key.equals(State.batterylife)) return;
+		if( ! key.equals(State.values.batterylife.name())) return;
 		
 		Util.debug(".. checking battey", this);
 		
-		if (state.getInteger(State.batterylife) < WARN_LEVEL) {
+		if (state.getInteger(State.values.batterylife.name()) < WARN_LEVEL) {
 			
 			app.message("battery low, sending email", null, null);
 			
-			String msg = "The battery " + Integer.toString(state.getInteger(State.batterylife)) 
+			String msg = "The battery " + Integer.toString(state.getInteger(State.values.batterylife.name())) 
 			+ "% and is draining!"; 
 							
 			// add the link back to the user screen 
 			msg += "\n\nPlease find the dock, log in here: http://" 
-				+ State.getReference().get(State.externaladdress) 
+				+ State.getReference().get(State.values.externaladdress.name()) 
 				+ ":" + settings.readRed5Setting("http.port") 
 				+ "/oculus/";
 			
 			// send email 
 			new SendMail("Oculus Message", msg, app); 
-			
-			// stop listening 
-//			state.removeObserver(this);
-			
-			// TODO: trigger auto dock
-			// app.autodock();
 		}
 	}
 }

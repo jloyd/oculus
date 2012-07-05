@@ -122,7 +122,7 @@ public class BatteryLife {
 					return;
 				}
 				
-				if ( ! state.equals(State.dockstatus, State.docking)){
+				if ( ! state.equals(State.values.dockstatus.name(), State.values.docking.name())){
 								
 					int batt[] = battStatsCombined();
 					String life = Integer.toString(batt[0]);
@@ -132,13 +132,13 @@ public class BatteryLife {
 					if (s == 1) {
 						status = "draining";
 						str = "battery " + life + "%," + status;
-						state.set(State.batterystatus, status);
-						if (!state.getBoolean(State.motionenabled)) {
-							state.set(State.motionenabled, true);
+						state.set(State.values.batterystatus.name(), status);
+						if (!state.getBoolean(State.values.motionenabled)) {
+							state.set(State.values.motionenabled, true);
 							str += " motion enabled";
 						}
-						if (! state.equals(State.dockstatus, State.undocked)) {
-							state.set(State.dockstatus, State.undocked);
+						if (! state.equals(State.values.dockstatus.name(), State.values.undocked.name())) {
+							state.set(State.values.dockstatus, State.values.undocked);
 							str += " dock un-docked";
 						}
 						battcharging = false;
@@ -151,15 +151,15 @@ public class BatteryLife {
 						}
 						battcharging = true;
 						str = "battery " + life + "%," + status;
-						if (state.get(State.dockstatus) == null) {
-							state.set(State.dockstatus, State.docked);
+						if (state.get(State.values.dockstatus) == null) {
+							state.set(State.values.dockstatus, State.values.docked);
 							str += " dock docked";
 						}
 						app.message(null, "multiple", str);
-						state.set(State.batterystatus, "charging");
+						state.set(State.values.batterystatus, "charging");
 					}						
 				
-					state.set(State.batterylife, life);
+					state.set(State.values.batterylife, life);
 				}
 			}
 		}).start();

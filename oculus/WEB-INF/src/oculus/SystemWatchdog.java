@@ -11,7 +11,7 @@ import oculus.Util;
 public class SystemWatchdog {
 	
 	private final Settings settings = new Settings();
-	private final boolean reboot = settings.getBoolean(State.reboot);		
+	private final boolean reboot = settings.getBoolean(State.values.reboot);		
 	
 	// check every ten minutes
 	public static final long DELAY = State.TEN_MINUTES;
@@ -34,9 +34,9 @@ public class SystemWatchdog {
 		public void run() {
 			
 			// only reboot is idle 
-			if ((state.getUpTime() > STALE) && !state.getBoolean(State.userisconnected)){ 
+			if ((state.getUpTime() > STALE) && !state.getBoolean(State.values.userisconnected)){ 
 				
-				String boot = new Date(state.getLong(State.boottime)).toString();				
+				String boot = new Date(state.getLong(State.values.boottime.name())).toString();				
 				Util.log("rebooting, last boot was: " + boot, this);
 				
 				// reboot  

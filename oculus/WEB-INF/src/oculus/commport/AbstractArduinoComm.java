@@ -76,12 +76,12 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 		steeringcomp = settings.getInteger("steeringcomp");
 		holdservo = settings.getBoolean(GUISettings.holdservo.toString());
 		
-		if (state.get(State.serialport) != null) {
+		if (state.get(State.values.serialport) != null) {
 			new Thread(new Runnable() {
 				public void run() {
 					connect();
 					Util.delay(SETUP);
-					Util.log("Connected to the motors on: " + state.get(State.serialport), this);
+					Util.log("Connected to the motors on: " + state.get(State.values.serialport), this);
 
 					byte[] cam = { CAM, (byte) camservohoriz };
 					sendCommand(cam);
@@ -99,8 +99,8 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 			if (!isconnected){
 			
 				// TAKE IT DOWN! 
-				if(state.get(oculus.State.firmware) == null ){ 
-					if(state.getBoolean(oculus.State.developer)){
+				if(state.get(oculus.State.values.firmware) == null ){ 
+					if(state.getBoolean(oculus.State.values.developer)){
 						Util.log("not connected, rebooting", this);		
 						Util.systemCall("shutdown -r -f -t 01");	
 					}
@@ -129,8 +129,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					Util.log("arduino watchdog time out, may be no hardware attached", this);
-					state.delete(oculus.State.commwatchdog);
-					
+					state.delete(oculus.State.values.commwatchdog);
 					return; // die, no point living?
 				}
 

@@ -88,16 +88,16 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 				final int range = Integer.parseInt(param[2]);
 
 				if (param[1].equals("back")) {
-					if (Math.abs(range - state.getInteger(State.sonarback)) > 1)
-						state.set(State.sonarback, range);
+					if (Math.abs(range - state.getInteger(State.values.sonarback)) > 1)
+						state.set(State.values.sonarback, range);
 					
 				} else if (param[1].equals("right")) {
-					if (Math.abs(range - state.getInteger(State.sonarright)) > 1)
-						state.set(State.sonarright, range); // + sonarOffset);
+					if (Math.abs(range - state.getInteger(State.values.sonarright)) > 1)
+						state.set(State.values.sonarright, range); // + sonarOffset);
 					
 				} else if (param[1].equals("left")) {
-					if (Math.abs(range - state.getInteger(State.sonarleft)) > 1)
-						state.set(State.sonarleft, range);
+					if (Math.abs(range - state.getInteger(State.values.sonarleft)) > 1)
+						state.set(State.values.sonarleft, range);
 				}
 
 				// must be an echo
@@ -110,7 +110,7 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 		try {
 
 			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
-					state.get(State.serialport)).open(
+					state.get(State.values.serialport)).open(
 					ArduinoCommSonar.class.getName(), SETUP);
 			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);

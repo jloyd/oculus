@@ -83,7 +83,7 @@ public class UpdateFTP { // implements Observer {
 					ftp.connect(host, port, user, pass);
 					ftp.cwd(folder);
 					
-					ftp.storString("ip.php", state.get(State.externaladdress));
+					ftp.storString("ip.php", state.get(State.values.externaladdress.name()));
 					ftp.storString("last.php", new java.util.Date().toString());
 					ftp.storString("user.php", System.getProperty("user.name"));		
 					ftp.storString("state.php", state.toString());

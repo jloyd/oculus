@@ -63,7 +63,7 @@ public class FrameGrabHTTP extends HttpServlet {
 		if (app.frameGrab()) {
 			
 			int n = 0;
-			while (state.getBoolean(State.framegrabbusy)) {
+			while (state.getBoolean(State.values.framegrabbusy)) {
 //				while (img == null) {
 				try {
 					Thread.sleep(5);
@@ -72,7 +72,7 @@ public class FrameGrabHTTP extends HttpServlet {
 				} 
 				n++;
 				if (n> 2000) {  // give up after 10 seconds 
-					state.set(State.framegrabbusy, false);
+					state.set(State.values.framegrabbusy, false);
 					break;
 				}
 			}

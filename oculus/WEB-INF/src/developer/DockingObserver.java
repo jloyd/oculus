@@ -24,7 +24,7 @@ public class DockingObserver implements Observer {
 
 		if (key == null) return;
 		
-		if(state.getBoolean(State.losttarget)){
+		if(state.getBoolean(State.values.losttarget.name())){
 			
 			System.out.println("target lost, trying home");
 			
@@ -33,7 +33,7 @@ public class DockingObserver implements Observer {
 			// Util.dockingTest(app, port, docker);
 		}
 
-		if (state.getBoolean(State.autodocking)) {
+		if (state.getBoolean(State.values.autodocking.name())) {
 			if (!docking) {
 				docking = true;
 				System.out.println("started autodocking...");
@@ -41,8 +41,8 @@ public class DockingObserver implements Observer {
 			}
 		}
 
-		if (state.get(State.dockstatus) != null) {
-			if (state.get(State.dockstatus).equals(State.docked)) {
+		if (state.get(State.values.dockstatus.name()) != null) {
+			if (state.get(State.values.dockstatus.name()).equals(State.values.docked)) {
 				if (docking) {
 					
 					System.out.println("done docking");

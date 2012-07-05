@@ -42,12 +42,10 @@ public class AutoDock implements Docker {
 	 * 
 	 */
 
-	// private static Logger log = Red5LoggerFactory.getLogger(AutoDock.class, "oculus");
-
 	private State state = State.getReference();
 	private Settings settings;
 	private BatteryLife life = BatteryLife.getReference();
-	private LogManager moves = null; 
+	//private LogManager moves = null; 
 	private IConnection grabber = null;
 	private String docktarget = null;
 	private AbstractArduinoComm comport = null;
@@ -63,27 +61,27 @@ public class AutoDock implements Docker {
 		this.comport = com;
 		this.light = light;
 		settings = new Settings();
-		if(settings.getBoolean(ManualSettings.developer)){
-			moves = new LogManager();
-			moves.open(Settings.movesfile);
-		}
+		//if(settings.getBoolean(ManualSettings.developer)){
+		//	moves = new LogManager();
+		//	moves.open(Settings.movesfile);
+		//}
 	}
 	
 
 	@Override
 	public void autoDock(String str) {
 		
-		if(moves != null) moves.append("autodock " + str);
+		//if(moves != null) moves.append("autodock " + str);
 		
 		String cmd[] = str.split(" ");
 		if (cmd[0].equals("cancel")) {
-			state.set(State.autodocking, false);
+			state.set(State.values.autodocking, false);
 			app.message("auto-dock ended","multiple","cameratilt " +app.camTiltPos()+" autodockcancelled blank motion stopped");
 			System.out.println("OCULUS: autodock cancelled");
 		}
 		if (cmd[0].equals("go")) {
-			if (state.getBoolean(State.motionenabled)) { 
-				if(state.getBoolean(State.autodocking)){
+			if (state.getBoolean(State.values.motionenabled)) { 
+				if(state.getBoolean(State.values.autodocking)){
 					app.message("auto-dock in progress", null, null);
 					return;
 				}
@@ -101,7 +99,7 @@ public class AutoDock implements Docker {
 				else { app.monitor("on"); }
 
 				sc.invoke("dockgrab", new Object[] {0,0,"start"}); // sends xy, but they're unuseds
-				state.set(State.autodocking, true);
+				state.set(State.values.autodocking, true);
 				autodockingcamctr = false;
 				//autodockgrabattempts = 0;
 				autodockctrattempts = 0;
@@ -112,14 +110,14 @@ public class AutoDock implements Docker {
 			else { app.message("motion disabled","autodockcancelled", null); }
 		}
 		if (cmd[0].equals("dockgrabbed")) { // RESULTS FROM GRABBER: calibrate, findfromxy, find
-			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.autodocking)) { // x,y,width,height,slope
+			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.values.autodocking)) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 			
 				if (cmd[4].equals("0")) { // width==0, failed to find target
 				
-					state.set(State.autodocking, false);	
-					state.set(State.docking, false);	
-					state.set(State.losttarget, true);	
+					state.set(State.values.autodocking, false);	
+					state.set(State.values.docking, false);	
+					state.set(State.values.losttarget, true);	
 					app.message("auto-dock target not found, try again","multiple", 
 							/*"cameratilt "+app.camTiltPos()+ */" autodockcancelled blank");
 					System.out.println("OCULUS: target lost");
@@ -158,8 +156,8 @@ public class AutoDock implements Docker {
 	
 	/** */
 	public void dock(String str) {
-		if (str.equals("dock") && !state.getBoolean(State.docking)) {
-			if (state.getBoolean(State.motionenabled)){
+		if (str.equals("dock") && !state.getBoolean(State.values.docking)) {
+			if (state.getBoolean(State.values.motionenabled)){
 				if (!life.batteryCharging()) {
 					
 					// moves.append("dock " + str);
@@ -168,13 +166,13 @@ public class AutoDock implements Docker {
 					// need to set this because speedset calls goForward also if true
 					comport.movingforward = false; 
 					comport.speedset("fast"); 
-					state.set(State.docking, true);
-					state.set(State.dockstatus, State.docking);
+					state.set(State.values.docking, true);
+					state.set(State.values.dockstatus, State.values.docking);
 					new Thread(new Runnable() {
 						public void run() {
 							int counter = 0;
 							int n;
-							while(state.getBoolean(State.docking)) {
+							while(state.getBoolean(State.values.docking)) {
 								
 								n = 200; // when speed=fast
 								if (counter <= 3) n += 200;  // when speed=fast
@@ -184,12 +182,12 @@ public class AutoDock implements Docker {
 								comport.stopGoing();
 								app.message(null,"motion","stopped");
 								if (life.batteryStatus() == 2) {
-									state.set(State.docking, false);
+									state.set(State.values.docking, false);
 									String str = "";
-									if (state.getBoolean(State.autodocking)) {
-										state.set(State.autodocking, "false");
+									if (state.getBoolean(State.values.autodocking)) {
+										state.set(State.values.autodocking, "false");
 										str += " cameratilt "+app.camTiltPos()+" autodockcancelled blank";
-										if (!app.stream.equals("stop") && state.get(State.user)==null) { 
+										if (!app.stream.equals("stop") && state.get(State.values.user)==null) { 
 											app.publish("stop"); 
 										}
 										
@@ -203,13 +201,13 @@ public class AutoDock implements Docker {
 										
 									}
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
-									System.out.println("OCULUS: " + state.get(State.user) +" docked successfully");
-									state.set(State.motionenabled, false);
-									state.set(State.dockstatus, State.docked);
+									System.out.println("OCULUS: " + state.get(State.values.user) +" docked successfully");
+									state.set(State.values.motionenabled, false);
+									state.set(State.values.dockstatus, State.values.docked);
 									// needs to be before battStats()
-									if (settings.getBoolean(State.developer)){
-										moves.append("docked successfully");
-									}
+									//if (settings.getBoolean(State.developer)){
+									//	moves.append("docked successfully");
+									//}
 									life.battStats(); 
 									
 
@@ -219,8 +217,8 @@ public class AutoDock implements Docker {
 								counter += 1;
 								if (counter >12) { // failed
 									
-									state.set(State.docking, false);
-									state.set(State.timeout, true);
+									state.set(State.values.docking, false);
+									state.set(State.values.timeout, true);
 
 									String s = "dock un-docked";
 									if (comport.moving) { 
@@ -228,9 +226,9 @@ public class AutoDock implements Docker {
 										s += " motion stopped";
 									} 
 									app.message("docking timed out", "multiple", s);
-									System.out.println("OCULUS: " + state.get(State.user) +" docking timed out");
-									state.set(State.dockstatus, State.undocked);
-									if (state.getBoolean(State.autodocking)) {
+									System.out.println("OCULUS: " + state.get(State.values.user) +" docking timed out");
+									state.set(State.values.dockstatus, State.values.undocked);
+									if (state.getBoolean(State.values.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
 											comport.speedset("fast");
 											comport.goBackward();
@@ -249,23 +247,23 @@ public class AutoDock implements Docker {
 			}
 			else { app.message("motion disabled", null, null); }
 		}
-		if (str.equals(State.undock)) {
-			if(state.getBoolean(State.autodocking)){
+		if (str.equals(State.values.undock.name())) {
+			if(state.getBoolean(State.values.autodocking)){
 				app.message("command dropped, autodocking", null, null);
 				return;
 			}
 			
-			state.set(State.motionenabled, true);
+			state.set(State.values.motionenabled, true);
 			comport.speedset("fast");
 			comport.goBackward();
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
-			state.set(State.dockstatus, State.undocked);
+			state.set(State.values.dockstatus, State.values.undocked);
 			new Thread(new Runnable() {
 				public void run() {
 					Util.delay(2000);
 					comport.stopGoing();
 					app.message("disengaged from dock", "motion", "stopped");
-					System.out.println("OCULUS: " + state.get(State.user) + " un-docked");
+					System.out.println("OCULUS: " + state.get(State.values.user) + " un-docked");
 					life.battStats();
 				}
 			}).start();

@@ -70,15 +70,15 @@ public class Discovery implements SerialPortEventListener {
 			searchMotors(); 	
 		} else if( ! motors.equals(params.disabled.toString())){			
 			Util.debug("skipping discovery, motors on: " + motors, this);
-			state.set(State.serialport, motors);
-			state.set(State.firmware, OCULUS_DC);
+			state.set(State.values.serialport, motors);
+			state.set(State.values.firmware, OCULUS_DC);
 		}
 		
 		if(lights.equals(params.discovery.toString())){	
 			searchLights();	
 		} else if( ! lights.equals(params.disabled.toString())){
 			Util.debug("skipping discovery, lights on: " + lights, this);
-			state.set(State.lightport, lights);
+			state.set(State.values.lightport, lights);
 		}
 	}
 	
@@ -185,13 +185,13 @@ public class Discovery implements SerialPortEventListener {
 	
 		// try to limit searching
 		if(ports.contains(motors)) ports.remove(motors);
-		if(state.get(State.serialport) != null) 
-			ports.remove(state.getBoolean(State.serialport));
+		if(state.get(State.values.serialport) != null) 
+			ports.remove(state.getBoolean(State.values.serialport));
 			
 		Util.debug("discovery for lights starting on ports: " + ports.size(), this);
 		
 		for (int i = ports.size() - 1; i >= 0; i--) {
-			if (state.get(State.lightport)!=null) { break; } // stop if find it
+			if (state.get(State.values.lightport)!=null) { break; } // stop if find it
 			//if (connect(ports.get(i), BAUD_RATES[0])) {	
 			if (connect(ports.get(i), 57600)) {
 				Util.delay(TIMEOUT*2);
@@ -210,7 +210,7 @@ public class Discovery implements SerialPortEventListener {
 	
 		//for (int i = ports.size() - 1; i >= 0; i--) {
 		for (int i=0; i<ports.size(); i++) {
-			if (state.get(State.serialport)!=null) { break; } // stop if find it
+			if (state.get(State.values.serialport)!=null) { break; } // stop if find it
 			//if (connect(ports.get(i), BAUD_RATES[1])) {
 			if (connect(ports.get(i), 115200)) {
 				Util.delay(TIMEOUT*2);
@@ -230,7 +230,7 @@ public class Discovery implements SerialPortEventListener {
 
 		if (id.length() == 1 ){
 			if(id.equals(LIGHTS)){		
-				state.set(State.lightport, getPortName());
+				state.set(State.values.lightport, getPortName());
 				Util.debug("found lights on comm port: " +  getPortName(), this);		
 			}
 			
@@ -245,18 +245,18 @@ public class Discovery implements SerialPortEventListener {
 
 			if (id.equalsIgnoreCase(OCULUS_DC)) {
 
-				state.set(State.serialport, getPortName());
-				state.set(State.firmware, OCULUS_DC);
+				state.set(State.values.serialport, getPortName());
+				state.set(State.values.firmware, OCULUS_DC);
 				
 			} else if (id.equalsIgnoreCase(OCULUS_SONAR)) {
 
-				state.set(State.serialport, getPortName());
-				state.set(State.firmware, OCULUS_SONAR);	
+				state.set(State.values.serialport, getPortName());
+				state.set(State.values.firmware, OCULUS_SONAR);	
 			
 			} else if (id.equalsIgnoreCase(OCULUS_TILT)) {
 
-				state.set(State.serialport, getPortName());
-				state.set(State.firmware, OCULUS_TILT);
+				state.set(State.values.serialport, getPortName());
+				state.set(State.values.firmware, OCULUS_TILT);
 				
 			}
 

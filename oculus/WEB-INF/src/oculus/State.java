@@ -5,49 +5,14 @@ import java.util.Properties;
 import java.util.Vector;
 
 public class State {
+	
+	public enum values{user, logintime, usercommand, userisconnected, reboot, developer, serialport, lightport, target, boottime, batterylife, 
+		motionenabled, externaladdress, localaddress, autodocktimeout, autodocking, timeout,losttarget , firmware, unknown, override,  commwatchdog,
+		framegrabbusy, sonarback, sonarright, sonarleft, dockgrabbusy, docking, dockxsize, dockysize, dockstatus, dockgrabtime, dockslope, dockxpos,
+		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus
+	};
 
 	public static final String SEPERATOR = " : ";
-	public static final String user = "user";
-	public static final String logintime = "logintime";
-	public static final String usercommand = "usercommand";
-	public static final String userisconnected = "userisconnected";
-	public static final String reboot = "reboot";
-	public static final String developer = "developer";
-	public static final String serialport = "serialport";
-	public static final String lightport = "lightport";
-	public static final String target = "target";
-	public static final String boottime = "boottime";
-	public static final String batterylife = "batterylife";
-	public static final String batterystatus = "batterstatus";
-	public static final String motionenabled = "motionenabled";
-	public static final String externaladdress = "externaladdress";
-	public static final String localaddress = "localaddress";
-	public static final String autodocktimeout = "autodocktimeout";
-	public static final String autodocking = "autodocking";
-	public static final String timeout = "timeout";
-	public static final String losttarget = "losttarget";
-	public static final String firmware = "firmware";
-	public static final String unknown = "unknown";	
-	public static final String override = "override";
-	public static final String commwatchdog = "commwatchdog";
-	public static final String framegrabbusy = "framegrabbusy";
-	public static final String sonarback = "sonarback";
-	public static final String sonarright = "sonarright";
-	public static final String sonarleft = "sonarleft";
-	public static final String dockgrabbusy = "dockgrabbusy";
-	public static final String docking = "docking";
-	public static final String dockxsize = "dockxsize";	
-	public static final String dockysize = "dockysize";
-	public static final String dockstatus = "dockstatus";
-	public static final String dockgrabtime = "dockgrabtime";
-	public static final String dockslope = "dockslope";
-	public static final String dockxpos = "dockxpos";
-	public static final String dockypos = "dockypos";
-	public static final String docked = "docked";
-	public static final String undocked = "undocked";
-	public static final String undock = "undock";
-	public static final String disabled = "disabled";
-	public static final String floodlight = "floodlight";
 	
 	public static final long ONE_DAY = 86400000;
 	public static final long ONE_MINUTE = 60000;
@@ -75,8 +40,8 @@ public class State {
 
 	/** private constructor for this singleton class */
 	private State() {
-		props.put(boottime, String.valueOf(System.currentTimeMillis()));
-		props.put(localaddress, Util.getLocalAddress());
+		props.put(values.boottime, String.valueOf(System.currentTimeMillis()));
+		props.put(values.localaddress, Util.getLocalAddress());
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -84,7 +49,7 @@ public class State {
 				while(ip==null){
 					ip = Util.getExternalIPAddress();
 					if(ip!=null)
-						State.getReference().set(State.externaladdress, ip);
+						State.getReference().set(values.externaladdress.name(), ip);
 					else Util.delay(500);
 				}
 			}
@@ -167,6 +132,17 @@ public class State {
 		}
 	}
 	
+	public void set(values key, long data){
+		set(key.name(), data);
+	}
+	
+	public void set(values key, String value){
+		set(key.name(), value);
+	}
+	
+	public void set(values key, boolean value){
+		set(key.name(), value);
+	}
 	
 	/** Put a name/value pair into the configuration */
 	public synchronized void set(final String key, final String value) {
@@ -187,6 +163,10 @@ public class State {
 		set(key, Long.toString(value));
 	}
 	
+	public String get(values key){
+		return get(key.name());
+	}
+	
 	/** */
 	public synchronized String get(final String key) {
 
@@ -201,6 +181,11 @@ public class State {
 		}
 
 		return ans;
+	}
+
+
+	public boolean getBoolean(values key){
+		return getBoolean(key.name());
 	}
 	
 	/** */
@@ -257,12 +242,12 @@ public class State {
 	
 	/** @return the ms since last boot */
 	public long getUpTime(){
-		return System.currentTimeMillis() - getLong(boottime);
+		return System.currentTimeMillis() - getLong(values.boottime.name());
 	}
 	
 	/** @return the ms since last user log in */
 	public long getLoginSince(){
-		return System.currentTimeMillis() - getLong(logintime);
+		return System.currentTimeMillis() - getLong(values.logintime.name());
 	}
 
 	/** */
@@ -293,6 +278,22 @@ public class State {
 	
 	public String get(PlayerCommands cmd){ 
 		return get(cmd.toString()); 
+	}
+
+	public void set(values key, values value) {
+		set(key.name(), value.name());
+	}
+
+	public void delete(values key) {
+		delete(key.name());
+	}
+
+	public int getInteger(values key) {
+		return getInteger(key.name());
+	}
+	
+	public long getLong(values key){
+		return getLong(key.name());
 	}
 	
 }

@@ -18,9 +18,9 @@ public enum ManualSettings {
 		config.setProperty(vself.toString(), "320_240_8_85");
 		config.setProperty(arduinoculus.name(), Discovery.params.discovery.name());
 		config.setProperty(oculed.name(), Discovery.params.discovery.name());
-		config.setProperty(emailaddress.name(), State.disabled.toString());
-		config.setProperty(emailpassword.name(), State.disabled.toString());
-		config.setProperty(commandport.name(), State.disabled.toString());
+		config.setProperty(emailaddress.name(), State.values.disabled.name());
+		config.setProperty(emailpassword.name(), State.values.disabled.name());
+		config.setProperty(commandport.name(), State.values.disabled.name());
 		return config;
 	}
 	

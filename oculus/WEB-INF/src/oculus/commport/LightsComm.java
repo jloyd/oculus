@@ -73,7 +73,7 @@ public class LightsComm implements SerialPortEventListener {
 		application = app; 
 		state.set(PlayerCommands.floodlight.toString(), false);
 		state.set(PlayerCommands.spotlightsetbrightness.toString(), 0);
-		if( state.get(State.lightport) != null ){
+		if( state.get(State.values.lightport) != null ){
 			new Thread(new Runnable() { 
 				public void run() {
 					connect();				
@@ -90,7 +90,7 @@ public class LightsComm implements SerialPortEventListener {
 		try {
 
 			serialPort = (SerialPort)CommPortIdentifier.getPortIdentifier(
-					state.get(State.lightport)).open(LightsComm.class.getName(), SETUP);
+					state.get(State.values.lightport)).open(LightsComm.class.getName(), SETUP);
 			serialPort.setSerialPortParams(BAUD_RATE, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
 			// open streams
@@ -98,8 +98,8 @@ public class LightsComm implements SerialPortEventListener {
 			in = serialPort.getInputStream();
 			
 		} catch (Exception e) {
-			Util.log("could NOT connect to the the lights on:" + state.get(State.lightport), this);
-			application.message("could NOT connect to the the lights on:" + state.get(State.lightport), null, null);
+			Util.log("could NOT connect to the the lights on:" + state.get(State.values.lightport), this);
+			application.message("could NOT connect to the the lights on:" + state.get(State.values.lightport), null, null);
 			return;
 		}
 		
@@ -113,7 +113,7 @@ public class LightsComm implements SerialPortEventListener {
 		serialPort.notifyOnDataAvailable(true);
 		isconnected = true;	
 		
-		Util.log("connected to the the lights on:" + state.get(State.lightport), this);
+		Util.log("connected to the the lights on:" + state.get(State.values.lightport), this);
 	}
 
 	/** @return True if the serial port is open */
@@ -166,7 +166,7 @@ public class LightsComm implements SerialPortEventListener {
 		public void run() {
 			Util.delay(SETUP);
 			while (true) {
-				if((System.currentTimeMillis() - state.getLong(oculus.State.usercommand)) > USER_TIME_OUT){
+				if((System.currentTimeMillis() - state.getLong(oculus.State.values.usercommand)) > USER_TIME_OUT){
 					if(state.getBoolean(PlayerCommands.floodlight.toString()) 
 							|| (state.getInteger(PlayerCommands.spotlightsetbrightness.toString())>0)){
 						

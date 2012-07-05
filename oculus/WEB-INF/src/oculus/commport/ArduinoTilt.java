@@ -29,7 +29,7 @@ public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventL
 		try {
 
 			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
-					state.get(State.serialport)).open(
+					state.get(State.values.serialport)).open(
 					AbstractArduinoComm.class.getName(), SETUP);
 			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);

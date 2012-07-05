@@ -2,6 +2,8 @@ package oculus;
 
 import java.io.*;
 
+import oculus.State.values;
+
 public class Settings {
 	
 	public final static String sep = System.getProperty("file.separator");
@@ -9,30 +11,27 @@ public class Settings {
 	public static String framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg";
 	public static String loginactivity = redhome+sep+"log"+sep+"loginactivity.txt";
 	public static String settingsfile = redhome+sep+"conf"+sep+"oculus_settings.txt";
-	public static String movesfile = redhome+sep+"log"+sep+"moves.txt";
 	public static String stdout = redhome+sep+"log"+sep+"jvm.stdout";
 	public static String ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
 	
 	public static final int ERROR = -1;
-	
 	public static boolean configuredUsers = false;
+	public static String os = "windows" ;  
 	public static int i = 0;
 	
-	//public static final String pushtotalk = "pushtotalk";
-	public static String os = "windows" ;  //  "linux" or "windows" 
+	
 	
 	/** create new file if missing */
-	public  Settings(){
+	public Settings(){
 		
 		System.out.println(i++ + " settings constructed");
 		
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
 		// be sure of basic configuration 
-		synchronized(this){
 		if(! new File(settingsfile).exists()) {
 			createFile(settingsfile);
-		}}
+		}
 		
 		// test if users exist 
 		if(readSetting("user0")!=null) configuredUsers = true;
@@ -215,15 +214,8 @@ public class Settings {
 				// over write with user's settings
 				String val = readSetting(factory.toString());
 				if (val != null){
-				
 					fw.append(factory.toString() + " " + val + "\r\n");
-	
-				} /*else {
-	
-					Util.debug("writeFile(): use default for: " + factory.toString(), this);
-					fw.append(factory.toString() + " " + GUISettings.getDefault(factory) + "\r\n");
-				} */
-				
+				} 
 			}
 			
 			fw.append("# manual settings \r\n");
@@ -232,17 +224,10 @@ public class Settings {
 				if (val != null){
 					if( val.equalsIgnoreCase("null")){ // TODO: DEFAULT ?? 
 						fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
+					} else {
+						fw.append(ops.toString() + " " + val + "\r\n");
 					}
-					else 
-					
-					fw.append(ops.toString() + " " + val + "\r\n");
-					
-				} /*else {
-					
-					Util.debug("writeFile(): use default for: " + ops.toString(), this);
-					fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
-					
-				}	*/
+				} 
 			}
 
 			if(configuredUsers){
@@ -264,8 +249,7 @@ public class Settings {
 			new File(temp).delete();
 
 		} catch (Exception e) {
-			// e.printStackTrace(System.out);
-			Util.debug("writeFile: " + e.getMessage(), this);
+			Util.log("Settings.writeFile(): " + e.getMessage(), this);
 		}
 	}
 
@@ -527,4 +511,9 @@ public class Settings {
 	public int getInteger(GUISettings setting) {
 		return getInteger(setting.toString());
 	}
+
+	public boolean getBoolean(values key) {
+		return getBoolean(key.name());
+	}
+
 }

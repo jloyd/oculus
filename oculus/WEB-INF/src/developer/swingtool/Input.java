@@ -158,7 +158,7 @@ public class Input extends JTextField implements KeyListener {
 				@Override
 				public void run() {
 
-					String urlString = "http://"+ State.getReference().get(State.externaladdress)+":5080/oculus/frameGrabHTTP";
+					String urlString = "http://"+ State.getReference().get(State.values.externaladdress.name())+":5080/oculus/frameGrabHTTP";
 					
 					try {
 						Util.saveUrl("_local.jpg", urlString );

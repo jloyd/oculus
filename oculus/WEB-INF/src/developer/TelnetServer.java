@@ -101,8 +101,8 @@ public class TelnetServer implements Observer {
 		@Override
 		public void run() {
 			
-			state.set(oculus.State.override, true);	
-			if(state.get(oculus.State.user)==null) state.set(oculus.State.user, user);
+			state.set(oculus.State.values.override.name(), true);	
+			if(state.get(oculus.State.values.user.name())==null) state.set(oculus.State.values.user.name(), user);
 			if(settings.getBoolean(GUISettings.loginnotify)) Util.beep();
 			sendToGroup(printers.size() + " tcp connections active");
 			
@@ -229,7 +229,7 @@ public class TelnetServer implements Observer {
 			out.println("shutting down "+reason);
 			Util.debug("closing socket [" + clientSocket + "] " + reason, this);
 			sendToGroup(printers.size() + " tcp connections active");
-			state.delete(oculus.State.override);		
+			state.delete(oculus.State.values.override.name());		
 			
 			try {
 
