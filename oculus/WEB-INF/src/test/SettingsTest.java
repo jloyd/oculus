@@ -13,12 +13,12 @@ import org.junit.Test;
 
 public class SettingsTest {
 
-	Settings settings = null;
+	Settings settings = new Settings("../../");
 
 	@Before
 	public void setUp() {
 		System.out.println("running: " + getClass().toString());
-		settings = new Settings();
+		//settings = Settings.getReference();
 		
 		if(settings==null) fail("no settings file found");
 		
@@ -29,10 +29,6 @@ public class SettingsTest {
 		if(settings.readSetting("salt").equals("null")) fail("no salt!"); 
 	}
 
-	//@After
-	//public void tearDown() throws Exception {
-	//System.out.println("tearDown(), after.. done");
-	
 	@Test
 	public void testReadSetting() {	
 		for (GUISettings factory : GUISettings.values()){ 

@@ -38,7 +38,7 @@ public class Client {
 		int port = 0;
 		
 		if(args.length==0) {			
-			settings = new Settings();
+			settings = Settings.getReference();
 			if (Settings.settingsfile != null)
 				if (Settings.settingsfile.contains("null"))
 					throw(new Exception("no settings file found"));

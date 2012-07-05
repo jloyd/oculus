@@ -20,7 +20,7 @@ public class RtmpPortRequest extends HttpServlet {
 			throws ServletException, IOException {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
-		settings = new Settings();
+		settings = Settings.getReference();
 		out.print(settings.readRed5Setting("rtmp.port"));
 		out.close();
 //		System.out.println("xmlhttphandler");

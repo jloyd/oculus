@@ -29,7 +29,7 @@ public class LiveSettingsTest {
 	@Before
 	public void setUp() throws NumberFormatException, UnknownHostException {
 		System.out.println(getClass().toString());
-		Settings settings = new Settings();
+		Settings settings = Settings.getReference();
 			if(Settings.settingsfile != null)
 				if(Settings.settingsfile.contains("null"))
 					fail("no settings file found");

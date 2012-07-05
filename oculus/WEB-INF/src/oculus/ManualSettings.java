@@ -29,10 +29,8 @@ public enum ManualSettings {
 		return defaults.getProperty(setting.name());
 	}
 	
-	/**/
-	
 	public static boolean isDefault(ManualSettings manual){
-		Settings settings = new Settings();
+		Settings settings = Settings.getReference();
 		if(settings.readSetting(manual).equals(getDefault(manual))) return true;
 		
 		return false;

@@ -6,6 +6,9 @@ import oculus.State.values;
 
 public class Settings {
 	
+	/** reference to this singleton class */
+	private static Settings singleton = null;
+
 	public final static String sep = System.getProperty("file.separator");
 	public static String redhome = System.getenv("RED5_HOME");
 	public static String framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg";
@@ -14,17 +17,18 @@ public class Settings {
 	public static String stdout = redhome+sep+"log"+sep+"jvm.stdout";
 	public static String ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
 	
-	public static final int ERROR = -1;
 	public static boolean configuredUsers = false;
+	public static final int ERROR = -1;
 	public static String os = "windows" ;  
-	public static int i = 0;
 	
+	public static Settings getReference() {
+		if (singleton == null) {
+			singleton = new Settings();
+		}
+		return singleton;
+	}
 	
-	
-	/** create new file if missing */
-	public Settings(){
-		
-		System.out.println(i++ + " settings constructed");
+	private Settings(){
 		
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
@@ -36,7 +40,19 @@ public class Settings {
 		// test if users exist 
 		if(readSetting("user0")!=null) configuredUsers = true;
 	}
-
+	
+	/** ONLY USE FOR JUNIT */
+	public Settings(String path){
+		
+		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
+		
+		redhome = path;
+		settingsfile = redhome+sep+"conf"+sep+"oculus_settings.txt";
+		
+		// test if users exist 
+		if(readSetting("user0")!=null) configuredUsers = true;
+	}
+	
 	/**
 	 * lookup values from props file
 	 * 

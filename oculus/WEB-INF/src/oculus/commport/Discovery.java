@@ -19,7 +19,7 @@ public class Discovery implements SerialPortEventListener {
 	// two states to watch for in settings 
 	public static enum params {discovery, disabled};
 	
-	private static Settings settings = new Settings();
+	private static Settings settings = Settings.getReference();
 	private static final String motors = settings.readSetting(ManualSettings.arduinoculus);
 	private static final String lights = settings.readSetting(ManualSettings.oculed);
 	private static State state = State.getReference();

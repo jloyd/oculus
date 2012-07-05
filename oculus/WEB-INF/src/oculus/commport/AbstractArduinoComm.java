@@ -16,7 +16,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 	protected long lastSent = System.currentTimeMillis();
 	protected long lastRead = System.currentTimeMillis();
-	protected Settings settings = new Settings();
+	protected Settings settings = Settings.getReference();
 	protected State state = State.getReference();
 	protected Application application = null;
 	protected volatile boolean isconnected = false;

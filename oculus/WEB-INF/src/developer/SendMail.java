@@ -23,7 +23,7 @@ public class SendMail {
 	private static int SMTP_HOST_PORT = 587;
 	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
 
-	private Settings settings = new Settings();;
+	private Settings settings = Settings.getReference();
 	private final String user = settings.readSetting(ManualSettings.emailaddress.toString()); 
 	private final String pass = settings.readSetting(ManualSettings.emailpassword.toString()); 
 
@@ -80,8 +80,6 @@ public class SendMail {
 	/** send messages to user */
 	public SendMail(final String sub, final String text, Application app) {
 		
-	//	settings = new Settings();
-
 		subject = sub;
 		body = text;
 		application = app;
@@ -182,7 +180,6 @@ public class SendMail {
 			if(application!=null) application.message("email has been sent", null, null);
 
 		} catch (Exception e) {
-			// log.error(e.getMessage());
 			System.out.println("error sending email, check settings");
 			if(application!=null) application.message("error sending email", null, null);
 		}

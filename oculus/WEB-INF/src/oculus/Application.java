@@ -31,7 +31,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private AbstractArduinoComm comport = null;
 	private LightsComm light = null;
 	private BatteryLife battery = null;
-	private Settings settings = new Settings();
+	private Settings settings = Settings.getReference();
 	private String pendinguserconnected = null;
 	private String remember = null;
 	private IConnection pendingplayer = null;
@@ -42,13 +42,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private boolean pendingplayerisnull = true;
 	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
-	
-	//dev stuff
 	private developer.TelnetServer commandServer = null;
-	//private developer.LogManager moves = new developer.LogManager();
-	public developer.OpenNIRead openNIRead = null;
 	
 	// try to make private
+	public developer.OpenNIRead openNIRead = null;
 	public boolean muteROVonMove = false;
 	public Speech speech = new Speech();
 	public String stream = null;
@@ -892,8 +889,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		if(str!=null){
-			if(str.equals(PlayerCommands.statuscheck.toString()))
-				if(commandServer!=null) commandServer.sendToGroup("[messageplayer] " + str);					
+			if(!str.equals(PlayerCommands.statuscheck.toString()))
+				if(commandServer!=null) 
+					commandServer.sendToGroup("[messageplayer] " + str);					
 		}
 	}
 

@@ -10,7 +10,7 @@ import oculus.Util;
 
 public class SystemWatchdog {
 	
-	private final Settings settings = new Settings();
+	private final Settings settings = Settings.getReference();
 	private final boolean reboot = settings.getBoolean(State.values.reboot);		
 	
 	// check every ten minutes

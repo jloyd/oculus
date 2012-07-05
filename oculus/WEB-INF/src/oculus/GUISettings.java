@@ -46,24 +46,10 @@ public enum GUISettings {
 		
 		return config;
 	}
-
-	/** @returns true if all settings are in properties */
-	public static boolean validate(Properties conf) {
-		Settings fromfile = new Settings();
-		String value = null;
-		for (GUISettings settings : GUISettings.values()) {
-			value = fromfile.readSetting(settings.name() );
-			if (value == null) {
-				System.out.println(conf.toString());
-				System.out.println("settings file missing: " + settings);
-				return false;
-			}
-		}
-		return true;
-	}
-
+	
 	public static String getDefault(GUISettings factory) {
 		Properties defaults = createDeaults();
 		return defaults.getProperty(factory.name() );	
 	}
+	
 }

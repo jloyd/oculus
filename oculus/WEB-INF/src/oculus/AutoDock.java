@@ -6,8 +6,6 @@ import oculus.commport.LightsComm;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.service.IServiceCapableConnection;
 
-import developer.LogManager;
-
 public class AutoDock implements Docker {
 
 	/* notes 
@@ -60,18 +58,12 @@ public class AutoDock implements Docker {
 		this.grabber = thegrab;
 		this.comport = com;
 		this.light = light;
-		settings = new Settings();
-		//if(settings.getBoolean(ManualSettings.developer)){
-		//	moves = new LogManager();
-		//	moves.open(Settings.movesfile);
-		//}
+		settings = Settings.getReference();
 	}
 	
 
 	@Override
 	public void autoDock(String str) {
-		
-		//if(moves != null) moves.append("autodock " + str);
 		
 		String cmd[] = str.split(" ");
 		if (cmd[0].equals("cancel")) {

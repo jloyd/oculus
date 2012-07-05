@@ -20,11 +20,9 @@ public class EmailAlerts implements Observer {
 	/** Constructor */
 	public EmailAlerts(Application parent) {
 		app = parent;
-		settings = new Settings();
-		//if (settings.getBoolean(Settings.emailalerts)){
-			state.addObserver(this);
-			oculus.Util.debug("starting email alerts...", this);
-		//}
+		settings = Settings.getReference();
+		state.addObserver(this);
+		oculus.Util.debug("starting email alerts...", this);
 	}
 
 	@Override

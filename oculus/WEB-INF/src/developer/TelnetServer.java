@@ -30,7 +30,7 @@ public class TelnetServer implements Observer {
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static oculus.State state = oculus.State.getReference();
 	private static LoginRecords records = new LoginRecords();
-	private static oculus.Settings settings = new Settings();
+	private static oculus.Settings settings =Settings.getReference();
 	private static ServerSocket serverSocket = null;  	
 	private static Application app = null;
 	

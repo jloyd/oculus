@@ -11,7 +11,7 @@ public class LoginRecords {
 	
 	public static Vector<Record> list = new Vector<Record>();
 	public static State state = State.getReference();
-	public static Settings settings = new Settings();
+	public static Settings settings = Settings.getReference();
 	private static Application app = null; 
 	
 	public LoginRecords(){}
@@ -55,7 +55,7 @@ public class LoginRecords {
 		String user = state.get(State.values.user);
 		if (user == null) return false;
 		if (user.equals("")) return false;
-		Settings settings = new Settings();
+		Settings settings = Settings.getReference();
 		String admin = settings.readSetting("user0").toLowerCase();
 		return admin.equals(user.toLowerCase());
 	}

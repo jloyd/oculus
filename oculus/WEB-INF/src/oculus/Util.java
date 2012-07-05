@@ -18,8 +18,9 @@ import java.util.Date;
 import java.util.Vector;
 
 public class Util {
-
-	private static final boolean debug = new Settings().getBoolean(ManualSettings.debugenabled);
+	
+	private static Settings settings = Settings.getReference();
+	private static final boolean debug = settings.getBoolean(ManualSettings.debugenabled);
 	private static final int PRECISION = 2;
 	
 	/**
@@ -335,7 +336,7 @@ public class Util {
 		if (Settings.os.equals("linux")) {
 			return; // TODO: linux set system volume
 		}
-		new Settings().writeSettings(GUISettings.volume.name(), percent);
+		settings.writeSettings(GUISettings.volume.name(), percent);
 		float vol = (float) percent / 100 * 65535;
 		String str;
 		str = "nircmdc.exe setsysvolume "+ (int) vol; //w in
