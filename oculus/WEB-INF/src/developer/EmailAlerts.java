@@ -1,28 +1,37 @@
 package developer;
 
 import oculus.Application;
+import oculus.ManualSettings;
 import oculus.Observer;
 import oculus.Settings;
 import oculus.State;
 import oculus.Util;
 
-/** */
+/**  low of battery to warm user with email */
 public class EmailAlerts implements Observer {
 
-	// how low of battery to warm user with email
-	// any lower and my dell will go into 
-	// low power mode, need time to park it   
 	public static final int WARN_LEVEL = 40;
-	private Application app = null;
-	private Settings settings;
+	
+	private Settings settings = Settings.getReference();;
 	private State state = State.getReference();
+	private Application app = null;
 	
 	/** Constructor */
 	public EmailAlerts(Application parent) {
 		app = parent;
-		settings = Settings.getReference();
-		state.addObserver(this);
-		oculus.Util.debug("starting email alerts...", this);
+		
+		// is configured
+		if(settings.readSetting(ManualSettings.emailaddress) != null && 
+				settings.readSetting(ManualSettings.emailpassword) !=null){
+			
+			// not disabled
+			if( ! settings.readSetting(ManualSettings.emailaddress).equals(State.values.disabled.name())){
+		
+				state.addObserver(this);
+				oculus.Util.debug("starting email alerts for battery life", this);
+				
+			}
+		}
 	}
 
 	@Override

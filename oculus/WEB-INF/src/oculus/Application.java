@@ -204,10 +204,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			Util.log("initialize(), has no salt!", this);
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
-		} else if(salt.equals("null")){
-			Util.log("initialize(), has null salt!", this);
-			salt = UUID.randomUUID().toString();
-			settings.newSetting("salt", salt);
 		}
 
 		// must call this here

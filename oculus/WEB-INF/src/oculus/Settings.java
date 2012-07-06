@@ -6,9 +6,7 @@ import oculus.State.values;
 
 public class Settings {
 	
-	/** reference to this singleton class */
-	private static Settings singleton = null;
-
+	public static final int ERROR = -1;
 	public final static String sep = System.getProperty("file.separator");
 	public static String redhome = System.getenv("RED5_HOME");
 	public static String framefile = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"images"+sep+"framegrab.jpg";
@@ -17,10 +15,11 @@ public class Settings {
 	public static String stdout = redhome+sep+"log"+sep+"jvm.stdout";
 	public static String ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
 	
-	public static boolean configuredUsers = false;
-	public static final int ERROR = -1;
-	public static String os = "windows" ;  
+	private static boolean configuredUsers = false;
+	public static String os = "windows" ; 
 	
+	/** reference to this singleton class */
+	private static Settings singleton = null;
 	public static Settings getReference() {
 		if (singleton == null) {
 			singleton = new Settings();
@@ -28,14 +27,13 @@ public class Settings {
 		return singleton;
 	}
 	
+	/** only check for settings file once */ 
 	private Settings(){
 		
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
 		// be sure of basic configuration 
-		if(! new File(settingsfile).exists()) {
-			createFile(settingsfile);
-		}
+		if(! new File(settingsfile).exists()) createFile(settingsfile);
 		
 		// test if users exist 
 		if(readSetting("user0")!=null) configuredUsers = true;
@@ -43,8 +41,6 @@ public class Settings {
 	
 	/** ONLY USE FOR JUNIT */
 	public Settings(String path){
-		
-		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
 		redhome = path;
 		settingsfile = redhome+sep+"conf"+sep+"oculus_settings.txt";
@@ -148,12 +144,8 @@ public class Settings {
 			reader.close();
 			filein.close();
 		} catch (Exception e) {
-			
-			//e.printStackTrace();
 			System.out.println(str + " _readSetting: " + e.getMessage());
-			
-			return null; //GUISettings.getDefault(GUISettings.valueOf(str));
-			
+			return null; 
 		}
 		
 		// don't let string "null" be confused for actually a null, error state  
@@ -163,15 +155,13 @@ public class Settings {
 	}
 
 
-	/** 
-	 * Make a copy in order and "cleaned" of anything but vaild settings 
-	 */
+	/** Make a copy in order and "cleaned" of anything but valid settings */
 	public String toString(){
 		
 		String result = new String();
 		for (GUISettings factory : GUISettings.values()) {
 			String val = readSetting(factory.toString());
-			if (val != null) // null is ok
+			if (val != null) if( ! val.equals("null"))
 				result += factory.toString() + " " + val + "\r\n";
 		}
 	
@@ -186,10 +176,9 @@ public class Settings {
 	}
 	
 	public synchronized void createFile(String path) {
-		System.out.println("... create file.");
 		try {
 			
-			final String temp = System.getenv("RED5_HOME") + sep+"conf"+sep+"oculus_created.txt";
+			final String temp = redhome+ sep+"conf"+sep+"oculus_created.txt";
 			FileWriter fw = new FileWriter(new File(temp));
 			
 			fw.append("# GUI settings \r\n");
@@ -200,8 +189,6 @@ public class Settings {
 			for (ManualSettings ops : ManualSettings.values()) 
 				fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
 				
-			fw.append("salt null");
-			
 			fw.close();
 			
 			// now swap temp for real file
@@ -221,16 +208,18 @@ public class Settings {
 		
 		try {
 			
-			final String temp = System.getenv("RED5_HOME") + sep+"conf"+sep+"oculus_created.txt";
+			final String temp = redhome + sep+"conf"+sep+"oculus_created.txt";
 			FileWriter fw = new FileWriter(new File(temp));
 			
-			fw.append("# GUI settings \r\n");
+			fw.append("# gui settings \r\n");
 			for (GUISettings factory : GUISettings.values()) {
-
-				// over write with user's settings
 				String val = readSetting(factory.toString());
 				if (val != null){
-					fw.append(factory.toString() + " " + val + "\r\n");
+					if(val.equals("null")){
+						fw.append(factory.toString() + " " + GUISettings.getDefault(factory) + "\r\n");
+					} else {
+						fw.append(factory.toString() + " " + val + "\r\n");
+					}
 				} 
 			}
 			
@@ -238,7 +227,7 @@ public class Settings {
 			for (ManualSettings ops : ManualSettings.values()) {
 				String val = readSetting(ops.toString());
 				if (val != null){
-					if( val.equalsIgnoreCase("null")){ // TODO: DEFAULT ?? 
+					if( val.equalsIgnoreCase("null")){ 
 						fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
 					} else {
 						fw.append(ops.toString() + " " + val + "\r\n");
@@ -246,6 +235,8 @@ public class Settings {
 				} 
 			}
 
+			if(readSetting("salt") != null) fw.append("salt " + readSetting("salt") + "\r\n");
+			
 			if(configuredUsers){
 				fw.append("# user list \r\n");
 				fw.append("salt " + readSetting("salt") + "\r\n");
@@ -255,7 +246,7 @@ public class Settings {
 					fw.append("user" + j + " " + users[j][0] + "\r\n");
 					fw.append("pass" + j + " " + users[j][1] + "\r\n");
 				}
-			} else fw.append("salt null");
+			} 
 			
 			fw.close();
 			

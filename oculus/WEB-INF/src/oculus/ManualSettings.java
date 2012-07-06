@@ -20,7 +20,7 @@ public enum ManualSettings {
 		config.setProperty(oculed.name(), Discovery.params.discovery.name());
 		config.setProperty(emailaddress.name(), State.values.disabled.name());
 		config.setProperty(emailpassword.name(), State.values.disabled.name());
-		config.setProperty(commandport.name(), State.values.disabled.name());
+		config.setProperty(commandport.name(), "4444"); // State.values.disabled.name());
 		return config;
 	}
 	

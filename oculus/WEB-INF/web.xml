@@ -33,7 +33,7 @@
 		<servlet-name>rtmpPortRequest</servlet-name>
 		<url-pattern>/rtmpPortRequest</url-pattern>
 	</servlet-mapping>
-	
+	 
 	<servlet>
 		<servlet-name>frameGrabHTTP</servlet-name>
 		<servlet-class>
@@ -46,7 +46,7 @@
 		<servlet-name>frameGrabHTTP</servlet-name>
 		<url-pattern>/frameGrabHTTP</url-pattern>
 	</servlet-mapping>
-	<!-- end of added by colin adamson-->
+	<!--end of added by colin adamson-->
 	
 	<!--  brad  -->
 	<servlet>
