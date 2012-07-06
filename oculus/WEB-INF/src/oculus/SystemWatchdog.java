@@ -17,7 +17,7 @@ public class SystemWatchdog {
 	public static final long DELAY = State.TEN_MINUTES;
 
 	// when is the system stale and need reboot
-	public static final long STALE = State.ONE_DAY * 2; 
+	public static final long STALE = State.ONE_DAY; 
 	
 	// shared state variables
 	private State state = State.getReference();
@@ -32,14 +32,12 @@ public class SystemWatchdog {
 	
 	private class Task extends TimerTask {
 		public void run() {
-			
-			// only reboot is idle 
 			if ((state.getUpTime() > STALE) && !state.getBoolean(State.values.userisconnected)){ 
 				
 				String boot = new Date(state.getLong(State.values.boottime.name())).toString();				
 				Util.log("rebooting, last boot was: " + boot, this);
 				
-				// reboot  
+				// reboot 
 				if (Settings.os.equals("windows")) {
 					Util.systemCall("shutdown -r -f -t 01");	
 				} else {

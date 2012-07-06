@@ -1,15 +1,17 @@
 package oculus;
 
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Vector;
 
 public class State {
 	
 	public enum values{user, logintime, usercommand, userisconnected, reboot, developer, serialport, lightport, target, boottime, batterylife, 
-		motionenabled, externaladdress, localaddress, autodocktimeout, autodocking, timeout,losttarget , firmware, unknown, override,  commwatchdog,
+		motionenabled, externaladdress, autodocktimeout, autodocking, timeout,losttarget , firmware, unknown, override,  commwatchdog,
 		framegrabbusy, sonarback, sonarright, sonarleft, dockgrabbusy, docking, dockxsize, dockysize, dockstatus, dockgrabtime, dockslope, dockxpos,
-		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus
+		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus, localaddress
 	};
 
 	public static final String SEPERATOR = " : ";
@@ -29,7 +31,8 @@ public class State {
 	private static State singleton = null;
 
 	/** properties object to hold configuration */
-	private Properties props = new Properties();
+	//private Properties props = new Properties();
+	private HashMap<String, String> props = new HashMap<String, String>(); // Properties();
 	
 	public static State getReference() {
 		if (singleton == null) {
@@ -40,8 +43,8 @@ public class State {
 
 	/** private constructor for this singleton class */
 	private State() {
-		props.put(values.boottime, String.valueOf(System.currentTimeMillis()));
-		props.put(values.localaddress, Util.getLocalAddress());
+		props.put(values.boottime.name(), String.valueOf(System.currentTimeMillis()));
+		props.put(values.localaddress.name(), Util.getLocalAddress());
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -77,34 +80,37 @@ public class State {
 		return aa.equalsIgnoreCase(b);
 	}
 	
-	/** debug */
+	/** */
 	public void dump(){
 		System.out.println("state number of listeners: " + observers.size());
 		for(int i = 0 ; i < observers.size() ; i++) 
 			System.out.println(i + " " + observers.get(i).getClass().getName() + "\n");
 		
-		Enumeration<Object> keys = props.keys();
-		while(keys.hasMoreElements()){
-			String key = (String) keys.nextElement();
-			String value = (String) props.getProperty(key);			
-			System.out.println(key + SEPERATOR + value);
+		try {
+			Set<String> keys = props.keySet();
+			for(Iterator<String> i = keys.iterator(); i.hasNext(); ){
+				String key = i.next();
+				System.out.println( key + " " + props.get(key));
+			}
+			
+		} catch (Exception e) {
+			Util.log(e.getLocalizedMessage(), this);
 		}
 	}
 	
 	/** */
 	@Override
 	public String toString(){	
-		String str = "";// new String("state listeners: " + observers.size());
-		Enumeration<Object> keys = props.keys();
-		while(keys.hasMoreElements()){
-			String key = (String) keys.nextElement();
-			String value = (String) props.getProperty(key);					
-			str += key + SEPERATOR + value + "\r\n";
-		}	
+		String str = "";
+		Set<String> keys = props.keySet();
+		for(Iterator<String> i = keys.iterator(); i.hasNext(); ){
+			String key = i.next();
+			str += (key + " " + props.get(key) + "\n");
+		}
 		return str;
 	}
 	
-	/**/
+	/** */
 	public boolean block(final String member, final String target, int timeout){
 		
 		long start = System.currentTimeMillis();
@@ -130,18 +136,6 @@ public class State {
 				return false;
 			}
 		}
-	}
-	
-	public void set(values key, long data){
-		set(key.name(), data);
-	}
-	
-	public void set(values key, String value){
-		set(key.name(), value);
-	}
-	
-	public void set(values key, boolean value){
-		set(key.name(), value);
 	}
 	
 	/** Put a name/value pair into the configuration */
@@ -173,7 +167,7 @@ public class State {
 		String ans = null;
 		try {
 
-			ans = props.getProperty(key.trim());
+			ans = props.get(key.trim());
 
 		} catch (Exception e) {
 			System.err.println(e.getStackTrace());
@@ -184,9 +178,7 @@ public class State {
 	}
 
 
-	public boolean getBoolean(values key){
-		return getBoolean(key.name());
-	}
+	
 	
 	/** */
 	public synchronized boolean getBoolean(String key) {
@@ -258,7 +250,7 @@ public class State {
 	
 	/** */
 	public synchronized boolean exists(String key) {
-		return props.contains(key);
+		return props.containsKey(key);
 	}
 
 	/** */ 
@@ -269,15 +261,15 @@ public class State {
 	}
 
 	public void delete(PlayerCommands cmd) {
-		delete(cmd.toString());
+		delete(cmd.name());
 	}
 
 	public void set(PlayerCommands cmd, String str) {
-		set(cmd.toString(), str);
+		set(cmd.name(), str);
 	}
 	
 	public String get(PlayerCommands cmd){ 
-		return get(cmd.toString()); 
+		return get(cmd.name()); 
 	}
 
 	public void set(values key, values value) {
@@ -296,4 +288,19 @@ public class State {
 		return getLong(key.name());
 	}
 	
+	public boolean getBoolean(values key){
+		return getBoolean(key.name());
+	}
+
+	public void set(values key, long data){
+		set(key.name(), data);
+	}
+	
+	public void set(values key, String value){
+		set(key.name(), value);
+	}
+	
+	public void set(values key, boolean value){
+		set(key.name(), value);
+	}
 }

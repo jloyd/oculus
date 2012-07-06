@@ -22,7 +22,7 @@ import oculus.Util;
  */
 public class TelnetServer implements Observer {
 	
-	public static enum Commands {message, users, tcp, beep, tail, image, memory, state, settings, help, bye, quit};
+	public static enum Commands {message, users, tcp, beep, tail, image, memory, state, settings, help, bye, uptime, quit};
 	public static final String SEPERATOR = " : ";
 	public static final boolean ADMIN_ONLY = true;
 	public static final int MIN_LENGTH = 2;
@@ -89,7 +89,7 @@ public class TelnetServer implements Observer {
 			}
 	
 			// TODO: log in 
-			// state.set(oculus.State.user, user);
+			state.set(oculus.State.values.user, user);
 			// new LoginRecords().beDriver();
 			
 			// keep track of all other user sockets output streams			
@@ -257,6 +257,13 @@ public class TelnetServer implements Observer {
 			
 			switch (telnet) {
 			
+			case uptime:
+				
+				out.println(state.getUpTime() + " ms");
+				
+				return true;
+			
+			
 			case message:
 				String args = new String(); 		
 				for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
@@ -359,7 +366,10 @@ public class TelnetServer implements Observer {
 				
 			case state:
 				if(cmd.length==3) state.set(cmd[1], cmd[2]);
-				else out.println(state.toString());
+				else {
+					out.println(state.toString());
+					// state.dump();
+				}
 				return true;
 				
 

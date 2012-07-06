@@ -204,12 +204,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			Util.log("initialize(), has no salt!", this);
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
-			// TODO: REMOVE USERS? 
 		} else if(salt.equals("null")){
-			Util.log("initialize(), has no salt!", this);
+			Util.log("initialize(), has null salt!", this);
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
-			// TODO: REMOVE USERS? 
 		}
 
 		// must call this here
@@ -339,8 +337,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str = pendinguserconnected + " pending connection from: "
 						+ pendingplayer.getRemoteAddress();
 				
-				// log.info(str);
-				Util.log("OCULUS: playersignin(): " + str);
+				Util.log("playersignin(): " + str);
 				messageGrabber(str, null);
 				sc.invoke("videoSoundMode", new Object[] { videosoundmode });
 			}
@@ -889,7 +886,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		if(str!=null){
-			if(!str.equals(PlayerCommands.statuscheck.toString()))
+			if(! str.equals("status check received"))
 				if(commandServer!=null) 
 					commandServer.sendToGroup("[messageplayer] " + str);					
 		}
@@ -1626,28 +1623,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			sendplayerfunction("showserverlog", str);
 
 		}
-		
-		
-		//if (loginRecords.isAdmin()) {
-						
-		//	FileInputStream filein;
-		//	String str = "";
-		//	try {
-		//		filein = new FileInputStream(oculus.Settings.stdout);
-		//		BufferedReader reader = new BufferedReader(
-		//				new InputStreamReader(filein));
-		//		String line = "";
-		//		while ((line = reader.readLine()) != null) {
-		//			str = "&bull; " + line + "<br>" + str;
-		//		}
-		
-		//		filein.close();
-		//		sendplayerfunction("showserverlog", str);
-		//	} catch (Exception e) {
-		//		e.printStackTrace();
-		//	}
-			
-		// }
+	
 	}
 
 	private void saveAndLaunch(String str) {
@@ -1777,18 +1753,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		// law and wan
 		String lan = state.get(State.values.localaddress);
-		;
-		if (lan == null)
-			result += "lanaddress error ";
-		else
-			result += "lanaddress " + lan + " ";
+		if (lan == null) result += "lanaddress error ";
+		else result += "lanaddress " + lan + " ";
 
 		String wan = state.get(State.values.externaladdress);
-		;
-		if (wan == null)
-			result += "wanaddress error ";
-		else
-			result += "wanaddress " + wan + " ";
+		if (wan == null) result += "wanaddress error ";
+		else result += "wanaddress " + wan + " ";
 
 		// http port
 		result += "httpport " + settings.readRed5Setting("http.port") + " ";
