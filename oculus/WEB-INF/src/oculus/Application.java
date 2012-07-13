@@ -402,11 +402,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 */
 	public void playerCallServer(final PlayerCommands fn, final String str) {
 		
-		if (PlayerCommands.requiresAdmin(fn.toString())){
-			if ( ! loginRecords.isAdmin()){ 
-				Util.debug("playerCallServer(), must be an admin to do: " + fn, this);
-				return;
-			}
+		/**/
+		if (PlayerCommands.requiresAdmin(fn.name())){
+			//if ( ! loginRecords.isAdmin()){ 
+				Util.debug("playerCallServer(), must be an admin to do: " + fn.name(), this);
+			//	return;
+			//}
 		}
 		
 		if(fn != PlayerCommands.statuscheck) 

@@ -362,25 +362,19 @@ public enum PlayerCommands {
 	
 	/** @return true if given command is in the sub-set */
 	public static boolean requiresAdmin(final String str) {
-		AdminCommands command = null;
 		try {
-			command = AdminCommands.valueOf(str);
-		} catch (Exception e) {}
+			AdminCommands.valueOf(str);
+		} catch (Exception e) {return false;}
 		
-		if(command==null) return true; // TODO: safe to assume?
-			
 		return true; 
 	}
 	
 	/** @return true if given command is in the sub-set */
 	public static boolean requiresAdmin(final PlayerCommands cmd) {
-		AdminCommands command = null;
 		try {
-			command = AdminCommands.valueOf(cmd.name());
-		} catch (Exception e) {}
+			AdminCommands.valueOf(cmd.name());
+		} catch (Exception e) {return false;}
 		
-		if(command==null) return false;
-			
 		return true; 
 	}
 	
