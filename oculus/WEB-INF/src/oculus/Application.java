@@ -401,13 +401,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the argument string to pass along
 	 */
 	public void playerCallServer(final PlayerCommands fn, final String str) {
-		
-		/**/
 		if (PlayerCommands.requiresAdmin(fn.name())){
-			//if ( ! loginRecords.isAdmin()){ 
-				Util.debug("playerCallServer(), must be an admin to do: " + fn.name(), this);
-			//	return;
-			//}
+			if ( ! loginRecords.isAdmin()){ 
+				Util.debug("playerCallServer(), must be an admin to do: " + fn.name() + " curent user: " + state.get(State.values.user), this);
+				return;
+			}
 		}
 		
 		if(fn != PlayerCommands.statuscheck) 
