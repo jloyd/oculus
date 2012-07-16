@@ -2,8 +2,6 @@ package developer.swingtool;
 
 import java.io.*;
 import java.net.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.InflaterInputStream;
 
 import javax.swing.*;
 
@@ -100,8 +98,7 @@ public class Input extends JTextField implements KeyListener {
 				if(command.toString().startsWith(str)){
 					out.println("match: " + str);	
 				}
-			}
-			
+			}	
 		}
 		
 		if (c == '\n' || c == '\r') {

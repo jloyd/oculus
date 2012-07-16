@@ -13,7 +13,8 @@ import org.junit.Test;
 
 public class SettingsTest {
 
-	Settings settings = new Settings("../../");
+	// force red5 path 
+	oculus.Settings settings = new oculus.Settings("../../");
 
 	@Before
 	public void setUp() {

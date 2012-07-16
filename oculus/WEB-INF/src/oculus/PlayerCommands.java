@@ -35,7 +35,7 @@ public enum PlayerCommands {
 	public enum RequiresArguments {
 	
 		publish("camera", "camadnmic", "mic", "stop"), 
-		floodlight("on", "off", "test"), 
+		floodlight("on", "off"), 
 		move("left", "right", "forward", "backward", "stop"),
 		nudge("left", "right", "forward", "backward"),
 		slide("left", "right"), 
@@ -48,15 +48,15 @@ public enum PlayerCommands {
 		tiltsettingsupdate("[0-255] [0-255] [0-255] {INT} {INT}"),
 		tilttest("[0-255]"),
 		speedset("slow", "med", "fast"), 
-		dock("dock", "undock"), 
-		//relaunchgrabber, 
+		dock("dock", "undock"),
 		clicksteer("{INT} {INT}"), 
 		chat("{STRING}"), 
-		statuscheck(/*"", TODO:///// ......... why? */ "battstats"),
+		statuscheck("battstats"),
 		systemcall("{STRING}"), 
 		streamsettingsset("low","med","high","full","custom"), 
 		streamsettingscustom("{STRING}"), //"{INT}_{INT}_{INT}_[0-100]"), 
-		//TODO: TRICKY UNDERSCORE
+		//TODO: TRICKY UNDERSCORE, String lets all pass
+		
 		
 		playerbroadcast("camera", "camadnmic", "mic", "stop"), 
 		password_update("{STRING}"), 

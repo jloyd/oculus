@@ -23,21 +23,17 @@ public class State {
 	public static final long TEN_MINUTES = 600000;
 	public static final int ERROR = -1;
 
-
 	/** notify these on change events */
 	public Vector<Observer> observers = new Vector<Observer>();
 	
 	/** reference to this singleton class */
-	private static State singleton = null;
+	private static State singleton = new State();
 
 	/** properties object to hold configuration */
 	//private Properties props = new Properties();
 	private HashMap<String, String> props = new HashMap<String, String>(); // Properties();
 	
 	public static State getReference() {
-		if (singleton == null) {
-			singleton = new State();
-		}
 		return singleton;
 	}
 

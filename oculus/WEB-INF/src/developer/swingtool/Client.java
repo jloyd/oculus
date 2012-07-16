@@ -3,10 +3,10 @@ package developer.swingtool;
 import java.io.*;
 import java.net.*;
 
-import oculus.ManualSettings;
-import oculus.Settings;
-
 public class Client {
+	
+	// force red5 path 
+	oculus.Settings settings = new oculus.Settings("../../");
 
 	public Client(String host, int port, final String usr, final String pass) throws IOException {
 		try {
@@ -31,31 +31,31 @@ public class Client {
 
 	// driver
 	public static void main(String args[]) throws Exception {
-		Settings settings = null;
-		String user = null;
-		String pass = null;
-		String ip = "127.0.0.1";
-		int port = 0;
 		
-		if(args.length==0) {			
-			settings = Settings.getReference();
-			if (Settings.settingsfile != null)
-				if (Settings.settingsfile.contains("null"))
-					throw(new Exception("no settings file found"));
+		String user = "brad";
+		String pass = "zdy";
+		String ip = "127.0.0.1";
+		int port = 4444;
+		
+		//if(args.length==0) {			
+		//	settings = Settings.getReference();
+		//	if (Settings.settingsfile != null)
+		//		if (Settings.settingsfile.contains("null"))
+		//			throw(new Exception("no settings file found"));
 			
 			// login info from settings
-			user = settings.readSetting("user0");
-			pass = settings.readSetting("pass0");
-			port = settings.getInteger(ManualSettings.commandport); 
-		}
+		//	user = settings.readSetting("user0");
+		//	pass = settings.readSetting("pass0");
+		//	port = settings.getInteger(ManualSettings.commandport); 
+		//}
 		
-		// use parms  
+		// use params off command line 
 		if(args.length==4){
 			ip = args[0];
 			port = Integer.parseInt(args[1]);
 			user = args[2];
 			pass = args[3];
-		}
+		} 
 		
 		new Client(ip, port, user, pass);
 	}
