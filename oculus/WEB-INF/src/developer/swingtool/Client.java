@@ -32,9 +32,9 @@ public class Client {
 	// driver
 	public static void main(String args[]) throws Exception {
 		
-		String user = "brad";
-		String pass = "zdy";
-		String ip = "127.0.0.1";
+		String user = null;
+		String pass = null;
+		String ip = null;
 		int port = 4444;
 		
 		//if(args.length==0) {			
