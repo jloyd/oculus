@@ -284,6 +284,7 @@ public enum PlayerCommands {
 		username_update("Change non-connected username with 'oldname' 'newname'"), 
 		disconnectotherconnections("Close rtmp connection with all user connections other than current connection"), 
 		monitor("Robot monitor sleep/wake control"), 
+		showlog("Returns partial jvm.stdout"),
 		assumecontrol("Assume control from current drive, specify new driver 'username'"), 
 		softwareupdate("Robot server software update control"),
 		arduinoecho("Set ArduinOculus microcontroller to echo all commands"),
@@ -295,7 +296,7 @@ public enum PlayerCommands {
 		writesetting("Write setting to oculus_settings.txt"), 
 		holdservo ("Set/unset use of power break for persicope servo"), 
 		opennisensor("Kinect/Xtion Primesense sensor control"), 
-		videosoundmode("Robot video compression codec"), 
+		videosoundmode("Set robot video compression codec"), 
 		pushtotalktoggle("When broadcasting client mic through robot speakers, always on or mute until keypress"),
 		restart("Restart server application on robot");
 
