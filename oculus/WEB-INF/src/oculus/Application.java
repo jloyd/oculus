@@ -217,9 +217,20 @@ public class Application extends MultiThreadedApplicationAdapter {
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean(GUISettings.muteonrovmove);
 		
-		if (settings.getBoolean(State.values.developer.name())) 
-			openNIRead = new developer.OpenNIRead(this);
+		// needs a refrence, or just start it ?
+		// MotionTracker motionTracker = 
+				
 	
+		if (settings.getBoolean(State.values.developer.name())) {
+			openNIRead = new developer.OpenNIRead(this);
+			try {
+				new developer.MotionTracker();
+			} catch (Exception e) {
+				Util.log(e.getLocalizedMessage(), this);
+			}
+		}
+		
+		
 		if ( ! settings.readSetting(ManualSettings.emailaddress).equals(State.values.disabled))
 			new developer.EmailAlerts(this);
 			

@@ -17,6 +17,7 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 	
 	public OpenNIRead(Application a) {
 		app = a;
+		oculus.Util.log("start..", this);
 	}
 	
 	@Override
@@ -27,6 +28,9 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 	}
 	
 	public void startDepthCam() {
+		
+		oculus.Util.log("start depth cam", this);
+		
 		String sep = "\\"; // windows
 		if (Settings.os.equals("linux")) { sep = "/"; }
 		String SAMPLES_XML = System.getenv("RED5_HOME") + sep+"webapps"+sep+"oculus"+sep+"openNIconfig.xml";
