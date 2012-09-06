@@ -11,7 +11,7 @@ public class State {
 	public enum values{user, logintime, usercommand, userisconnected, reboot, developer, serialport, lightport, target, boottime, batterylife, 
 		motionenabled, externaladdress, autodocktimeout, autodocking, timeout,losttarget , firmware, unknown, override,  commwatchdog,
 		framegrabbusy, sonarback, sonarright, sonarleft, dockgrabbusy, docking, dockxsize, dockysize, dockstatus, dockgrabtime, dockslope, dockxpos,
-		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus, localaddress
+		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus, localaddress, centerpoint, motioncommand
 	};
 
 	public static final String SEPERATOR = " : ";
@@ -30,8 +30,7 @@ public class State {
 	private static State singleton = new State();
 
 	/** properties object to hold configuration */
-	//private Properties props = new Properties();
-	private HashMap<String, String> props = new HashMap<String, String>(); // Properties();
+	private HashMap<String, String> props = new HashMap<String, String>(); 
 	
 	public static State getReference() {
 		return singleton;
@@ -299,4 +298,5 @@ public class State {
 	public void set(values key, boolean value){
 		set(key.name(), value);
 	}
+
 }

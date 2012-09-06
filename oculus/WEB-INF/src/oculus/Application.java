@@ -217,17 +217,18 @@ public class Application extends MultiThreadedApplicationAdapter {
 		httpPort = settings.readRed5Setting("http.port");
 		muteROVonMove = settings.getBoolean(GUISettings.muteonrovmove);
 		
-		// needs a refrence, or just start it ?
-		// MotionTracker motionTracker = 
-				
-	
-		if (settings.getBoolean(State.values.developer.name())) {
+		if (settings.getBoolean(State.values.developer)) {
+			
 			openNIRead = new developer.OpenNIRead(this);
+			
 			try {
-				new developer.MotionTracker();
+				
+				developer.MotionTracker.getReference();
+			
 			} catch (Exception e) {
-				Util.log(e.getLocalizedMessage(), this);
+				Util.log("MotionTracker: "+ e.getLocalizedMessage(), this);
 			}
+			
 		}
 		
 		
@@ -473,6 +474,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			moveMacroCancel();
 			comport.slide(str);
 			//if (moves != null) moves.append("slide " + str);
+			state.set(State.values.motioncommand.name(), System.currentTimeMillis());
 			messageplayer("command received: " + fn + str, null, null);
 			break;
 
@@ -503,8 +505,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("resetting arduinoculus", null, null);
 			break;
 
-		case move:move(str);break;
-		case nudge:nudge(str);break;
+		case move:move(str);
+			state.set(State.values.motioncommand.name(), System.currentTimeMillis());
+			break;
+		case nudge:nudge(str);
+			state.set(State.values.motioncommand.name(), System.currentTimeMillis());
+			break;
+			
 		case speech:saySpeech(str);break;
 		case dock:docker.dock(str);break;
 		case battstats:battery.battStats();break;
@@ -583,27 +590,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("pushtotalk", str);
 			messageplayer("self mic push T to talk "+str, null, null);
 			break;
-			
-		/*	
-		case bkz:
-			Util.debug("test...  take image", this);
-			final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {			
-						int i = Integer.parseInt(str);
-						new File("capture").mkdir();
-						for(; i > 0 ; i--) {
-							Util.debug(i + " save: " + urlString, this);
-							Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
-						}
-					} catch (Exception e) {
-						Util.log("can't get image: " + e.getLocalizedMessage(), this);
-					}
-				}}).start();	
-				
-			*/
 			
 		}
 	}

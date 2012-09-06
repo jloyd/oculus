@@ -17,6 +17,8 @@ import javax.imageio.ImageIO;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import developer.MotionTracker;
+
 //import org.red5.io.amf3.ByteArray;
 
 public class FrameGrabHTTP extends HttpServlet {
@@ -30,6 +32,9 @@ public class FrameGrabHTTP extends HttpServlet {
 	private static boolean radarImageGenerating = false;
 	//	FrameGrabHTTP servletRunning;
 	
+	MotionTracker tracker = MotionTracker.getReference();
+	
+	/** */ 
 	public static void setApp(Application a) {
 		if(app != null) return;
 		app = a;
@@ -48,9 +53,15 @@ public class FrameGrabHTTP extends HttpServlet {
             if (mode.equals("radar")) {
         		radarGrab(req,res);            	
             }
+           
+            // TODO: BRAD
+            if(mode.equals("hist")) {
+            	histGrab(req,res);    
+            }
         	
         }
 		else { frameGrab(req,res); }
+        
 	}
 	
 	private void frameGrab(HttpServletRequest req, HttpServletResponse res) 
@@ -143,6 +154,14 @@ public class FrameGrabHTTP extends HttpServlet {
 //		image.flush();
 //		timer.cancel();
 	}
+	
+	private void histGrab(HttpServletRequest req, HttpServletResponse res) 
+			throws ServletException, IOException {
+			res.setContentType("image/gif");
+			OutputStream out = res.getOutputStream();
+			ImageIO.write(tracker.getHist(), "GIF", out);
+		}
+		
 	
 	private void generateRadarImage() {
 		radarImageGenerating = true;

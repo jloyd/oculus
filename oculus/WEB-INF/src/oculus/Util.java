@@ -450,14 +450,14 @@ public class Util {
     }
 	
 	public static void debug(String str, Object c) {
-		if(debug) System.out.println("DEBUG: " + c.getClass().getName() + ", " +str + ", "+getTime());
+		if(debug) System.out.println("DEBUG: " + c.getClass().getName() + ", " + getTime() + ", " +str);
 	}
 
 	public static void log(String str, Object c) {
-		System.out.println("OCULUS: " + c.getClass().getName() + ", " +str + ", " + getTime());
+		System.out.println("OCULUS: " + c.getClass().getName() + ", " + getTime() + ", " +str);
 	}
 
 	public static void log(String str) {
-		System.out.println("OCULUS: " +str+ ", " + getTime());
+		System.out.println("OCULUS: " + getTime() + ", " + str);
 	}
 }

@@ -17,7 +17,6 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 	
 	public OpenNIRead(Application a) {
 		app = a;
-		oculus.Util.log("start..", this);
 	}
 	
 	@Override
@@ -39,8 +38,6 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 			if (depthCamInit == false) {
 				OutArg<ScriptNode> scriptNodeArg = new OutArg<ScriptNode>();
 				context = Context.createFromXmlFile(SAMPLES_XML, scriptNodeArg);
-//				OpenNIRead pThis = new OpenNIRead();
-//				context.getErrorStateChangedEvent().addObserver(pThis);
 				context.getErrorStateChangedEvent().addObserver(this);
 				depth = (DepthGenerator)context.findExistingNode(NodeType.DEPTH);
 				depthMD = new DepthMetaData();
@@ -59,7 +56,7 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 			depth.stopGenerating();
 //			context.release();
 //			context = null;
-//			app.message("depth Cam shutdown complete",null,null);
+			app.message("depth Cam shutdown complete",null,null);
 			depthCamGenerating= false;
 		} catch (StatusException e) {
 			e.printStackTrace();
@@ -85,8 +82,8 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 		return result;
 	}
 
-	public static void main(String[] args) // shows ctr pixel value, sample
-	{
+//	public static void main(String[] args) // shows ctr pixel value, sample
+//	{
 //		try 
 //		{
 //			OutArg<ScriptNode> scriptNodeArg = new OutArg<ScriptNode>();
@@ -104,6 +101,6 @@ public class OpenNIRead implements IObserver<ErrorStateEventArgs>{
 //			}
 //		} 
 //		catch (Throwable e) { e.printStackTrace(); }
-	}
+//	}
 	
 }
