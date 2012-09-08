@@ -9,28 +9,29 @@ import oculus.Settings;
 import oculus.State;
 import oculus.Util;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.ShortBuffer;
-import javax.imageio.ImageIO;
+import java.util.Vector;
+
 import org.OpenNI.*;
 
 public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
-
-	protected static final long START_UP_DELAY = 500;
-	protected static final long POLL_DELAY = 300;
+	
+	protected static final int MAX_SIZE = 10;
+	protected static final long START_UP_DELAY = 15000;
+	protected static final long POLL_DELAY = 500;
 	
 	private static MotionTracker singleton = null;
 	private State state = State.getReference();
+	
+	// keep a first in, lasts out buffer of frames 
+	private Vector<byte[]> frames = new Vector<byte[]>(MAX_SIZE); 
+	
 	private boolean running = false;
 	private Context context;
 	private DepthGenerator depth;
 	private DepthMetaData depthMD;
 	private int xRes = 0;
 	private int yRes = 0;
-	private byte[] imgbytes;
-	private float histogram[];
-	private BufferedImage bimg;
 	
 	
 	/** */
@@ -39,6 +40,7 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 		return singleton;
 	}
 
+	
 	/** */
 	private MotionTracker() {
 
@@ -70,12 +72,12 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 		xRes = depthMD.getFullXRes();
 		yRes = depthMD.getFullXRes();
 		
-		Util.debug("start up, xRes: " + xRes + " yRes: " + yRes, this);
-		initImage();
+		Util.debug("____start up, xRes: " + xRes + " yRes: " + yRes, this);
 		
 		state.addObserver(this);
 		start();
 	}
+	
 	
 	/** */
 	public void stop()  {
@@ -86,6 +88,7 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 			Util.debug("stop(): " + e.getLocalizedMessage(), this);
 		}
 	}
+	
 	
 	/** */
 	public void start(){
@@ -105,14 +108,21 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 					
 					updateCenter();
 					
-				//	updateDepth();
-				
-				//	save("test.png");
+					// push out oldest record
+	                if (frames.size() == frames.capacity())
+	                	frames.removeElementAt(0);
+	            
+	                // get new frame 
+					frames.add(getDepth());
+					
+					
+					//Util.log("size: " + frames.size(), this);
 					
 				}
 			}
 		}).start();
 	}
+	
 	
 	/** send current center point to state. (distance in mm) */
 	private void updateCenter(){
@@ -120,25 +130,12 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 		if(center != state.getInteger(State.values.centerpoint))
 			state.set(State.values.centerpoint, center);
 	}
-
+	
 	
 	/** */ 
-	public void initImage(){
-
-        histogram = new float[10000];
-		imgbytes = new byte[xRes*yRes]; 
-        
-		DataBufferByte dataBuffer = new DataBufferByte(imgbytes, xRes*yRes);        
-		Raster raster = Raster.createPackedRaster(dataBuffer, (Integer) xRes, yRes, 8, null);   
-		bimg = new BufferedImage((Integer) xRes, yRes, BufferedImage.TYPE_BYTE_GRAY);
-		bimg.setData(raster);
+	private float[] calcHist(){
 		
-	}   
-	
-	
-	/** */ 
-	private void calcHist(){
-        // reset
+		float histogram[] = new float[xRes*yRes]; 
         for (int i = 0; i < histogram.length; ++i) histogram[i] = 0;
         ShortBuffer depth = depthMD.getData().createShortBuffer();
         depth.rewind();
@@ -161,15 +158,19 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
                 histogram[i] = (int)(256 * (1.0f - (histogram[i] / (float)points)));
             }
         }
+        
+        return histogram;
     }
 
 	
 	/** */ 
-    private void updateDepth(){
+    private byte[] getDepth(){
+    	
+    	byte[] imgbytes = new byte[xRes*yRes]; 
         try {
         	
             context.waitAnyUpdateAll();
-            calcHist();
+            float[] histogram = calcHist();
             ShortBuffer depth = depthMD.getData().createShortBuffer();
             depth.rewind();
             
@@ -181,6 +182,8 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
         } catch (GeneralException e) {
         	Util.log("updateDepth(): " + e.getLocalizedMessage(), this);
         }
+        
+        return imgbytes;
     }
 
     
@@ -190,37 +193,54 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
     }
     
     
-    /** */ 
-    public BufferedImage getHist(){
-    	updateDepth();
-    	DataBufferByte dataBuffer = new DataBufferByte(imgbytes, xRes*yRes);
+    /**  
+    public BufferedImage getHistogram(){
+		BufferedImage bimg = new BufferedImage((Integer) xRes, yRes, BufferedImage.TYPE_BYTE_GRAY);
+    	DataBufferByte dataBuffer = new DataBufferByte(getDepth(), xRes*yRes);
     	Raster raster = Raster.createPackedRaster(dataBuffer, xRes, yRes, 8, null);
     	bimg.setData(raster);
     	return bimg;
+    }*/
+
+    
+    /**
+     * used to test, send images via servlett 
+     * 
+     *  @param takes an integer to index into stored frames in buffer 
+     *  @return an image created from the buffer 
+     */ 
+    public BufferedImage getHistogram(final int i){
+    	BufferedImage bimg = new BufferedImage((Integer) xRes, yRes, BufferedImage.TYPE_BYTE_GRAY);
+    	DataBufferByte dataBuffer = new DataBufferByte(frames.get(frames.size()-i), xRes*yRes);
+    	Raster raster = Raster.createPackedRaster(dataBuffer, xRes, yRes, 8, null);
+    	bimg.setData(raster);
+    	return bimg;	
     }
 
-    /** */ 
+    
+    /** 
     public void save(final String filename){ 
     
     	// TODO: remove later.. 
-    	// long start = System.currentTimeMillis();
-    	updateDepth();
+    	long start = System.currentTimeMillis();
     	
-        DataBufferByte dataBuffer = new DataBufferByte(imgbytes, xRes*yRes);
+    	BufferedImage bimg = new BufferedImage((Integer) xRes, yRes, BufferedImage.TYPE_BYTE_GRAY);
+        DataBufferByte dataBuffer = new DataBufferByte(getDepth(), xRes*yRes);
         Raster raster = Raster.createPackedRaster(dataBuffer, xRes, yRes, 8, null);
         bimg.setData(raster);
 
-        File outputfile = new File(filename);
+        java.io.File outputfile = new java.io.File(filename);
         try {
-			ImageIO.write(bimg, "png", outputfile);
+        	javax.imageio.ImageIO.write(bimg, "png", outputfile);
 		} catch (IOException e) {
 			Util.log("save(): " + e.getLocalizedMessage(), this);
 		}
       
         // takes under 100ms
-        // Util.log("saved to file: " + outputfile.getAbsolutePath() + (System.currentTimeMillis()-start)+" ms", this);
-    }
-	
+        Util.log("saved to file: " + outputfile.getAbsolutePath() + (System.currentTimeMillis()-start)+" ms", this);
+        
+    }*/
+	 
 	
 	/** @return the current frame as an array of distance values in mm 
 	public int[][] getFrame(){
