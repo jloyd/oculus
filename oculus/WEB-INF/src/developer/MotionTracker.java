@@ -1,5 +1,6 @@
 package developer;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
@@ -10,6 +11,7 @@ import oculus.State;
 import oculus.Util;
 
 import java.nio.ShortBuffer;
+import java.util.Date;
 import java.util.Vector;
 
 import org.OpenNI.*;
@@ -18,13 +20,14 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 	
 	protected static final int MAX_SIZE = 10;
 	protected static final long START_UP_DELAY = 15000;
-	protected static final long POLL_DELAY = 500;
+	protected static final long POLL_DELAY = 200;
 	
 	private static MotionTracker singleton = null;
 	private State state = State.getReference();
 	
 	// keep a first in, lasts out buffer of frames 
 	private Vector<byte[]> frames = new Vector<byte[]>(MAX_SIZE); 
+	private Vector<Long> meta = new Vector<Long>(MAX_SIZE); 
 	
 	private boolean running = false;
 	private Context context;
@@ -32,6 +35,8 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 	private DepthMetaData depthMD;
 	private int xRes = 0;
 	private int yRes = 0;
+	
+	private int pollDelay = 300;
 	
 	
 	/** */
@@ -48,6 +53,8 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 		if (Settings.os.equals("linux")) sep = "/";
 		String SAMPLES_XML = System.getenv("RED5_HOME") + sep + "webapps" + sep + "oculus" + sep + "openNIconfig.xml";
 
+		state.addObserver(this);
+		
 		try {
 			
 			OutArg<ScriptNode> scriptNodeArg = new OutArg<ScriptNode>();
@@ -58,23 +65,22 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 			
 		} catch (Throwable e) {
 			Util.debug("constructor: " + e.getLocalizedMessage(), this);
-			try {
-				depth.stopGenerating();
-			} catch (StatusException e1) {
-				Util.debug("constructor: " + e1.getLocalizedMessage(), this);
-				return;
-			}
+			return;
+		}
+		
+		if(depth==null){
+			Util.log("can't get dept cam..", this);
 			return;
 		}
 		
 		// setup must be done before any reads 
 		depth.getMetaData(depthMD);
-		xRes = depthMD.getFullXRes();
-		yRes = depthMD.getFullXRes();
+		xRes = depthMD.getXRes();
+		yRes = depthMD.getYRes();
 		
 		Util.debug("____start up, xRes: " + xRes + " yRes: " + yRes, this);
 		
-		state.addObserver(this);
+		
 		start();
 	}
 	
@@ -89,6 +95,11 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 		}
 	}
 	
+	/** */
+	public void setPollDelay(int delay){
+		if(delay > POLL_DELAY) 
+			pollDelay = delay;
+	}
 	
 	/** */
 	public void start(){
@@ -104,19 +115,17 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
 				// read at fixed rate 
 				while(running){ 
 					
-					Util.delay(POLL_DELAY);
+					Util.delay(pollDelay);
 					
 					updateCenter();
 					
 					// push out oldest record
-	                if (frames.size() == frames.capacity())
-	                	frames.removeElementAt(0);
-	            
+	                if (frames.size() == frames.capacity()) frames.removeElementAt(0);
+	                if (meta.size() == meta.capacity()) meta.removeElementAt(0);
+
 	                // get new frame 
 					frames.add(getDepth());
-					
-					
-					//Util.log("size: " + frames.size(), this);
+					meta.add(System.currentTimeMillis());
 					
 				}
 			}
@@ -214,6 +223,13 @@ public class MotionTracker implements IObserver<ErrorStateEventArgs>, Observer {
     	DataBufferByte dataBuffer = new DataBufferByte(frames.get(frames.size()-i), xRes*yRes);
     	Raster raster = Raster.createPackedRaster(dataBuffer, xRes, yRes, 8, null);
     	bimg.setData(raster);
+    	
+    	// TODO: 
+    	Graphics2D g = bimg.createGraphics(); 
+    	// g.setColor(Color.red);
+    	// g.setFont(new Font("SansSerif", Font.BOLD, 16));
+    	g.drawString("["+ i + "] " + new Date(meta.get(meta.size()-1)) + " delay: " + pollDelay , 15, 15);
+    	
     	return bimg;	
     }
 

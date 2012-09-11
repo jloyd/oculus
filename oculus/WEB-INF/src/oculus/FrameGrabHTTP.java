@@ -157,9 +157,30 @@ public class FrameGrabHTTP extends HttpServlet {
 	
 	private void histGrab(HttpServletRequest req, HttpServletResponse res) 
 			throws ServletException, IOException {
+	
+			int number = 1;
+			try {
+				String frame = req.getParameter("frame");
+				number = Integer.valueOf(frame);
+			} catch (NumberFormatException e) {
+				// Util.log("histGrab: " + e.getLocalizedMessage(), this);
+				number = 1;
+			}
+			
+			// TODO: brad 
+			// set thread time delay for testing
+			String delay = req.getParameter("delay");
+			if(delay!=null){
+				try {
+					tracker.setPollDelay(Integer.valueOf(delay));
+				} catch (NumberFormatException e) {
+					//Util.log("histGrab: " + e.getLocalizedMessage(), this);
+				}
+			}
+		
 			res.setContentType("image/gif");
 			OutputStream out = res.getOutputStream();
-			ImageIO.write(tracker.getHist(), "GIF", out);
+			ImageIO.write(tracker.getHistogram(number), "GIF", out);
 		}
 		
 	

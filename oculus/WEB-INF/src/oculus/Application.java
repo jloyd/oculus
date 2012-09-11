@@ -223,7 +223,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 			try {
 				
-				developer.MotionTracker.getReference();
+				if(developer.MotionTracker.getReference()==null){
+					Util.log("application couldnt create: ", this);;
+				}
 			
 			} catch (Exception e) {
 				Util.log("MotionTracker: "+ e.getLocalizedMessage(), this);
