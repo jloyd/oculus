@@ -1,6 +1,5 @@
 package oculus.commport;
 
-// import developer.SendMail;
 import oculus.Application;
 import oculus.Observer;
 import oculus.State;
@@ -12,15 +11,13 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 public class ArduinoCommSonar extends AbstractArduinoComm implements
-		SerialPortEventListener, ArduioPort, Observer {
+		SerialPortEventListener, ArduioPort {
 
 	public static final long SONAR_DELAY = 1500;
-	//public static int sonarOffset = -1; 
 	
 	public ArduinoCommSonar(Application app) {	
 		super(app);
 		new WatchDog().start();
-		state.addObserver(this);
 	}
 
 	/** inner class to check if getting responses in timely manor */
@@ -129,6 +126,7 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 		}
 	}
 
+	/*
 	@Override
 	public void updated(String key) {
 
@@ -147,5 +145,5 @@ public class ArduinoCommSonar extends AbstractArduinoComm implements
 
 			}
 		}
-	}
+	}*/
 }

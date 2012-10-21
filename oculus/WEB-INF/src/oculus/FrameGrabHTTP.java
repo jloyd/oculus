@@ -41,13 +41,11 @@ public class FrameGrabHTTP extends HttpServlet {
 		var = 0;
 	}
 	
-	public void doGet(HttpServletRequest req, HttpServletResponse res)
-			throws ServletException, IOException {
+	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		doPost(req,res);
 	}
 	
-	public void doPost(HttpServletRequest req, HttpServletResponse res)
-			throws ServletException, IOException {
+	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         if (req.getParameter("mode") != null) {
             String mode = req.getParameter("mode");
             if (mode.equals("radar")) {
@@ -64,8 +62,7 @@ public class FrameGrabHTTP extends HttpServlet {
         
 	}
 	
-	private void frameGrab(HttpServletRequest req, HttpServletResponse res) 
-		throws ServletException, IOException {
+	private void frameGrab(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		
 		res.setContentType("image/jpeg");
 		OutputStream out = res.getOutputStream();

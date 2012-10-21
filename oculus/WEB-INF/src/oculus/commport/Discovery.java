@@ -33,6 +33,7 @@ public class Discovery implements SerialPortEventListener {
 	public static final int FLOWCONTROL = SerialPort.FLOWCONTROL_NONE;
 
 	/* add known devices here, strings returned from the firmware */
+	public static final String ARDUINO_MOTOR_SHIELD = "arduinoMotorShield";
 	public static final String OCULUS_TILT = "oculusTilt";
 	public static final String OCULUS_SONAR = "oculusSonar";
 	public static final String OCULUS_DC = "oculusDC";
@@ -186,7 +187,7 @@ public class Discovery implements SerialPortEventListener {
 		// try to limit searching
 		if(ports.contains(motors)) ports.remove(motors);
 		if(state.get(State.values.serialport) != null) 
-			ports.remove(state.getBoolean(State.values.serialport));
+			ports.remove(state.get(State.values.serialport));
 			
 		Util.debug("discovery for lights starting on ports: " + ports.size(), this);
 		
@@ -257,6 +258,11 @@ public class Discovery implements SerialPortEventListener {
 
 				state.set(State.values.serialport, getPortName());
 				state.set(State.values.firmware, OCULUS_TILT);
+				
+			} else if (id.equalsIgnoreCase(ARDUINO_MOTOR_SHIELD)) {
+
+				state.set(State.values.serialport, getPortName());
+				state.set(State.values.firmware, ARDUINO_MOTOR_SHIELD);
 				
 			}
 
@@ -332,6 +338,10 @@ public class Discovery implements SerialPortEventListener {
 
 	/** match types of firmware names and versions */
 	public AbstractArduinoComm getMotors(Application application) {
+		
+		if(state.get(State.values.firmware).equals(ARDUINO_MOTOR_SHIELD)) 
+			return new ArduinoMotorSheild(application);
+		
 		return new ArduinoCommDC(application);
 	}
 	

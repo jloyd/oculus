@@ -15,6 +15,7 @@ public class EmailAlerts implements Observer {
 	private Settings settings = Settings.getReference();;
 	private State state = State.getReference();
 	private Application app = null;
+	private boolean sent = false;
 	
 	/** Constructor */
 	public EmailAlerts(Application parent) {
@@ -37,6 +38,8 @@ public class EmailAlerts implements Observer {
 	@Override
 	public void updated(String key) {
 		
+		if(sent) return;
+		
 		if( ! key.equals(State.values.batterylife.name())) return;
 		
 		Util.debug(".. checking battey", this);
@@ -45,8 +48,7 @@ public class EmailAlerts implements Observer {
 			
 			app.message("battery low, sending email", null, null);
 			
-			String msg = "The battery " + Integer.toString(state.getInteger(State.values.batterylife.name())) 
-			+ "% and is draining!"; 
+			String msg = "The battery " + Integer.toString(state.getInteger(State.values.batterylife.name())) + "% and is draining!"; 
 							
 			// add the link back to the user screen 
 			msg += "\n\nPlease find the dock, log in here: http://" 
@@ -56,6 +58,10 @@ public class EmailAlerts implements Observer {
 			
 			// send email 
 			new SendMail("Oculus Message", msg, app); 
+			
+			// only sent once 
+			sent = true;
+			
 		}
 	}
 }

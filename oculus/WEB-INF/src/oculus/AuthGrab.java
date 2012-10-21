@@ -47,13 +47,11 @@ public class AuthGrab extends HttpServlet {
 		return true;
 	}
 	
-	public void doGet(HttpServletRequest req, HttpServletResponse res)
-			throws ServletException, IOException {
+	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		doPost(req,res);
 	}
 	
-	public void doPost(HttpServletRequest req, HttpServletResponse res)
-			throws ServletException, IOException {
+	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 				
         final String user = req.getParameter("user");
         final String pass = req.getParameter("pass");

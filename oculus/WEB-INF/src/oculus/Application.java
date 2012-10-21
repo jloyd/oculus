@@ -223,13 +223,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 			try {
 				
-				if(developer.MotionTracker.getReference()==null){
-					Util.log("application couldnt create: ", this);;
-				}
+				developer.MotionTracker.getReference().setApp(this);
 			
 			} catch (Exception e) {
 				Util.log("MotionTracker: "+ e.getLocalizedMessage(), this);
 			}
+			
+			// new developer.AvoidObjects(this);
 			
 		}
 		
@@ -886,7 +886,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	private void sendplayerfunction(String fn, String params) {
+	public void sendplayerfunction(String fn, String params) {
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			sc.invoke("playerfunction", new Object[] { fn, params });
@@ -902,6 +902,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageGrabber("synth voice: " + str, null);
 		//Speech speech = new Speech();   // DONT initialize each time here, takes too long
 		speech.mluv(str);
+		
 	}
 
 	private void getDrivingSettings() {
