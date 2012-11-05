@@ -1342,10 +1342,8 @@ function arduinoReset() {
 
 function arduinoEcho(value){
 	message("firmware command echo " + value, sentcmdcolor);
-	
-	if(value=='on')	callServer("arduinoecho", "true");
-	if(value=='off') callServer("arduinoecho", "false");
-//	overlay('off');
+	if(value=="true")	{ callServer("arduinoecho", "true"); }
+	if(value=="false")  { callServer("arduinoecho", "false"); }
 }
 
 function writesetting(value){
@@ -1364,7 +1362,6 @@ function restart() {
 	if (confirm("restart server\nare you sure?")) { 
 	  message("sending restart: "+str,sentcmdcolor);
 	  callServer('restart','');
-//	  overlay('off');
 	}
 }
 

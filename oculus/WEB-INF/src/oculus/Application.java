@@ -391,6 +391,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the parameter to pass onto the function
 	 */
 	public void playerCallServer(final String fn, final String str) {
+		Util.debug("from player flash: "+fn+", "+str, this); 
+		
 		if (fn == null) return;
 		if (fn.equals("")) return;
 		
@@ -872,6 +874,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void messageplayer(String str, String status, String value) {
+		Util.debug("TO player flash: "+str+", "+status+", "+value, this);
 		
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
@@ -1267,7 +1270,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** */
 	public void messageGrabber(String str, String status) {
-		Util.debug("TO grabber flash: "+str+", "+status, this); // TODO: remove, testing only 
+		Util.debug("TO grabber flash: "+str+", "+status, this);  
 
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
