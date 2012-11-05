@@ -199,8 +199,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public void initialize() {
 
 		salt = settings.readSetting("salt");
-		if (salt == null) {
-			Util.log("initialize(), has no salt!", this);
+		if (salt == null || salt.equalsIgnoreCase("null")) {
 			salt = UUID.randomUUID().toString();
 			settings.newSetting("salt", salt);
 		}

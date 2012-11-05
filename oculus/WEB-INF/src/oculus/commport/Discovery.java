@@ -14,7 +14,7 @@ import oculus.Util;
 
 import gnu.io.*;
 
-public class Discovery implements SerialPortEventListener {
+public class Discovery { // implements SerialPortEventListener {
 	
 	// two states to watch for in settings 
 	public static enum params {discovery, disabled};
@@ -51,7 +51,7 @@ public class Discovery implements SerialPortEventListener {
 	/* read from device */
 	private static byte[] buffer = null; 
 	
-	private boolean handlingEvent = false;
+//	private boolean handlingEvent = false;
 	
 	/* constructor makes a list of available ports */
 	public Discovery() {
@@ -129,16 +129,14 @@ public class Discovery implements SerialPortEventListener {
 			
 			Util.debug("connected: " + address + " buad:" + rate, this);
 			
-			if (true) { // rate==115200) {
-				Util.delay(TIMEOUT*2);
-				doPortQuery();
-			}
-			else {
-				// register for serial events
-				Util.debug("registering port listeners... ",this);
-				serialPort.addEventListener(this);
-				serialPort.notifyOnDataAvailable(true);
-			}
+			Util.delay(TIMEOUT*2);
+			
+			doPortQuery();
+						
+//			register for serial events
+//			Util.debug("registering port listeners... ",this);
+//			serialPort.addEventListener(this);
+//			serialPort.notifyOnDataAvailable(true);
 
 		} catch (Exception e) {
 			Util.log("error connecting to: " + address, this);
@@ -156,11 +154,11 @@ public class Discovery implements SerialPortEventListener {
 	/** Close the serial port streams */
 	private void close() {
 		
-		if (handlingEvent) { return; } // hopefully this is never used
+//		if (handlingEvent) { return; } // hopefully this is never used
 		
 		if (serialPort != null) {
 			Util.debug("close port: " + serialPort.getName() + " baud: " + serialPort.getBaudRate(), this);
-			serialPort.removeEventListener();
+			// serialPort.removeEventListener();
 			serialPort.close();
 			serialPort = null;
 		}
@@ -207,7 +205,7 @@ public class Discovery implements SerialPortEventListener {
 		// try to limit searching 
 		if(ports.contains(lights)) ports.remove(lights);
 		
-		Util.debug("discovery for motors starting on ports: " + ports.size(), this); 
+		Util.debug("discovery for motors starting on " + ports.size()+" ports", this); 
 	
 		//for (int i = ports.size() - 1; i >= 0; i--) {
 		for (int i=0; i<ports.size(); i++) {
@@ -273,6 +271,7 @@ public class Discovery implements SerialPortEventListener {
 	
 	/** send command to get product id */
 	public void getProduct() {
+		Util.debug("getProduct",this);
 		try {
 			inputStream.skip(inputStream.available());
 		} catch (IOException e) {
@@ -290,23 +289,23 @@ public class Discovery implements SerialPortEventListener {
 		Util.delay(RESPONSE_DELAY);
 	}
 
-	@Override
-	public void serialEvent(SerialPortEvent arg0) {
-	
-		if (!handlingEvent) { // ignoring other events .. hopefully not anything important
-			handlingEvent = true;
-			Util.debug("_event: " + arg0,this);
-			
-			if(buffer!=null){
-				Util.debug("...too much serial?",this);
-				return;
-			}
-			
-			doPortQuery();				
-
-			handlingEvent = false;
-		}
-	}
+//	@Override
+//	public void serialEvent(SerialPortEvent arg0) { 
+//	
+//		if (!handlingEvent) { // ignoring other events .. hopefully not anything important
+//			handlingEvent = true;
+//			Util.debug("_event: " + arg0,this);
+//			
+//			if(buffer!=null){
+//				Util.debug("...too much serial?",this);
+//				return;
+//			}
+//			
+//			doPortQuery();				
+//
+//			handlingEvent = false;
+//		}
+//	}
 	
 	private void doPortQuery() {
 		byte[] buffer = new byte[32];
@@ -316,14 +315,17 @@ public class Discovery implements SerialPortEventListener {
 		String device = new String();
 		int read = 0;
 		try {
-			
-			read = inputStream.read(buffer);
-			
+			Util.log("doPortQuery, read buffer", this);
+			if (inputStream.available() > 0) { //prevents linux hang
+				read = inputStream.read(buffer); 
+			}
+			else { Util.debug("no bytes available to read", this); }
 		} catch (IOException e) {
 			Util.log(e.getStackTrace().toString(),this);
 		}
 		
-		// read buffer 
+		// read buffer
+		Util.log("doPortQuery, parse buffer", this);
 		for (int j = 0; j < read; j++) {
 			if(Character.isLetter((char) buffer[j]))
 				device += (char) buffer[j];
@@ -338,7 +340,8 @@ public class Discovery implements SerialPortEventListener {
 
 	/** match types of firmware names and versions */
 	public AbstractArduinoComm getMotors(Application application) {
-		
+
+// CA: below throws null pointer
 //		if(state.get(State.values.firmware).equals(ARDUINO_MOTOR_SHIELD)) 
 //			return new ArduinoMotorSheild(application);
 		
@@ -346,7 +349,7 @@ public class Discovery implements SerialPortEventListener {
 	}
 	
 
-	/** manage types of ights here */
+	/** manage types of lights here */
 	public LightsComm getLights(Application application) {
 		return new LightsComm(application);
 	}

@@ -42,7 +42,7 @@ public class EmailAlerts implements Observer {
 		
 		if( ! key.equals(State.values.batterylife.name())) return;
 		
-		Util.debug(".. checking battey", this);
+		Util.debug(".. checking battery", this);
 		
 		if (state.getInteger(State.values.batterylife.name()) < WARN_LEVEL) {
 			

@@ -68,8 +68,10 @@ public class BatteryLife {
 					while ((line = procReader.readLine()) != null) {
 						str += line + " ";
 					}
+					str.trim();
+					Util.debug("linux batt string: **"+str+"**", this);
 					String dirs[] = str.split(" ");
-					if (dirs.length > 0 && str.matches("\\w+")) { 
+					if (dirs.length > 0 && str.length() > 0) { 
 						int minnum = 999; // most systems will have less than 999 batteries...
 						int num = 0;
 						for (String dir : dirs) {
