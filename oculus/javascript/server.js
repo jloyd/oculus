@@ -340,3 +340,7 @@ function screensize(mode) {
 	}
 	getFlashMovie("oculus_grabber").sizeChanged(w, h);
 }
+
+function debug(str) {
+	document.getElementById('debugbox').innerHTML = str;	
+}

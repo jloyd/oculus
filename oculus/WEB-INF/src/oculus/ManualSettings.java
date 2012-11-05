@@ -7,7 +7,7 @@ import oculus.commport.Discovery;
 /** place extensions to settings here */
 public enum ManualSettings {
 	
-	emailaddress, emailpassword, developer, debugenabled, commandport, stopdelay, vself, arduinoculus, oculed;
+	gmailaddress, gmailpassword, developer, debugenabled, commandport, stopdelay, vself, arduinoculus, oculed;
 
 	/** get basic settings */
 	public static Properties createDeaults(){
@@ -18,8 +18,8 @@ public enum ManualSettings {
 		config.setProperty(vself.toString(), "320_240_8_85");
 		config.setProperty(arduinoculus.name(), Discovery.params.discovery.name());
 		config.setProperty(oculed.name(), Discovery.params.discovery.name());
-		config.setProperty(emailaddress.name(), State.values.disabled.name());
-		config.setProperty(emailpassword.name(), State.values.disabled.name());
+		config.setProperty(gmailaddress.name(), State.values.disabled.name());
+		config.setProperty(gmailpassword.name(), State.values.disabled.name());
 		config.setProperty(commandport.name(), "4444"); // State.values.disabled.name());
 		return config;
 	}

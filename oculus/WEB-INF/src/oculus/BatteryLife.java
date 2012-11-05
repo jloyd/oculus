@@ -69,7 +69,7 @@ public class BatteryLife {
 						str += line + " ";
 					}
 					String dirs[] = str.split(" ");
-					if (dirs.length > 0) { 
+					if (dirs.length > 0 && str.matches("\\w+")) { 
 						int minnum = 999; // most systems will have less than 999 batteries...
 						int num = 0;
 						for (String dir : dirs) {

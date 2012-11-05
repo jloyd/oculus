@@ -52,7 +52,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	
 	public Application() {
 		super();
-		
 		passwordEncryptor.setAlgorithm("SHA-1");
 		passwordEncryptor.setPlainDigest(true);
 		FrameGrabHTTP.setApp(this);
@@ -234,7 +233,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		
-		if ( ! settings.readSetting(ManualSettings.emailaddress).equals(State.values.disabled))
+		if ( ! settings.readSetting(ManualSettings.gmailaddress).equals(State.values.disabled))
 			new developer.EmailAlerts(this);
 			
 		if ( ! settings.readSetting(ManualSettings.commandport).equals(State.values.disabled))
@@ -615,6 +614,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the parameters to pass on to the function.
 	 */
 	public void grabberCallServer(String fn, String str) {
+		Util.debug("from grabber flash: "+fn+", "+str, this); // TODO: remove, testing only 
 		grabberCommands cmd = null;
 		try {
 			cmd = grabberCommands.valueOf(fn);
@@ -1268,6 +1268,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** */
 	public void messageGrabber(String str, String status) {
+		Util.debug("TO grabber flash: "+str+", "+status, this); // TODO: remove, testing only 
+
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("message", new Object[] { str, status });

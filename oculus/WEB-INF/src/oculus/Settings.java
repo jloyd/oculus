@@ -161,14 +161,14 @@ public class Settings {
 		String result = new String();
 		for (GUISettings factory : GUISettings.values()) {
 			String val = readSetting(factory.toString());
-			if (val != null) if( ! val.equals("null"))
+			if (val != null) // if( ! val.equals("null")) 
 				result += factory.toString() + " " + val + "\r\n";
 		}
 	
 		for (ManualSettings ops : ManualSettings.values()) {
 			String val = readSetting(ops.toString());
 			if (val != null) // never send out passwords 
-				if( ! ops.equals(ManualSettings.emailpassword)) 
+				if( ! ops.equals(ManualSettings.gmailpassword)) 
 					result += ops.toString() + " " + val + "\r\n";
 		}
 		
@@ -188,7 +188,8 @@ public class Settings {
 			fw.append("# manual settings \r\n");
 			for (ManualSettings ops : ManualSettings.values()) 
 				fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
-				
+			
+			fw.append("salt null");
 			fw.close();
 			
 			// now swap temp for real file
@@ -214,28 +215,26 @@ public class Settings {
 			fw.append("# gui settings \r\n");
 			for (GUISettings factory : GUISettings.values()) {
 				String val = readSetting(factory.toString());
-				if (val != null){
-					if(val.equals("null")){
-						fw.append(factory.toString() + " " + GUISettings.getDefault(factory) + "\r\n");
-					} else {
-						fw.append(factory.toString() + " " + val + "\r\n");
-					}
+				if (val != null) {
+					fw.append(factory.toString() + " " + val + "\r\n");
 				} 
+				else {
+					fw.append(factory.toString() + " " + GUISettings.getDefault(factory) + "\r\n");
+				}
 			}
 			
 			fw.append("# manual settings \r\n");
 			for (ManualSettings ops : ManualSettings.values()) {
 				String val = readSetting(ops.toString());
 				if (val != null){
-					if( val.equalsIgnoreCase("null")){ 
-						fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
-					} else {
-						fw.append(ops.toString() + " " + val + "\r\n");
-					}
+					fw.append(ops.toString() + " " + val + "\r\n");
 				} 
+				else {
+					fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
+				}
 			}
 
-			if(readSetting("salt") != null) fw.append("salt " + readSetting("salt") + "\r\n");
+//			if(readSetting("salt") != null) fw.append("salt " + readSetting("salt") + "\r\n");
 			
 			if(configuredUsers){
 				fw.append("# user list \r\n");
@@ -247,6 +246,7 @@ public class Settings {
 					fw.append("pass" + j + " " + users[j][1] + "\r\n");
 				}
 			} 
+			else { fw.append("salt null"); }
 			
 			fw.close();
 			

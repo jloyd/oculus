@@ -339,8 +339,8 @@ public class Discovery implements SerialPortEventListener {
 	/** match types of firmware names and versions */
 	public AbstractArduinoComm getMotors(Application application) {
 		
-		if(state.get(State.values.firmware).equals(ARDUINO_MOTOR_SHIELD)) 
-			return new ArduinoMotorSheild(application);
+//		if(state.get(State.values.firmware).equals(ARDUINO_MOTOR_SHIELD)) 
+//			return new ArduinoMotorSheild(application);
 		
 		return new ArduinoCommDC(application);
 	}
