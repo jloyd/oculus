@@ -1,6 +1,7 @@
 package oculus;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
@@ -592,6 +593,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("pushtotalk", str);
 			messageplayer("self mic push T to talk "+str, null, null);
 			break;
+		case quit:
+			quit();
+			break;
 			
 		}
 	}
@@ -599,7 +603,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/** put all commands here */
 	public enum grabberCommands {
 		streammode, saveandlaunch, populatesettings, systemcall, chat, dockgrabbed, autodock, 
-		restart, checkforbattery, factoryreset;
+		restart, checkforbattery, factoryreset, quit;
 		@Override
 		public String toString() {
 			return super.toString();
@@ -674,6 +678,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		case restart:
 			restart();
+			break;
+		case quit:
+			quit();
 			break;
 		}
 	}
@@ -896,14 +903,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void saySpeech(String str) {
-		if (Settings.os.equals("linux")) {
-			messageplayer("unsupported in linux",null,null);
-			return;
-		}
+//		if (Settings.os.equals("linux")) {
+//			messageplayer("unsupported in linux",null,null);
+//			return;
+//		}
 		messageplayer("synth voice: " + str, null, null);
 		messageGrabber("synth voice: " + str, null);
 		//Speech speech = new Speech();   // DONT initialize each time here, takes too long
-		speech.mluv(str);
+		Util.debug("SPEECH sayspeech: "+str, this);
+		if (Settings.os.equals("linux")) {
+			try {
+				String strarr[] = {"espeak",str};
+				Runtime.getRuntime().exec(strarr);
+			} catch (IOException e) { e.printStackTrace(); }
+		}
+		else { speech.mluv(str); }
 		
 	}
 
@@ -1126,24 +1140,38 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void restart() {
-		if (Settings.os.equals("linux")) { 
-			messageplayer("unsupported in linux",null,null);
-			messageGrabber("unsupported in linux", null);
-			return;
-		}
+//		if (Settings.os.equals("linux")) { 
+//			messageplayer("unsupported in linux",null,null);
+//			messageGrabber("unsupported in linux", null);
+//			return;
+//		}
 
 		messageplayer("restarting server application", null, null);
 		messageGrabber("restarting server application", null);
 		File f;
-		f = new File(System.getenv("RED5_HOME") + "\\restart");
+//		f = new File(System.getenv("RED5_HOME") + "\\restart"); // windows
+		f = new File(Settings.redhome + Settings.sep + "restart"); // windows & linux
 		try {
 			if (!f.exists()) {
 				f.createNewFile();
 			}
-			Runtime.getRuntime().exec("red5-shutdown.bat");
+			if (Settings.os.equals("linux")) {
+				Runtime.getRuntime().exec(Settings.redhome+Settings.sep+"red5-shutdown.sh");
+			}
+			else { Runtime.getRuntime().exec("red5-shutdown.bat"); }
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void quit() {
+		try {
+			if (Settings.os.equals("linux")) {
+				Runtime.getRuntime().exec(Settings.redhome+Settings.sep+"red5-shutdown.sh");
+			}
+			else { Runtime.getRuntime().exec("red5-shutdown.bat"); }
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 
 	public void monitor(String str) {

@@ -18,7 +18,7 @@ public enum PlayerCommands {
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
-    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart;
+    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, quit,;
 	
 	/** get text for any player command */
 	public String getHelp(){
@@ -28,7 +28,7 @@ public enum PlayerCommands {
 	// sub-set that are restricted to "user0"
 	public enum AdminCommands {
 		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
-		showlog, softwareupdate, relaunchgrabber, systemcall
+		showlog, softwareupdate, relaunchgrabber, systemcall, quit
 	}
 	
 	// sub-set that are require parameters 
