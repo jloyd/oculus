@@ -515,7 +515,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			state.set(State.values.motioncommand.name(), System.currentTimeMillis());
 			break;
 			
-		case speech:saySpeech(str);break;
+		case speech:
+			messageplayer("synth voice: " + str, null, null);
+			messageGrabber("synth voice: " + str, null);
+			saySpeech(str);
+			break;
+			
 		case dock:docker.dock(str);break;
 		case battstats:battery.battStats();break;
 		case cameracommand:cameraCommand(str);break;
@@ -546,10 +551,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case username_update: account("username_update", str); break;
 		case disconnectotherconnections: disconnectOtherConnections(); break;
 		case monitor:
-			if (Settings.os.equals("linux")){
-				messageplayer("unsupported in linux",null,null);
-				return;
-			}
+//			if (Settings.os.equals("linux")){
+//				messageplayer("unsupported in linux",null,null);
+//				return;
+//			}
 			monitor(str);
 			break;
 		case showlog: showlog(); break;
@@ -564,8 +569,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case floodlight: light.floodLight(str); break;
 		case setsystemvolume:
 			Util.setSystemVolume(Integer.parseInt(str), this);
-			if (Settings.os.equals("linux")) { messageplayer("unsupported in linux",null,null); }
-			else { messageplayer("ROV volume set to "+str+"%", null, null); }
+//			if (Settings.os.equals("linux")) { messageplayer("unsupported in linux",null,null); }
+//			else { 
+			messageplayer("ROV volume set to "+str+"%", null, null); 
 			break;
 		
 		case holdservo:
@@ -907,8 +913,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 //			messageplayer("unsupported in linux",null,null);
 //			return;
 //		}
-		messageplayer("synth voice: " + str, null, null);
-		messageGrabber("synth voice: " + str, null);
 		//Speech speech = new Speech();   // DONT initialize each time here, takes too long
 		Util.debug("SPEECH sayspeech: "+str, this);
 		if (Settings.os.equals("linux")) {
@@ -1176,22 +1180,30 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	public void monitor(String str) {
 		// uses nircmd.exe from http://www.nirsoft.net/utils/nircmd.html
-		if (Settings.os.equals("linux")) {
-			// messageplayer("unsupported in linux",null,null);
-			return;
-		}
+//		if (Settings.os.equals("linux")) {
+//			// messageplayer("unsupported in linux",null,null);
+//			return;
+//		}
 		messageplayer("monitor " + str, null, null);
 		str = str.trim();
-		if (str.equals("on")) {
-			str = "cmd.exe /c start monitoron.bat";
-		} else {
-			str = "nircmdc.exe monitor async_off";
-		}
 		try {
+
+			if (str.equals("on")) {
+				if (Settings.os.equals("linux")) {
+					str = "xset -display :0 dpms force on";
+					Runtime.getRuntime().exec(str);
+					str = "gnome-screensaver-command -d";
+				}
+				else { str = "cmd.exe /c start monitoron.bat"; }
+			} else {
+				if (Settings.os.equals("linux")) {
+					str = "xset -display :0 dpms force off";
+				}
+				else { str = "nircmdc.exe monitor async_off"; }
+			}
 			Runtime.getRuntime().exec(str);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 
 	public void move(String str) {

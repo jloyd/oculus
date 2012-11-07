@@ -26,10 +26,13 @@ public class LoginRecords {
 		state.set(State.values.userisconnected, true);
 		state.set(State.values.logintime, System.currentTimeMillis());
 		
-		if (settings.getBoolean(GUISettings.loginnotify))
-			if(app!=null)
-				app.speech.mluv("lawg inn " + state.get(State.values.user));
-				// accessing 'Speech.mluv' directly so doesn't display text in client window on login 
+		if (settings.getBoolean(GUISettings.loginnotify)) {
+			if(app!=null) {
+//				app.speech.mluv("lawg inn " + state.get(State.values.user));
+				//accessing 'Speech.mluv' directly so doesn't display text in client window on login
+				app.saySpeech("lawg inn " + state.get(State.values.user));
+			}
+		}
 
 		Util.debug("beDriver(): " + state.get(State.values.user), this);
 		

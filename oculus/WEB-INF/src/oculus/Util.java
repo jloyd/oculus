@@ -333,14 +333,16 @@ public class Util {
 	 * @param percent
 	 */
 	public static void setSystemVolume(int percent, Application app){
-		if (Settings.os.equals("linux")) {
-			return; // TODO: linux set system volume
-		}
-		settings.writeSettings(GUISettings.volume.name(), percent);
-		float vol = (float) percent / 100 * 65535;
 		String str;
-		str = "nircmdc.exe setsysvolume "+ (int) vol; //w in
-		Util.systemCall(str);					
+		if (Settings.os.equals("linux")) {
+			str = "amixer set Master "+percent+"%";
+		}
+		else  {
+			float vol = (float) percent / 100 * 65535;
+			str = "nircmdc.exe setsysvolume "+ (int) vol; //w in
+		}
+		Util.systemCall(str);
+		settings.writeSettings(GUISettings.volume.name(), percent);
 	}
 
 	/**
