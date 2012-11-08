@@ -19,16 +19,17 @@ public class Downloader {
 			final String localFileName, final String destinationDir) {
 
 		long start = System.currentTimeMillis();
+		String sep = System.getProperty("file.separator");
 		
 		InputStream is = null;
 		OutputStream os = null;
 		URLConnection URLConn = null;
 
 		// create path to local file
-		final String path = destinationDir + System.getProperty("file.separator") + localFileName;
+		final String path = System.getenv("RED5_HOME")+ sep + destinationDir + sep + localFileName;
 
 		// create target directory
-		new File(destinationDir).mkdirs();
+		new File(System.getenv("RED5_HOME")+ sep + destinationDir).mkdirs();
 
 		// delete target first
 		new File(path).delete();
@@ -82,29 +83,32 @@ public class Downloader {
 	 */
 	public boolean unzipFolder( String zipFile, String destFolder ) {
 		
-		final String zip = (System.getenv("RED5_HOME") + "\\" + zipFile).trim();
-		final String des = (System.getenv("RED5_HOME") + "\\" + destFolder).trim(); 
-		
-		// clean target 
-		if(new File(des).exists()) deleteDir(new File(des));
-		
-		// 
+		String sep = System.getProperty("file.separator");
+		final String zip = (System.getenv("RED5_HOME") + sep + zipFile).trim();
+		final String des = (System.getenv("RED5_HOME") + sep + destFolder).trim(); 
+
 		if( ! new File(zip).exists()){	
 			Util.log("no zip file found: " + zip, this);
 			return false;
 		}
 				
 		// if zip exists, blocking extraction 
-		Util.systemCallBlocking("fbzip -e -p " + zip + " " + des);
+		if (System.getProperty("os.name").matches("Linux")) { 
+			Util.systemCallBlocking("unzip "+zip+" -d "+des);
+		}
+		else {
+			Util.systemCallBlocking("fbzip -e -p " + zip + " " + des);
+		}
 			
 		// test if folders 
 		if(new File(des).exists())
 			if(new File(des).isDirectory())
-				if(new File(des+"\\update").exists())
-					if(new File(des+"\\update").isDirectory()) 
+				if(new File(des+sep+"update").exists())
+					if(new File(des+sep+"update").isDirectory()) 
 						return true;
 		
 		// error state
+		Util.log("unzip and delete dirs - error");
 		return false;
 	}
 	
@@ -155,7 +159,9 @@ public class Downloader {
 	 * @param filename
 	 */
 	public void deleteFile(String filename) {
-		File f = new File(filename);
+		String sep = System.getProperty("file.separator");
+
+		File f = new File(System.getenv("RED5_HOME")+sep+filename);
 		try {
 			f.delete();
 		} catch (Exception e) {
@@ -164,6 +170,7 @@ public class Downloader {
 	}
 	
 	public boolean deleteDir(File dir) {
+
 	    if (dir.isDirectory()) {
 	        String[] children = dir.list();
 	        for (int i=0; i<children.length; i++) {

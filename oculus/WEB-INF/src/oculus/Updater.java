@@ -16,7 +16,8 @@ public class Updater {
 		int currentVersion = -1;
 
 		// get current version info from txt file in root folder
-		String filename = System.getenv("RED5_HOME")+"\\version.nfo";
+		String sep = System.getProperty("file.separator");
+		String filename = System.getenv("RED5_HOME")+sep+"version.nfo";
 		
 		FileInputStream filein;
 		try {

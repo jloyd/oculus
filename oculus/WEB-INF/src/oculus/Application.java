@@ -1170,8 +1170,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void quit() {
+		Util.debug("running "+Settings.os, this);
 		try {
-			if (Settings.os.equals("linux")) {
+			if (Settings.os.equalsIgnoreCase("linux")) {
 				Runtime.getRuntime().exec(Settings.redhome+Settings.sep+"red5-shutdown.sh");
 			}
 			else { Runtime.getRuntime().exec("red5-shutdown.bat"); }
@@ -1810,10 +1811,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void softwareUpdate(String str) {
-		if (Settings.os.equals("linux")) {
-			messageplayer("unsupported in linux",null,null);
-			return;
-		}
+//		if (Settings.os.equals("linux")) {
+//			messageplayer("unsupported in linux",null,null);
+//			return;
+//		}
 
 		if (str.equals("check")) {
 			messageplayer("checking for new software...", null, null);
@@ -1848,16 +1849,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 								null, null);
 
 						// this is a blocking call
-						if (dl.unzipFolder("download\\update.zip", "webapps"))
+						if (dl.unzipFolder("download"+Settings.sep+"update.zip", "webapps"))
 							messageplayer("done.", "softwareupdate",
 									"downloadcomplete");
 
 						// not needed now is unpacked
-						dl.deleteFile("download\\update.zip");
-
-						// backup config
-						settings.writeFile("oculus_settings_backup_"
-								+ up.getCurrentVersion() + ".txt");
+						dl.deleteDir(new File(Settings.redhome+Settings.sep+"download"));
 
 					} else {
 						messageplayer("update download failed", null, null);

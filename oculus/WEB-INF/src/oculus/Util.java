@@ -210,7 +210,8 @@ public class Util {
 			String line = null;
 			System.out.println(proc.hashCode() + "OCULUS: exec():  " + args);
 			while ((line = procReader.readLine()) != null)
-				System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
+				// System.out.println(proc.hashCode() + " systemCallBlocking() : " + line);
+			proc.waitFor(); // required for linux else throws process hasn't terminated error
 			System.out.println("OCULUS: process exit value = " + proc.exitValue());
 			System.out.println("OCULUS: blocking run time = " + (System.currentTimeMillis()-start) + " ms");
 
