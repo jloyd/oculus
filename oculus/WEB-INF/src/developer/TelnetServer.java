@@ -22,6 +22,8 @@ import oculus.Util;
  */
 public class TelnetServer implements Observer {
 	
+	//TODO: add junit test to check that all commands below are PlayerCommands duplicated
+	// OR just move these all to playercommands?
 	public static enum Commands {message, users, tcp, beep, tail, image, memory, state, settings, help, bye, uptime, quit};
 	public static final String SEPERATOR = " : ";
 	public static final boolean ADMIN_ONLY = true;
@@ -57,7 +59,8 @@ public class TelnetServer implements Observer {
 			}
 	
 			// send banner 
-			out.println("oculus version " + new Updater().getCurrentVersion() + " ready for admin login."); 
+			out.println("welcome to oculus version " + new Updater().getCurrentVersion()); 
+			out.println("ready for admin login, enter line with format user:password OR user:encrypted_password");
 			
 			try {
 				
@@ -68,7 +71,7 @@ public class TelnetServer implements Observer {
 				pass = inputstr.substring(inputstr.indexOf(':')+1, inputstr.length()).trim();
 								
 				// Admin only 
-				if(ADMIN_ONLY) if( ! user.equals(settings.readSetting("user0"))) shutDown("must be admin for telnet");
+				if(ADMIN_ONLY) if( ! user.equals(settings.readSetting("user0"))) shutDown("must be admin user for telnet");
 							
 				// try salted 
 				if(app.logintest(user, pass)==null){
@@ -81,7 +84,7 @@ public class TelnetServer implements Observer {
 					
 					// try plain text 
 					if(app.logintest(user, encryptedPassword)==null)
-						shutDown("login failure, please drop dead: " + user);
+						shutDown("login failure: " + user);
 			
 				}
 			} catch (Exception ex) {
@@ -207,7 +210,7 @@ public class TelnetServer implements Observer {
 					// do min test, check for the same number of arguments 
 					String[] list = req.getArgumentList()[0].split(" ");
 					if(list.length != (cmd.length-1)){
-						out.println("error: wrong number args, rquires [" + list.length + "]");
+						out.println("error: wrong number args, requires [" + list.length + "]");
 						return;
 					}		
 				}
@@ -218,7 +221,6 @@ public class TelnetServer implements Observer {
 			if(args.length()==0) args = null;
 			
 			// now send it 
-			Util.debug(str, this);
 			app.playerCallServer(player, args);
 		}
 		

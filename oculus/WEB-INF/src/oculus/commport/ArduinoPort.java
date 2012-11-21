@@ -2,7 +2,7 @@ package oculus.commport;
 
 import gnu.io.SerialPortEvent;
 
-public interface ArduioPort {
+public interface ArduinoPort {
 
 	public static final long DEAD_TIME_OUT = 30000;
 	public static final int SETUP = 3000;

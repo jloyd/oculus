@@ -1,6 +1,7 @@
 package oculus;
 
 import java.io.*;
+import java.util.UUID;
 
 import oculus.State.values;
 
@@ -33,10 +34,10 @@ public class Settings {
 		if (System.getProperty("os.name").matches("Linux")) { os = "linux"; }
 		
 		// be sure of basic configuration 
-		if(! new File(settingsfile).exists()) createFile(settingsfile);
+		if(! new File(settingsfile).exists()) { createFile(settingsfile); }
 		
 		// test if users exist 
-		if(readSetting("user0")!=null) configuredUsers = true;
+		if(readSetting("user0")!=null) {  configuredUsers = true; }
 	}
 	
 	/** ONLY USE FOR JUNIT */
@@ -178,24 +179,23 @@ public class Settings {
 	public synchronized void createFile(String path) {
 		try {
 			
-			final String temp = redhome+ sep+"conf"+sep+"oculus_created.txt";
-			FileWriter fw = new FileWriter(new File(temp));
+			Util.log("creating "+path.toString(), this);
+			
+			FileWriter fw = new FileWriter(new File(path));
 			
 			fw.append("# GUI settings \r\n");
-			for (GUISettings factory : GUISettings.values()) 
+			for (GUISettings factory : GUISettings.values()) {
 				fw.append(factory.toString() + " " + GUISettings.getDefault(factory) + "\r\n");
-				
+			}
+			
 			fw.append("# manual settings \r\n");
-			for (ManualSettings ops : ManualSettings.values()) 
+			for (ManualSettings ops : ManualSettings.values()) {
 				fw.append(ops.toString() + " " + ManualSettings.getDefault(ops) + "\r\n");
+			}
 			
-			fw.append("salt null");
+			fw.append("# user list \r\n");
+			fw.append("salt "+UUID.randomUUID().toString() + "\r\n");
 			fw.close();
-			
-			// now swap temp for real file
-			new File(path).delete();
-			new File(temp).renameTo(new File(settingsfile));
-			new File(temp).delete();
 
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
@@ -234,19 +234,17 @@ public class Settings {
 				}
 			}
 
-//			if(readSetting("salt") != null) fw.append("salt " + readSetting("salt") + "\r\n");
-			
+			fw.append("# user list \r\n");
 			if(configuredUsers){
-				fw.append("# user list \r\n");
-				fw.append("salt " + readSetting("salt") + "\r\n");
-	
+				if(readSetting("salt") != null) { fw.append("salt " + readSetting("salt") + "\r\n"); }
 				String[][] users = getUsers();
 				for (int j = 0; j < users.length; j++) {
 					fw.append("user" + j + " " + users[j][0] + "\r\n");
 					fw.append("pass" + j + " " + users[j][1] + "\r\n");
 				}
 			} 
-			else { fw.append("salt null"); }
+			else {  fw.append("salt "+UUID.randomUUID().toString() + "\r\n"); }
+ 
 			
 			fw.close();
 			
@@ -373,7 +371,7 @@ public class Settings {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(filein));
 			int i = 0;
 			while ((lines[i] = reader.readLine()) != null) {
-				lines[i] = lines[i].replaceAll("\\s+$", "");
+				lines[i] = lines[i].replaceAll("\\s+$", ""); 
 				if (!lines[i].equals("")) {
 					i++;
 				}

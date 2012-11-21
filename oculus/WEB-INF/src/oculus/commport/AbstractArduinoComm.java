@@ -12,7 +12,7 @@ import oculus.Util;
 
 import gnu.io.SerialPort;
 
-public abstract class AbstractArduinoComm implements ArduioPort {
+public abstract class AbstractArduinoComm implements ArduinoPort {
 
 	protected long lastSent = System.currentTimeMillis();
 	protected long lastRead = System.currentTimeMillis();
@@ -247,7 +247,7 @@ public abstract class AbstractArduinoComm implements ArduioPort {
 
 		} catch (Exception e) {
 			reset();
-			System.out.println("OCULUS: sendCommand(), " + e.getMessage());
+			Util.log("OCULUS: sendCommand(), " + e.getMessage(), this);
 		}
 
 		// track last write

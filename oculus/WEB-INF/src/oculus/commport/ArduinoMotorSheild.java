@@ -8,7 +8,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-public class ArduinoMotorSheild extends AbstractArduinoComm implements SerialPortEventListener, ArduioPort {
+public class ArduinoMotorSheild extends AbstractArduinoComm implements SerialPortEventListener, ArduinoPort {
 	
 	private static final int AVERAGE_LEVEL = 4;
 	int right, left, rightTotal, leftTotal, samples = 0;

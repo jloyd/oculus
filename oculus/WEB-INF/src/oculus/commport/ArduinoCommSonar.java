@@ -11,7 +11,7 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 public class ArduinoCommSonar extends AbstractArduinoComm implements
-		SerialPortEventListener, ArduioPort {
+		SerialPortEventListener, ArduinoPort {
 
 	public static final long SONAR_DELAY = 1500;
 	

@@ -7,7 +7,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventListener, ArduioPort {
+public class ArduinoTilt extends AbstractArduinoComm implements SerialPortEventListener, ArduinoPort {
 
 	int pan = 90;
 	int tilt = 90;

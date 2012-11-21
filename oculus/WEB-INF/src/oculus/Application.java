@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
-import java.util.UUID;
 
 import oculus.commport.AbstractArduinoComm;
 import oculus.commport.Discovery;
@@ -195,18 +194,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		docker = new AutoDock(this, grabber, comport, light);
 		loginRecords.setApplication(this);
 	}
-
+ 
 	/** */
 	public void initialize() {
-
-		salt = settings.readSetting("salt");
-		if (salt == null || salt.equalsIgnoreCase("null")) {
-			salt = UUID.randomUUID().toString();
-			settings.newSetting("salt", salt);
-		}
-
-		// must call this here
+		
 		settings.writeFile();
+		salt = settings.readSetting("salt");
 
 		// must be blocking search of all ports, but only once!
 		Discovery discovery = new Discovery();
@@ -366,6 +359,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageGrabber(str, "connection " + state.get(State.values.user.name()) + "&nbsp;connected");
 			Util.log("playersignin(), " + str, this);
 			loginRecords.beDriver();
+			
+			if (settings.getBoolean(GUISettings.loginnotify)) {
+				saySpeech("lawg inn " + state.get(State.values.user));
+			}
 			
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			sc.invoke("videoSoundMode", new Object[] { videosoundmode });
@@ -599,7 +596,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("pushtotalk", str);
 			messageplayer("self mic push T to talk "+str, null, null);
 			break;
-		case quit:
+		case shutdown:
 			quit();
 			break;
 			
@@ -609,7 +606,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/** put all commands here */
 	public enum grabberCommands {
 		streammode, saveandlaunch, populatesettings, systemcall, chat, dockgrabbed, autodock, 
-		restart, checkforbattery, factoryreset, quit;
+		restart, checkforbattery, factoryreset, shutdown;
 		@Override
 		public String toString() {
 			return super.toString();
@@ -685,7 +682,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case restart:
 			restart();
 			break;
-		case quit:
+		case shutdown:
 			quit();
 			break;
 		}
@@ -1169,7 +1166,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 	
-	public void quit() {
+	public void quit() { 
 		Util.debug("running "+Settings.os, this);
 		try {
 			if (Settings.os.equalsIgnoreCase("linux")) {
@@ -1375,6 +1372,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		initialstatuscalled = false;
 		pendingplayerisnull = true;
 		loginRecords.beDriver();
+		
+		if (settings.getBoolean(GUISettings.loginnotify)) {
+			saySpeech("lawg inn " + state.get(State.values.user));
+		}
 	}
 
 	/** */
@@ -1398,6 +1399,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		}
 		loginRecords.bePassenger();
+		
+		if (settings.getBoolean(GUISettings.loginnotify)) {
+			saySpeech("passenger lawg inn " + state.get(State.values.user));
+		}
 	}
 
 	private void playerBroadCast(String str) {
@@ -1875,7 +1880,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	public void factoryReset() {
 
-		final String backup = "oculus_factory_reset.txt";
+		final String backup = "conf"+Settings.sep+"backup_oculus_settings.txt";
 
 		// backup
 		new File(Settings.settingsfile).renameTo(new File(backup));

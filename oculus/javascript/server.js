@@ -256,7 +256,7 @@ function ifnotshow() {
 }
 
 function quit() {
-	callServer('quit','');
+	callServer('shutdown','');
 	message("shutdown",null);
 }
 

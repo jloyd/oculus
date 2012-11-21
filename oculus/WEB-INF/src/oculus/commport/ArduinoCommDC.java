@@ -9,7 +9,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEventListener, ArduioPort {
+public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEventListener, ArduinoPort {
 
 	public ArduinoCommDC(Application app) {
 		super(app);

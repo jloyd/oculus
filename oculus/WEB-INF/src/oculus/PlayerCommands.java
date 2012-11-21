@@ -18,7 +18,7 @@ public enum PlayerCommands {
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
-    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, quit,;
+    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown;
 	
 	/** get text for any player command */
 	public String getHelp(){
@@ -26,9 +26,10 @@ public enum PlayerCommands {
 	}
 	
 	// sub-set that are restricted to "user0"
+	// TODO: add junit test to check that these all below are PlayerCommands 
 	public enum AdminCommands {
 		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
-		showlog, softwareupdate, relaunchgrabber, systemcall, quit
+		showlog, softwareupdate, relaunchgrabber, systemcall, shutdown
 	}
 	
 	// sub-set that are require parameters 
@@ -289,7 +290,7 @@ public enum PlayerCommands {
 		softwareupdate("Robot server software update control"),
 		arduinoecho("Set ArduinOculus microcontroller to echo all commands"),
 		arduinoreset("Reset ArduinOculus microcontroller"),
-		setsystemvolume("Set robot operating system audio volume"), 
+		setsystemvolume("Set robot operating system audio volume 0-100"), 
 		beapassenger("Be passenger of current driver, specify passenger 'username'"), 
 		muterovmiconmovetoggle("Set/unset mute-rov-mic-on-move' setting "),
 		spotlightsetbrightness("Set main spotlight brightness. 0=off"), 
@@ -298,7 +299,8 @@ public enum PlayerCommands {
 		opennisensor("Kinect/Xtion Primesense sensor control"), 
 		videosoundmode("Set robot video compression codec"), 
 		pushtotalktoggle("When broadcasting client mic through robot speakers, always on or mute until keypress"),
-		restart("Restart server application on robot");
+		restart("Restart server application on robot"),
+		terminate("Quit server application on robot");
 
         private final String message;
 
