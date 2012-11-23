@@ -18,7 +18,8 @@ public enum PlayerCommands {
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
-    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown;
+    writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown,
+    setstreamactivitythreshold;
 	
 	/** get text for any player command */
 	public String getHelp(){
@@ -76,7 +77,8 @@ public enum PlayerCommands {
 		holdservo ("{BOOLEAN}"), 
 		opennisensor("on", "off"), 
 		videosoundmode("low", "high"), 
-		pushtotalktoggle("{BOOLEAN}");
+		pushtotalktoggle("{BOOLEAN}"),
+		streamactivityevent("{INT} {INT}");
 			
 		private final List<String> values;
 
@@ -300,7 +302,8 @@ public enum PlayerCommands {
 		videosoundmode("Set robot video compression codec"), 
 		pushtotalktoggle("When broadcasting client mic through robot speakers, always on or mute until keypress"),
 		restart("Restart server application on robot"),
-		terminate("Quit server application on robot");
+		terminate("Quit server application on robot"),
+		streamactivityevent("Set video motion, audio volume detection threshold, 0-100 (0=off)");
 
         private final String message;
 

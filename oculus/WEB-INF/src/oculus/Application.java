@@ -185,9 +185,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		// set video, audio quality mode in grabber flash, depending on server/client OS
-		String videosoundmode="high"; // windows, default
-		if (Settings.os.equals("linux")) {
-			videosoundmode="low";
+		String videosoundmode=state.get(State.values.videosoundmode.name());
+		if (videosoundmode == null) { 
+			videosoundmode="high";  
+			if (Settings.os.equals("linux")) { // TODO: or motion/sound activity threshold enabled
+				videosoundmode="low";
+			}
 		}
 		setGrabberVideoSoundMode(videosoundmode);
 
@@ -220,9 +223,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			} catch (Exception e) {
 				Util.log("MotionTracker: "+ e.getLocalizedMessage(), this);
 			}
-			
-			// new developer.AvoidObjects(this);
-			
 		}
 		
 		
@@ -599,6 +599,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case shutdown:
 			quit();
 			break;
+		case setstreamactivitythreshold: setStreamActivityThreshold(str); break;
 			
 		}
 	}
@@ -606,7 +607,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/** put all commands here */
 	public enum grabberCommands {
 		streammode, saveandlaunch, populatesettings, systemcall, chat, dockgrabbed, autodock, 
-		restart, checkforbattery, factoryreset, shutdown;
+		restart, checkforbattery, factoryreset, shutdown, streamactivitydetected;
 		@Override
 		public String toString() {
 			return super.toString();
@@ -685,6 +686,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case shutdown:
 			quit();
 			break;
+		case streamactivitydetected:
+			streamActivityDetected(str);
+			break;
 		}
 	}
 
@@ -702,6 +706,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 				comport.releaseCameraServo();
 			state.delete(PlayerCommands.publish);
 		}
+
+		// NOT REQUIRED, delete if OK
+//		if (str.equals("stop") && state.get(State.values.streamActivityThresholdEnabled.name())!=null) {
+//			str = "paused"; // 'stop' will cause grabber page reload, don't want that if motion/noise detection enabled
+//		}
 
 		// messageplayer("streaming "+str,"stream",stream);
 		messageGrabber("streaming " + stream, "stream " + stream);
@@ -732,6 +741,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void setGrabberVideoSoundMode(String str) {
+		
 		if (state.getBoolean(State.values.autodocking.name())) {
 			messageplayer("command dropped, autodocking", null, null);
 			return;
@@ -744,6 +754,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 		sc.invoke("videoSoundMode", new Object[] { str });
+		state.set(State.values.videosoundmode.name(), str);
 		Util.log("grabber video sound mode = "+str, this);
 	}
 	
@@ -1890,4 +1901,47 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		restart();
 	}
+	
+	private void setStreamActivityThreshold(String str) { // TODO: Move to separate class
+		String val[] = str.split("\\D+");
+		if (val.length != 2) { return; } 
+		Integer videoThreshold = Integer.parseInt(val[0]);
+		Integer audioThreshold = Integer.parseInt(val[1]);
+		Util.debug("threshold vals: "+videoThreshold+","+audioThreshold, this);
+		
+		if (videoThreshold != 0 || audioThreshold != 0) {
+			if (state.get(State.values.videosoundmode.name()).equals("high")) {
+				setGrabberVideoSoundMode("low"); // videosoundmode needs to be low to for activity threshold to work
+				if (stream != null) {
+					if (!stream.equals("stop")) { // if stream already running
+						publish(stream); // restart, in low mode
+					}
+				}
+			}
+			
+			if (stream != null) { 
+				if (stream.equals("stop")) {
+					if (audioThreshold == 0) { publish("camera"); }
+					else if (videoThreshold == 0) { publish("camandmic"); }
+					else { publish("camandmic"); }
+				}
+			}
+			state.set(State.values.streamActivityThresholdEnabled.name(), System.currentTimeMillis());
+		}
+		else { state.delete(State.values.streamActivityThresholdEnabled); }
+
+		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+		sc.invoke("setActivityThreshold", new Object[] { videoThreshold, audioThreshold });
+		messageplayer("stream activity set to: "+str, null, null);
+
+	}
+	
+	private void streamActivityDetected(String str) {
+//		messageplayer("streamactivitybeforetime: "+str+"<br>time "+Long.toString(System.currentTimeMillis())+"<br>set at "+Long.toString(state.getLong(State.values.streamActivityThresholdEnabled)), null, null);
+		if (System.currentTimeMillis() > state.getLong(State.values.streamActivityThresholdEnabled) + 5000.0) { 
+			messageplayer("streamactivity: "+str, "streamactivity", str);
+			setStreamActivityThreshold("0 0"); // disable
+		}
+	}
+
 }

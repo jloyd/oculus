@@ -9,9 +9,10 @@ import java.util.Vector;
 public class State {
 	
 	public enum values{user, logintime, usercommand, userisconnected, reboot, developer, serialport, lightport, target, boottime, batterylife, 
-		motionenabled, externaladdress, autodocktimeout, autodocking, timeout,losttarget , firmware, unknown, override,  commwatchdog,
+		motionenabled, externaladdress, autodocktimeout, autodocking, timeout, losttarget, firmware, unknown, override, commwatchdog,
 		framegrabbusy, sonarback, sonarright, sonarleft, dockgrabbusy, docking, dockxsize, dockysize, dockstatus, dockgrabtime, dockslope, dockxpos,
-		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus, localaddress, centerpoint, motioncommand
+		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus, localaddress, centerpoint, motioncommand, 
+		streamActivityThresholdEnabled, videosoundmode
 	};
 
 	public static final String SEPERATOR = " : ";
@@ -286,7 +287,7 @@ public class State {
 	public boolean getBoolean(values key){
 		return getBoolean(key.name());
 	}
-
+	
 	public void set(values key, long data){
 		set(key.name(), data);
 	}
