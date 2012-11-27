@@ -49,6 +49,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public boolean muteROVonMove = false;
 	public Speech speech = new Speech();
 	public String stream = null;
+	public static byte[] framegrabimg  = null;
 	
 	public Application() {
 		super();
@@ -600,7 +601,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			quit();
 			break;
 		case setstreamactivitythreshold: setStreamActivityThreshold(str); break;
-			
+		case getlightlevel: docker.getLightLevel(); break;
 		}
 	}
 
@@ -828,7 +829,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public boolean frameGrab() {
 
 		 if(state.getBoolean(State.values.framegrabbusy.name()) || !(stream.equals("camera") || stream.equals("camandmic"))) {
-			 Util.log("framegrab busy or unavailable, command dropped", this);
+			 messageplayer("stream unavailable or framegrab busy, command dropped", null, null);
 			 return false;
 		 }
 
@@ -888,9 +889,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		_RAWBitmapImage.readBytes(c);
 		if (BCurrentlyAvailable > 0) {
 			state.set(State.values.framegrabbusy.name(), false);
-			FrameGrabHTTP.img = c;
-			AuthGrab.img = c;
-
+//			FrameGrabHTTP.img = c;
+//			AuthGrab.img = c;
+			framegrabimg = c;
 		}
 	}
 
@@ -1902,7 +1903,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		restart();
 	}
 	
-	private void setStreamActivityThreshold(String str) { // TODO: Move to separate class
+	private void setStreamActivityThreshold(String str) { 
 		String val[] = str.split("\\D+");
 		if (val.length != 2) { return; } 
 		Integer videoThreshold = Integer.parseInt(val[0]);
@@ -1913,7 +1914,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if (state.get(State.values.videosoundmode.name()).equals("high")) {
 				setGrabberVideoSoundMode("low"); // videosoundmode needs to be low to for activity threshold to work
 				if (stream != null) {
-					if (!stream.equals("stop")) { // if stream already running
+					if (!stream.equals("stop")) { // if stream already running,
 						publish(stream); // restart, in low mode
 					}
 				}
@@ -1921,8 +1922,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 			if (stream != null) { 
 				if (stream.equals("stop")) {
-					if (audioThreshold == 0) { publish("camera"); }
-					else if (videoThreshold == 0) { publish("camandmic"); }
+					if (audioThreshold == 0 && videoThreshold > 0) { publish("camera"); }
+					else if (audioThreshold > 0 && videoThreshold == 0) { publish("mic"); }
 					else { publish("camandmic"); }
 				}
 			}
@@ -1937,11 +1938,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void streamActivityDetected(String str) {
-//		messageplayer("streamactivitybeforetime: "+str+"<br>time "+Long.toString(System.currentTimeMillis())+"<br>set at "+Long.toString(state.getLong(State.values.streamActivityThresholdEnabled)), null, null);
 		if (System.currentTimeMillis() > state.getLong(State.values.streamActivityThresholdEnabled) + 5000.0) { 
 			messageplayer("streamactivity: "+str, "streamactivity", str);
 			setStreamActivityThreshold("0 0"); // disable
 		}
 	}
+	
 
 }

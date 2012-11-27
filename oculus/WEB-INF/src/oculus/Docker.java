@@ -7,5 +7,7 @@ public interface Docker {
 	public abstract void autoDock(String str);
 
 	public abstract void dock(String str);
+	
+	public abstract void getLightLevel();
 
 }

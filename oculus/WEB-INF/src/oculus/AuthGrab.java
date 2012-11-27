@@ -14,7 +14,7 @@ public class AuthGrab extends HttpServlet {
 	private static Application app = null;
 	private static State state = State.getReference();
 	private static Settings settings;
-	public static byte[] img  = null;
+//	public static byte[] img  = null;
 
 	public static void setApp(Application a) {
 		if(app != null) return;
@@ -112,10 +112,10 @@ public class AuthGrab extends HttpServlet {
 	
 	public void sendImage(OutputStream out) throws IOException {
 	
-		if(img==null) return;
+		if(Application.framegrabimg==null) return;
 		
 		// long start = System.currentTimeMillis();
-		for (int i=0; i<img.length; i++) out.write(img[i]);
+		for (int i=0; i<Application.framegrabimg.length; i++) out.write(Application.framegrabimg[i]);
 		out.close();
 		   
 		// Util.debug("frame grab done sending in " + (System.currentTimeMillis() - start) + " ms", this);			

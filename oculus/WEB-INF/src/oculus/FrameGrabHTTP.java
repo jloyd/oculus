@@ -6,7 +6,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.io.ByteArrayOutputStream;
+//import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 //import java.util.Random;
@@ -24,7 +24,7 @@ import developer.MotionTracker;
 public class FrameGrabHTTP extends HttpServlet {
 	
 	private static Application app = null;
-	public static byte[] img  = null;
+//	public static byte[] img  = null;
 	private State state = State.getReference();
 	
 	private static int var;
@@ -67,7 +67,7 @@ public class FrameGrabHTTP extends HttpServlet {
 		res.setContentType("image/jpeg");
 		OutputStream out = res.getOutputStream();
 
-		img = null;
+		Application.framegrabimg = null;
 		if (app.frameGrab()) {
 			
 			int n = 0;
@@ -85,9 +85,9 @@ public class FrameGrabHTTP extends HttpServlet {
 				}
 			}
 			
-			if (img != null) {
-				for (int i=0; i<img.length; i++) {
-					out.write(img[i]);
+			if (Application.framegrabimg != null) {
+				for (int i=0; i<Application.framegrabimg.length; i++) {
+					out.write(Application.framegrabimg[i]);
 				}
 			}
 		    out.close();

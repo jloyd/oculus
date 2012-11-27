@@ -1,5 +1,12 @@
 package oculus;
 
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
+import java.io.ByteArrayInputStream;
+
+import javax.imageio.ImageIO;
+
 import oculus.commport.AbstractArduinoComm;
 import oculus.commport.LightsComm;
 
@@ -398,6 +405,71 @@ public class AutoDock implements Docker {
 				}
 			}
 		}
+	}
+	
+	
+	public void getLightLevel() {
+
+		 if(state.getBoolean(State.values.framegrabbusy.name()) || !(app.stream.equals("camera") || app.stream.equals("camandmic"))) {
+			 app.message("framegrab busy or stream unavailable, command dropped", null,null);
+			 return;
+		 }
+
+		if (grabber instanceof IServiceCapableConnection) {
+			state.set(State.values.framegrabbusy.name(), true);
+			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+			sc.invoke("framegrabMedium", new Object[] {});
+			app.message("getlightlevel command received", null, null);
+		}
+		
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					int n = 0;
+					while (state.getBoolean(State.values.framegrabbusy)) {
+						try {
+							Thread.sleep(5);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						} 
+						n++;
+						if (n> 2000) {  // give up after 10 seconds 
+							state.set(State.values.framegrabbusy, false);
+							break;
+						}
+					}
+					
+					Util.debug("img received, processing...", this);
+					
+					if (Application.framegrabimg != null) {
+						//convert bytes to image
+						ByteArrayInputStream in = new ByteArrayInputStream(Application.framegrabimg);
+						BufferedImage img = ImageIO.read(in);
+
+						/* change to greyscale */
+//						ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+//						ColorConvertOp op = new ColorConvertOp(cs, null);
+//						img = op.filter(img, null);
+						
+						n = 0;
+						int avg = 0;
+						for (int y = 0; y < img.getHeight(); y++) {
+						    for (int x = 0; x < img.getWidth(); x++) {
+								int  rgb   = img.getRGB(x, y); 
+								int  red   = (rgb & 0x00ff0000) >> 16;
+					    		int  green = (rgb & 0x0000ff00) >> 8;
+					    		int  blue  =  rgb & 0x000000ff;
+						        avg += red*0.3 + green*0.59 + blue*0.11 ; // grey using 39-59-11 rule 
+						        n++;
+						    }
+						}
+						avg = avg / n;
+						app.message("getlightlevel: "+Integer.toString(avg), null, null);
+					}
+
+				} catch (Exception e) { e.printStackTrace(); }
+			}
+		}).start();
 	}
 }
 

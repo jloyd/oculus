@@ -19,7 +19,7 @@ public enum PlayerCommands {
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown,
-    setstreamactivitythreshold;
+    setstreamactivitythreshold, getlightlevel;
 	
 	/** get text for any player command */
 	public String getHelp(){
@@ -78,7 +78,7 @@ public enum PlayerCommands {
 		opennisensor("on", "off"), 
 		videosoundmode("low", "high"), 
 		pushtotalktoggle("{BOOLEAN}"),
-		streamactivityevent("{INT} {INT}");
+		streamactivityevent("[0-100] [0-100]");
 			
 		private final List<String> values;
 
@@ -302,8 +302,9 @@ public enum PlayerCommands {
 		videosoundmode("Set robot video compression codec"), 
 		pushtotalktoggle("When broadcasting client mic through robot speakers, always on or mute until keypress"),
 		restart("Restart server application on robot"),
-		terminate("Quit server application on robot"),
-		streamactivityevent("Set video motion, audio volume detection threshold, 0-100 (0=off)");
+		shutdown("Quit server application on robot"),
+		streamactivityevent("Set video motion, audio volume detection threshold, 0-100 (0=off)"),
+		getlightlevel("Returns average pixel greyscale value (0-255) of frame from current stream");
 
         private final String message;
 
