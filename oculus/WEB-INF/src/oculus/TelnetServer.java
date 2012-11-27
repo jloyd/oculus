@@ -1,21 +1,13 @@
-package developer;
+package oculus;
 
 import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
+import oculus.PlayerCommands.RequiresArguments;
+
 import org.jasypt.util.password.ConfigurablePasswordEncryptor;
 
-import oculus.Application;
-import oculus.GUISettings;
-import oculus.LoginRecords;
-import oculus.Observer;
-import oculus.ManualSettings;
-import oculus.PlayerCommands;
-import oculus.PlayerCommands.RequiresArguments;
-import oculus.Settings;
-import oculus.Updater;
-import oculus.Util;
 
 /**
  * Start the terminal server. Start a new thread for a each connection. 

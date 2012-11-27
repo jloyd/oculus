@@ -13,7 +13,7 @@ import oculus.commport.LightsComm;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.service.IServiceCapableConnection;
 
-public class AutoDock implements Docker {
+public class AutoDock {
 
 	/* notes 
 	 * 
@@ -69,7 +69,6 @@ public class AutoDock implements Docker {
 	}
 	
 
-	@Override
 	public void autoDock(String str) {
 		
 		String cmd[] = str.split(" ");

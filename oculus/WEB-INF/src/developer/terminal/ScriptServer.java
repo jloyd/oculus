@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 
-import developer.TelnetServer;
 
+import oculus.TelnetServer;
 import oculus.Util;
 
 public class ScriptServer extends AbstractTerminal {

@@ -36,13 +36,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private String remember = null;
 	private IConnection pendingplayer = null;
 	private String httpPort;
-	private Docker docker = null;
+	private AutoDock docker = null;
 	private State state = State.getReference();
 	private boolean initialstatuscalled = false;
 	private boolean pendingplayerisnull = true;
 	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
-	private developer.TelnetServer commandServer = null;
+	private oculus.TelnetServer commandServer = null;
 	
 	// try to make private
 	public developer.OpenNIRead openNIRead = null;
@@ -231,7 +231,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			new developer.EmailAlerts(this);
 			
 		if ( ! settings.readSetting(ManualSettings.commandport).equals(State.values.disabled))
-			commandServer = new developer.TelnetServer(this);
+			commandServer = new oculus.TelnetServer(this);
 		
 		if (UpdateFTP.configured()) new developer.UpdateFTP();
 

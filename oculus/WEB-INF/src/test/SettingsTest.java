@@ -49,14 +49,14 @@ public class SettingsTest {
 		// make sure no duplicates in Telnet and Player Commands 
 		for (PlayerCommands factory : PlayerCommands.values()) {
 			String val = factory.toString();
-			for (developer.TelnetServer.Commands cmd : developer.TelnetServer.Commands.values()){
+			for (oculus.TelnetServer.Commands cmd : oculus.TelnetServer.Commands.values()){
 				if(cmd.toString().equals(val)) 
 					fail("player commands overlap telnet commands: " + val);				
 			}
 		}
 		
 		// make sure no duplicates in Telnet and Player Commands 
-		for (developer.TelnetServer.Commands factory : developer.TelnetServer.Commands.values()) {
+		for (oculus.TelnetServer.Commands factory : oculus.TelnetServer.Commands.values()) {
 			String val = factory.toString();
 			for (PlayerCommands cmd : PlayerCommands.values()){
 				if(cmd.toString().equals(val)) 

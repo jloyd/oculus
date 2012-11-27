@@ -242,7 +242,7 @@ public class LightsComm implements SerialPortEventListener {
 			try {
 				out.write(command);
 			} catch (Exception e) {
-				Util.debug(e.getMessage(), this);
+				Util.log(e.getMessage(), this);
 				reset();
 			}
 			lastSent = System.currentTimeMillis();
