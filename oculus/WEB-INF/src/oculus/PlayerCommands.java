@@ -58,8 +58,6 @@ public enum PlayerCommands {
 		streamsettingsset("low","med","high","full","custom"), 
 		streamsettingscustom("{STRING}"), //"{INT}_{INT}_{INT}_[0-100]"), 
 		//TODO: TRICKY UNDERSCORE, String lets all pass
-		
-		
 		playerbroadcast("camera", "camadnmic", "mic", "stop"), 
 		password_update("{STRING}"), 
 		new_user_add("{STRING} {STRING}"), 
@@ -78,7 +76,7 @@ public enum PlayerCommands {
 		opennisensor("on", "off"), 
 		videosoundmode("low", "high"), 
 		pushtotalktoggle("{BOOLEAN}"),
-		streamactivityevent("[0-100] [0-100]");
+		setstreamactivitythreshold("[0-100] [0-100]");
 			
 		private final List<String> values;
 

@@ -12,7 +12,7 @@ public class State {
 		motionenabled, externaladdress, autodocktimeout, autodocking, timeout, losttarget, firmware, unknown, override, commwatchdog,
 		framegrabbusy, sonarback, sonarright, sonarleft, dockgrabbusy, docking, dockxsize, dockysize, dockstatus, dockgrabtime, dockslope, dockxpos,
 		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus, localaddress, centerpoint, motioncommand, 
-		streamActivityThresholdEnabled, videosoundmode
+		streamActivityThresholdEnabled, streamActivityThreshold, videosoundmode, stream
 	};
 
 	public static final String SEPERATOR = " : ";
@@ -256,17 +256,18 @@ public class State {
 			observers.get(i).updated(key);	
 	}
 
-	public void delete(PlayerCommands cmd) {
-		delete(cmd.name());
-	}
-
-	public void set(PlayerCommands cmd, String str) {
-		set(cmd.name(), str);
-	}
-	
-	public String get(PlayerCommands cmd){ 
-		return get(cmd.name()); 
-	}
+	//access to playercommands for state values defeats purpose of enum values
+//	public void delete(PlayerCommands cmd) {
+//		delete(cmd.name());
+//	}
+//
+//	public void set(PlayerCommands cmd, String str) {
+//		set(cmd.name(), str);
+//	}
+//	
+//	public String get(PlayerCommands cmd){ 
+//		return get(cmd.name()); 
+//	}
 
 	public void set(values key, values value) {
 		set(key.name(), value.name());

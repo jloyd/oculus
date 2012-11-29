@@ -185,7 +185,7 @@ public class AutoDock {
 									if (state.getBoolean(State.values.autodocking)) {
 										state.set(State.values.autodocking, "false");
 										str += " cameratilt "+app.camTiltPos()+" autodockcancelled blank";
-										if (!app.stream.equals("stop") && state.get(State.values.user)==null) { 
+										if (!state.get(State.values.stream).equals("stop") && state.get(State.values.user)==null) { 
 											app.publish("stop"); 
 										}
 										
@@ -409,8 +409,10 @@ public class AutoDock {
 	
 	public void getLightLevel() {
 
-		 if(state.getBoolean(State.values.framegrabbusy.name()) || !(app.stream.equals("camera") || app.stream.equals("camandmic"))) {
-			 app.message("framegrab busy or stream unavailable, command dropped", null,null);
+		 if(state.getBoolean(State.values.framegrabbusy.name()) || 
+				 !(state.get(State.values.stream).equals("camera") || 
+						 state.get(State.values.stream).equals("camandmic"))) {
+			 app.message("framegrab busy or stream unavailable", null,null);
 			 return;
 		 }
 

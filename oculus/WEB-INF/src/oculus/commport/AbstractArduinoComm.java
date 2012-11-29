@@ -629,12 +629,11 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	}
 
 	public void checkForHoldServo() {
+		String stream = state.get(State.values.stream);
+		if (stream == null) return;
 
-		if (application.stream == null) return;
-
-		if (!holdservo || application.stream.equals("stop")
-				|| application.stream.equals("mic")
-				|| application.stream == null) {
+		if (!holdservo || stream.equals("stop") || stream.equals("mic") ||
+				stream == null) {
 			Util.delay(camwait);
 			sendCommand(CAMRELEASE);
 		}

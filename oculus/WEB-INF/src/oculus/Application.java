@@ -48,7 +48,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public developer.OpenNIRead openNIRead = null;
 	public boolean muteROVonMove = false;
 	public Speech speech = new Speech();
-	public String stream = null;
+//	public String stream = null;
 	public static byte[] framegrabimg  = null;
 	
 	public Application() {
@@ -110,8 +110,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			player = null;
 
 			if (!state.getBoolean(State.values.autodocking.name())) {
-				if (stream != null) {
-					if (!stream.equals("stop")) {
+				if (state.get(State.values.stream) != null) {
+					if (!state.get(State.values.stream).equals("stop")) {
 						publish("stop");
 					}
 				}
@@ -157,16 +157,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	public void grabbersignin(String mode) {
 		if (mode.equals("init")) {
-			stream = null;
+			state.delete(State.values.stream);
 		} else {
-			stream = "stop";
+			state.set(State.values.stream, "stop");
 		}
 		grabber = Red5.getConnectionLocal();
 		String str = "awaiting&nbsp;connection";
 		if (state.get(State.values.user.name()) != null) {
 			str = state.get(State.values.user.name()) + "&nbsp;connected";
 		}
-		str += " stream " + stream;
+		str += " stream " + state.get(State.values.stream);
 		messageGrabber("connected to subsystem", "connection " + str);
 		Util.log("grabber signed in from " + grabber.getRemoteAddress(), this);
 		if (playerstream) {
@@ -694,7 +694,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void grabberSetStream(String str) {
-		stream = str;
+		final String stream = str;
+		state.set(State.values.stream, str);
 
 		if (str.equals("camera") || str.equals("camandmic")) {
 			if (comport != null && comport.holdservo) {
@@ -705,13 +706,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (str.equals("stop") || str.equals("mic")) {
 			if (comport != null && comport.holdservo)
 				comport.releaseCameraServo();
-			state.delete(PlayerCommands.publish);
+//			state.delete(PlayerCommands.publish);
 		}
 
-		// NOT REQUIRED, delete if OK
-//		if (str.equals("stop") && state.get(State.values.streamActivityThresholdEnabled.name())!=null) {
-//			str = "paused"; // 'stop' will cause grabber page reload, don't want that if motion/noise detection enabled
-//		}
+
 
 		// messageplayer("streaming "+str,"stream",stream);
 		messageGrabber("streaming " + stream, "stream " + stream);
@@ -748,7 +746,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			return;
 		}
 
-		if (stream == null) {
+		if (state.get(State.values.stream) == null) {
 			messageplayer("stream control unavailable, server may be in setup mode", null, null);
 			return;
 		}
@@ -766,7 +764,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			return;
 		}
 
-		if (stream == null) {
+		if (state.get(State.values.stream)  == null) {
 			messageplayer("stream control unavailable, server may be in setup mode", null, null);
 			return;
 		}
@@ -784,8 +782,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("publish", new Object[] { str, width, height, fps, quality });
 				// messageGrabber("stream "+str);
 				messageplayer("command received: publish " + str, null, null);
-				state.set(PlayerCommands.publish, str);
-				Util.log("publish: " + state.get(PlayerCommands.publish), this);
+//				state.set(PlayerCommands.publish, str);
+//				state.set(State.values.stream, str);
+				Util.log("publish: " + str, this);
 			}
 		} catch (NumberFormatException e) {
 			Util.log("publish() " + e.getMessage());
@@ -794,6 +793,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void muteROVMic() {
+		String stream = state.get(State.values.stream);
 		if (grabber == null) return;
 		if (stream == null) return;
 		if (grabber instanceof IServiceCapableConnection
@@ -804,6 +804,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void unmuteROVMic() {
+		String stream = state.get(State.values.stream);
 		if (grabber == null) return;
 		if (stream == null) return;
 		if (grabber instanceof IServiceCapableConnection
@@ -828,7 +829,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	/**  */
 	public boolean frameGrab() {
 
-		 if(state.getBoolean(State.values.framegrabbusy.name()) || !(stream.equals("camera") || stream.equals("camandmic"))) {
+		 if(state.getBoolean(State.values.framegrabbusy.name()) || 
+				 !(state.get(State.values.stream).equals("camera") || 
+						 state.get(State.values.stream).equals("camandmic"))) {
 			 messageplayer("stream unavailable or framegrab busy, command dropped", null, null);
 			 return false;
 		 }
@@ -836,7 +839,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (grabber instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("framegrab", new Object[] {});
-			// messageplayer("framegrab command received", null, null);
 			state.set(State.values.framegrabbusy.name(), true);
 		}
 		return true;
@@ -1088,7 +1090,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 			str += " vidctroffset " + settings.readSetting("vidctroffset");
 			str += " rovvolume " + settings.readSetting(GUISettings.volume);
-			str += " stream " + stream + " selfstream stop";
+			str += " stream " + state.get(State.values.stream) + " selfstream stop";
 			str += " pushtotalk " + settings.readSetting("pushtotalk");
 			if (loginRecords.isAdmin())
 				str += " admin true";
@@ -1121,8 +1123,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		settings.writeSettings("vset", "vcustom");
 		settings.writeSettings("vcustom", str);
 		String s = "custom stream set to: " + str;
-		if (!stream.equals("stop") && !state.getBoolean(State.values.autodocking)) {
-			publish(stream);
+		if (!state.get(State.values.stream).equals("stop") && !state.getBoolean(State.values.autodocking)) {
+			publish(state.get(State.values.stream));
 			s += "<br>restarting stream";
 		}
 		messageplayer(s, null, null);
@@ -1133,8 +1135,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Util.debug("streamSettingsSet: "+str, this);
 		settings.writeSettings("vset", "v" + str);
 		String s = "stream set to: " + str;
-		if (!stream.equals("stop") && !state.getBoolean(State.values.autodocking)) {
-			publish(stream);
+		if (!state.get(State.values.stream).equals("stop") && !state.getBoolean(State.values.autodocking)) {
+			publish(state.get(State.values.stream));
 			s += "<br>restarting stream";
 		}
 		messageplayer(s, null, null);
@@ -1392,6 +1394,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	/** */
 	private void beAPassenger(String user) {
+		String stream = state.get(State.values.stream);
 		pendingplayerisnull = true;
 		String str = user + " added as passenger";
 		messageplayer(str, null, null);
@@ -1606,6 +1609,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void passwordChange(String user, String pass) {
+		Util.debug(user+" "+pass, this);
 		String message = "password updated";
 		// pass = pass.replaceAll("\\s+$", "");
 		if (pass.matches("\\w+")) {
@@ -1904,11 +1908,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	private void setStreamActivityThreshold(String str) { 
+		String stream = state.get(State.values.stream);
 		String val[] = str.split("\\D+");
 		if (val.length != 2) { return; } 
 		Integer videoThreshold = Integer.parseInt(val[0]);
 		Integer audioThreshold = Integer.parseInt(val[1]);
-		Util.debug("threshold vals: "+videoThreshold+","+audioThreshold, this);
+//		Util.debug("threshold vals: "+videoThreshold+","+audioThreshold, this);
+		state.set(State.values.streamActivityThreshold.name(), str);
 		
 		if (videoThreshold != 0 || audioThreshold != 0) {
 			if (state.get(State.values.videosoundmode.name()).equals("high")) {
@@ -1929,7 +1935,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			state.set(State.values.streamActivityThresholdEnabled.name(), System.currentTimeMillis());
 		}
-		else { state.delete(State.values.streamActivityThresholdEnabled); }
+		else { 
+			state.delete(State.values.streamActivityThresholdEnabled);
+			state.delete(State.values.streamActivityThreshold);
+		}
 
 		IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 		sc.invoke("setActivityThreshold", new Object[] { videoThreshold, audioThreshold });

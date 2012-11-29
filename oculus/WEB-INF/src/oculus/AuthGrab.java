@@ -84,7 +84,8 @@ public class AuthGrab extends HttpServlet {
 		// long start = System.currentTimeMillis();		
 		
 		
-		if(state.get(PlayerCommands.publish)==null){
+//		if(state.get(PlayerCommands.publish)==null){
+		if(state.get(State.values.stream)==null || state.get(State.values.stream).equals("stop")){
     		
     		Util.debug("cam was off, turned on..... ", this);
     		
