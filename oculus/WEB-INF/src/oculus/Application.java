@@ -16,6 +16,7 @@ import org.red5.server.api.service.IServiceCapableConnection;
 import org.jasypt.util.password.*;
 import org.red5.io.amf3.ByteArray;
 
+import developer.SendMail;
 import developer.UpdateFTP;
 
 
@@ -227,8 +228,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		
-		if ( ! settings.readSetting(ManualSettings.gmailaddress).equals(State.values.disabled))
-			new developer.EmailAlerts(this);
+//		if ( ! settings.readSetting(ManualSettings.gmailaddress).equals(State.values.disabled))
+//			new developer.EmailAlerts(this);
 			
 		if ( ! settings.readSetting(ManualSettings.commandport).equals(State.values.disabled))
 			commandServer = new oculus.TelnetServer(this);
@@ -602,6 +603,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		case setstreamactivitythreshold: setStreamActivityThreshold(str); break;
 		case getlightlevel: docker.getLightLevel(); break;
+		case email: new SendMail(str, this);
 		}
 	}
 

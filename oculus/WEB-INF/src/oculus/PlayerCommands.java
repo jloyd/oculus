@@ -19,7 +19,7 @@ public enum PlayerCommands {
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown,
-    setstreamactivitythreshold, getlightlevel;
+    setstreamactivitythreshold, getlightlevel, email;
 	
 	/** get text for any player command */
 	public String getHelp(){
@@ -76,7 +76,8 @@ public enum PlayerCommands {
 		opennisensor("on", "off"), 
 		videosoundmode("low", "high"), 
 		pushtotalktoggle("{BOOLEAN}"),
-		setstreamactivitythreshold("[0-100] [0-100]");
+		setstreamactivitythreshold("[0-100] [0-100]"),
+		email("{STRING} {STRING} {STRING}");
 			
 		private final List<String> values;
 
@@ -302,7 +303,8 @@ public enum PlayerCommands {
 		restart("Restart server application on robot"),
 		shutdown("Quit server application on robot"),
 		streamactivityevent("Set video motion, audio volume detection threshold, 0-100 (0=off)"),
-		getlightlevel("Returns average pixel greyscale value (0-255) of frame from current stream");
+		getlightlevel("Returns average pixel greyscale value (0-255) of frame from current stream"),
+		email("Send email with params: emailto [subject] body");
 
         private final String message;
 

@@ -169,7 +169,7 @@ public class Settings {
 		for (ManualSettings ops : ManualSettings.values()) {
 			String val = readSetting(ops.toString());
 			if (val != null) // never send out passwords 
-				if( ! ops.equals(ManualSettings.gmailpassword)) 
+				if( ! ops.equals(ManualSettings.email_password)) 
 					result += ops.toString() + " " + val + "\r\n";
 		}
 		

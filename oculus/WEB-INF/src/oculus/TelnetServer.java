@@ -19,7 +19,7 @@ public class TelnetServer implements Observer {
 	public static enum Commands {message, users, tcp, beep, tail, image, memory, state, settings, help, bye, uptime, quit};
 	public static final String SEPERATOR = " : ";
 	public static final boolean ADMIN_ONLY = true;
-	public static final int MIN_LENGTH = 2;
+	public static final int MIN_LENGTH = 2; //TODO: why 2? Why not 1?
 	
 	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static oculus.State state = oculus.State.getReference();
@@ -51,8 +51,8 @@ public class TelnetServer implements Observer {
 			}
 	
 			// send banner 
-			out.println("welcome to oculus version " + new Updater().getCurrentVersion()); 
-			out.println("ready for admin login, enter line with format user:password OR user:encrypted_password");
+			out.println("Welcome to Oculus version " + new Updater().getCurrentVersion()); 
+			out.println("<login> admin login with user:password OR user:encrypted_password");
 			
 			try {
 				
@@ -89,6 +89,8 @@ public class TelnetServer implements Observer {
 			
 			// keep track of all other user sockets output streams			
 			printers.add(out);	
+			out.println(user + " connected via socket");
+			Util.log(user+" connected via socket", this);
 			this.start();
 		}
 
@@ -121,7 +123,7 @@ public class TelnetServer implements Observer {
 				str = str.trim();
 				if(str.length()>=MIN_LENGTH){
 					
-					Util.debug(clientSocket.getInetAddress().toString() + " : " + str, this);	
+					Util.debug("socket user '"+user+"' sending from "+clientSocket.getInetAddress().toString() + " : " + str, this);	
 					if( ! manageCommand(str)) {			
 						
 						Util.debug("doPlayer(" + str + ")", this);	
