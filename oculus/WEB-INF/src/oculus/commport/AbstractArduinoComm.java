@@ -53,11 +53,8 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	public int camdelay = 50;
 	public int speedfast = 255;
 	public int turnspeed = 255;
-	public int speed = speedfast;
-	protected String direction = null;
-	public boolean moving = false;
-	public volatile boolean sliding = false;
-	public volatile boolean movingforward = false;
+
+	public static final String DIRECTION = State.values.tempdirection.name();
 
 	public AbstractArduinoComm(Application app) {
 
@@ -75,6 +72,12 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 		clicknudgemomentummult = settings.getDouble("clicknudgemomentummult");
 		steeringcomp = settings.getInteger("steeringcomp");
 		holdservo = settings.getBoolean(GUISettings.holdservo.toString());
+		
+		state.set(State.values.speed, speedfast);
+		state.set(State.values.moving, false);
+		state.set(State.values.sliding, false);
+		state.set(State.values.movingforward, false);
+		state.set(State.values.camservopos, camservopos);
 		
 		if (state.get(State.values.serialport) != null) {
 			new Thread(new Runnable() {
@@ -257,33 +260,33 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	@Override
 	public void stopGoing() {
 
-		if (application.muteROVonMove && moving) {
+		if (state.getBoolean(State.values.muteROVonMove) && state.getBoolean(State.values.moving)) {
 			application.unmuteROVMic();
 		}
 
 		new Sender(STOP);
-		moving = false;
-		movingforward = false;
+		state.set(State.values.moving, false);
+		state.set(State.values.movingforward, false);
 	}
 
 	@Override
 	public void goForward() {
-		new Sender(new byte[] { FORWARD, (byte) speed });
-		moving = true;
-		movingforward = true;
+		new Sender(new byte[] { FORWARD, (byte) state.getInteger(State.values.speed) });
+		state.set(State.values.moving, true);
+		state.set(State.values.movingforward, true);
 
-		if (application.muteROVonMove) {
+		if (state.getBoolean(State.values.muteROVonMove)) {
 			application.muteROVMic();
 		}
 	}
 
 	@Override
 	public void goBackward() {
-		new Sender(new byte[] { BACKWARD, (byte) speed });
-		moving = true;
-		movingforward = false;
+		new Sender(new byte[] { BACKWARD, (byte) state.getInteger(State.values.speed) });
+		state.set(State.values.moving, true);
+		state.set(State.values.movingforward, false);
 
-		if (application.muteROVonMove) {
+		if (state.getBoolean(State.values.muteROVonMove)) {
 			application.muteROVMic();
 		}
 	}
@@ -292,13 +295,13 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	public void turnRight() {
 		int tmpspeed = turnspeed;
 		int boost = 10;
-		if (speed < turnspeed && (speed + boost) < speedfast)
-			tmpspeed = speed + boost;
+		if (state.getInteger(State.values.speed) < turnspeed && (state.getInteger(State.values.speed) + boost) < speedfast)
+			tmpspeed = state.getInteger(State.values.speed) + boost;
 
 		new Sender(new byte[] { RIGHT, (byte) tmpspeed });
-		moving = true;
+		state.set(State.values.moving, true);
 
-		if (application.muteROVonMove) {
+		if (state.getBoolean(State.values.muteROVonMove)) {
 			application.muteROVMic();
 		}
 	}
@@ -307,13 +310,13 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	public void turnLeft() {
 		int tmpspeed = turnspeed;
 		int boost = 10;
-		if (speed < turnspeed && (speed + boost) < speedfast)
-			tmpspeed = speed + boost;
+		if (state.getInteger(State.values.speed) < turnspeed && (state.getInteger(State.values.speed) + boost) < speedfast)
+			tmpspeed = state.getInteger(State.values.speed) + boost;
 
 		new Sender(new byte[] { LEFT, (byte) tmpspeed });
-		moving = true;
+		state.set(State.values.moving, true);
 
-		if (application.muteROVonMove) {
+		if (state.getBoolean(State.values.muteROVonMove)) {
 			application.muteROVMic();
 		}
 	}
@@ -418,44 +421,44 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	@Override
 	public void speedset(String str) {
 		if (str.equals("slow")) {
-			speed = speedslow;
+			state.set(State.values.speed, speedslow);
 		}
 		if (str.equals("med")) {
-			speed = speedmed;
+			state.set(State.values.speed, speedmed);
 		}
 		if (str.equals("fast")) {
-			speed = speedfast;
+			state.set(State.values.speed, speedfast);
 		}
-		if (movingforward) {
+		if (state.getBoolean(State.values.movingforward)) {
 			goForward();
 		}
 	}
 
 	@Override
 	public void nudge(String dir) {
-		direction = dir;
+		state.set(DIRECTION, dir);
 		new Thread(new Runnable() {
 			public void run() {
 				int n = nudgedelay;
-				if (direction.equals("right")) {
+				if (state.equals(DIRECTION, "right")) {
 					turnRight();
 				}
-				if (direction.equals("left")) {
+				if (state.equals(DIRECTION, "left")) {
 					turnLeft();
 				}
-				if (direction.equals("forward")) {
+				if (state.equals(DIRECTION, "forward")) {
 					goForward();
-					movingforward = false;
+					state.set(State.values.movingforward, false);
 					n *= 4;
 				}
-				if (direction.equals("backward")) {
+				if (state.equals(DIRECTION, "backward")) {
 					goBackward();
 					n *= 4;
 				}
 
 				Util.delay(n);
 
-				if (movingforward == true) {
+				if (state.getBoolean(State.values.movingforward)) {
 					goForward();
 				} else {
 					stopGoing();
@@ -466,40 +469,40 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 
 	@Override
 	public void slide(String dir) {
-		if (sliding == false) {
-			sliding = true;
-			direction = dir;
+		if (!state.getBoolean(State.values.sliding)) {
+			state.set(State.values.sliding, true);
+			state.set(DIRECTION, dir);
 			tempspeed = 999;
 			new Thread(new Runnable() {
 				public void run() {
 					try {
 						int distance = 300;
 						int turntime = 500;
-						tempspeed = speed;
-						speed = speedfast;
-						if (direction.equals("right")) {
+						tempspeed = state.getInteger(State.values.speed);
+						state.set(State.values.speed, speedfast);
+						if (state.equals(DIRECTION, "right")) {
 							turnLeft();
 						} else {
 							turnRight();
 						}
 						Thread.sleep(turntime);
-						if (sliding == true) {
+						if (state.getBoolean(State.values.sliding)) {
 							goBackward();
 							Thread.sleep(distance);
-							if (sliding == true) {
-								if (direction.equals("right")) {
+							if (state.getBoolean(State.values.sliding)) {
+								if (state.equals(DIRECTION, "right")) {
 									turnRight();
 								} else {
 									turnLeft();
 								}
 								Thread.sleep(turntime);
-								if (sliding == true) {
+								if (state.getBoolean(State.values.sliding)) {
 									goForward();
 									Thread.sleep(distance);
-									if (sliding == true) {
+									if (state.getBoolean(State.values.sliding)) {
 										stopGoing();
-										sliding = false;
-										speed = tempspeed;
+										state.set(State.values.sliding, false);
+										state.set(State.values.speed, tempspeed);
 									}
 								}
 							}
@@ -514,10 +517,10 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 
 	@Override
 	public void slidecancel() {
-		if (sliding == true) {
+		if (state.getBoolean(State.values.sliding)) {
 			if (tempspeed != 999) {
-				speed = tempspeed;
-				sliding = false;
+				state.set(State.values.speed, tempspeed);
+				state.set(State.values.sliding, false);
 			}
 		}
 	}
@@ -551,9 +554,9 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	@Override
 	public void clickNudge(Integer x) {
 		if (x > 0) {
-			direction = "right";
+			state.set(DIRECTION, "right");
 		} else {
-			direction = "left";
+			state.set(DIRECTION, "left");
 		}
 		clicknudgedelay = maxclicknudgedelay * (Math.abs(x)) / 320;
 		/*
@@ -569,16 +572,17 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					tempspeed = speed;
-					speed = speedfast;
-					if (direction.equals("right")) {
+					tempspeed = state.getInteger(State.values.speed);
+					state.set(State.values.speed, speedfast);
+//					if (state.equals(state.get(DIRECTION), "right")) {
+					if (state.get(DIRECTION).equals("right")) {
 						turnRight();
 					} else {
 						turnLeft();
 					}
 					Thread.sleep(clicknudgedelay);
-					speed = tempspeed;
-					if (movingforward == true) {
+					state.set(State.values.speed, tempspeed);
+					if (state.getBoolean(State.values.movingforward)) {
 						goForward();
 					} else {
 						stopGoing();
@@ -637,6 +641,8 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 			Util.delay(camwait);
 			sendCommand(CAMRELEASE);
 		}
+		
+		state.set(State.values.camservopos, camservopos);
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 package oculus;
 
-import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
 import java.io.ByteArrayInputStream;
 
 import javax.imageio.ImageIO;
@@ -56,9 +54,13 @@ public class AutoDock {
 	private AbstractArduinoComm comport = null;
 	private LightsComm light = null;
 	private Application app = null;
-	
 	private boolean autodockingcamctr = false;
 	private int autodockctrattempts = 0;
+
+	public static final String UNDOCKED = "un-docked";
+	public static final String DOCKED = "docked";
+	public static final String DOCKING = "docking";
+	public static final String MOVINGFORWARD = State.values.movingforward.name();
 	
 	public AutoDock(Application theapp, IConnection thegrab, AbstractArduinoComm com, LightsComm light){
 		this.app = theapp;
@@ -108,6 +110,11 @@ public class AutoDock {
 			else { app.message("motion disabled","autodockcancelled", null); }
 		}
 		if (cmd[0].equals("dockgrabbed")) { // RESULTS FROM GRABBER: calibrate, findfromxy, find
+			state.set(State.values.dockxpos.name(), cmd[2]);
+			state.set(State.values.dockypos.name(), cmd[3]);
+			state.set(State.values.dockxsize.name(), cmd[4]);
+			state.set(State.values.dockysize.name(), cmd[5]);
+			state.set(State.values.dockslope.name(), cmd[6]);
 			if ((cmd[1].equals("find") || cmd[1].equals("findfromxy")) && state.getBoolean(State.values.autodocking)) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
 			
@@ -162,10 +169,10 @@ public class AutoDock {
 					app.message("docking initiated", "multiple", "speed fast motion moving dock docking");
 
 					// need to set this because speedset calls goForward also if true
-					comport.movingforward = false; 
+					state.set(State.values.movingforward, false);
 					comport.speedset("fast"); 
 					state.set(State.values.docking, true);
-					state.set(State.values.dockstatus, State.values.docking);
+					state.set(State.values.dockstatus, DOCKING);
 					new Thread(new Runnable() {
 						public void run() {
 							int counter = 0;
@@ -201,7 +208,7 @@ public class AutoDock {
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
 									System.out.println("OCULUS: " + state.get(State.values.user) +" docked successfully");
 									state.set(State.values.motionenabled, false);
-									state.set(State.values.dockstatus, State.values.docked);
+									state.set(State.values.dockstatus, DOCKED);
 									// needs to be before battStats()
 									//if (settings.getBoolean(State.developer)){
 									//	moves.append("docked successfully");
@@ -216,16 +223,15 @@ public class AutoDock {
 								if (counter >12) { // failed
 									
 									state.set(State.values.docking, false);
-									state.set(State.values.timeout, true);
 
 									String s = "dock un-docked";
-									if (comport.moving) { 
+									if (state.getBoolean(MOVINGFORWARD)) { 
 										comport.stopGoing();
 										s += " motion stopped";
 									} 
 									app.message("docking timed out", "multiple", s);
 									System.out.println("OCULUS: " + state.get(State.values.user) +" docking timed out");
-									state.set(State.values.dockstatus, State.values.undocked);
+									state.set(State.values.dockstatus, UNDOCKED);
 									if (state.getBoolean(State.values.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
 											comport.speedset("fast");
@@ -245,7 +251,7 @@ public class AutoDock {
 			}
 			else { app.message("motion disabled", null, null); }
 		}
-		if (str.equals(State.values.undock.name())) {
+		if (str.equals("undock")) {
 			if(state.getBoolean(State.values.autodocking)){
 				app.message("command dropped, autodocking", null, null);
 				return;
@@ -255,7 +261,7 @@ public class AutoDock {
 			comport.speedset("fast");
 			comport.goBackward();
 			app.message("un-docking", "multiple", "speed fast motion moving dock un-docked");
-			state.set(State.values.dockstatus, State.values.undocked);
+			state.set(State.values.dockstatus, UNDOCKED);
 			new Thread(new Runnable() {
 				public void run() {
 					Util.delay(2000);

@@ -139,9 +139,9 @@ public class BatteryLife {
 							state.set(State.values.motionenabled, true);
 							str += " motion enabled";
 						}
-						if (! state.equals(State.values.dockstatus.name(), State.values.undocked.name())) {
-							state.set(State.values.dockstatus, State.values.undocked);
-							str += " dock un-docked";
+						if (! state.equals(State.values.dockstatus.name(), AutoDock.UNDOCKED)) {
+							state.set(State.values.dockstatus, AutoDock.UNDOCKED);
+							str += " dock " + AutoDock.UNDOCKED;
 						}
 						battcharging = false;
 						app.message(null, "multiple", str);
@@ -154,8 +154,8 @@ public class BatteryLife {
 						battcharging = true;
 						str = "battery " + life + "%," + status;
 						if (state.get(State.values.dockstatus) == null) {
-							state.set(State.values.dockstatus, State.values.docked);
-							str += " dock docked";
+							state.set(State.values.dockstatus, AutoDock.DOCKED);
+							str += " dock "+AutoDock.DOCKED;
 						}
 						app.message(null, "multiple", str);
 						state.set(State.values.batterystatus, "charging");

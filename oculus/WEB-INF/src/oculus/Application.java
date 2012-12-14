@@ -33,24 +33,19 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private LightsComm light = null;
 	private BatteryLife battery = null;
 	private Settings settings = Settings.getReference();
-	private String pendinguserconnected = null;
-	private String remember = null;
 	private IConnection pendingplayer = null;
-	private String httpPort;
 	private AutoDock docker = null;
 	private State state = State.getReference();
-	private boolean initialstatuscalled = false;
-	private boolean pendingplayerisnull = true;
-	private boolean playerstream = false;
 	private LoginRecords loginRecords = new LoginRecords();
 	private oculus.TelnetServer commandServer = null;
+	private boolean pendingplayerisnull = true;
+	private String authtoken = null;
+	private boolean initialstatuscalled = false; 
 	
-	// try to make private
 	public developer.OpenNIRead openNIRead = null;
-	public boolean muteROVonMove = false;
 	public Speech speech = new Speech();
-//	public String stream = null;
 	public static byte[] framegrabimg  = null;
+	public Boolean passengerOverrideFlag = false;
 	
 	public Application() {
 		super();
@@ -74,7 +69,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (logininfo.length == 1) { // test for cookie auth
 			String username = logintest("", logininfo[0]);
 			if (username != null) {
-				pendinguserconnected = username;
+				state.set(State.values.pendinguserconnected, username);
 				return true;
 			}
 		}
@@ -82,9 +77,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 			String encryptedPassword = (passwordEncryptor.encryptPassword(logininfo[0] + salt + logininfo[1])).trim();
 			if (logintest(logininfo[0], encryptedPassword) != null) {
 				if (logininfo[2].equals("remember")) {
-					remember = encryptedPassword;
+					authtoken = encryptedPassword;
 				}
-				pendinguserconnected = logininfo[0];
+				state.set(State.values.pendinguserconnected, logininfo[0]);
 				return true;
 			}
 		}
@@ -107,10 +102,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			if(settings.getBoolean(ManualSettings.developer))
 				if(state.get(State.values.user.name()) != null)
 					Util.log("user was NOT logged out correctly!");
-			
-			player = null;
 
-			if (!state.getBoolean(State.values.autodocking.name())) {
+			if (!state.getBoolean(State.values.autodocking)) { //if autodocking, keep autodocking
 				if (state.get(State.values.stream) != null) {
 					if (!state.get(State.values.stream).equals("stop")) {
 						publish("stop");
@@ -128,15 +121,25 @@ public class Application extends MultiThreadedApplicationAdapter {
 					comport.stopGoing();
 					comport.releaseCameraServo();
 				}
+				
+				if (state.getBoolean(State.values.playerstream)) {
+					state.set(State.values.playerstream, false);
+					grabberPlayPlayer(0);
+					messageGrabber("playerbroadcast", "0");
+				}
+				
+				// this needs to be before player = null
+				if (state.get(State.values.pendinguserconnected) != null) {
+					assumeControl(state.get(State.values.pendinguserconnected));
+					state.delete(State.values.pendinguserconnected);
+					return;
+				}
 			}
-
-			if (playerstream) {
-				playerstream = false;
-				grabberPlayPlayer(0);
-				messageGrabber("playerbroadcast", "0");
-			}
+			
+			player = null;
 
 		}
+		
 		if (connection.equals(grabber)) {
 			grabber = null;
 			// log.info("grabber disconnected");
@@ -170,7 +173,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		str += " stream " + state.get(State.values.stream);
 		messageGrabber("connected to subsystem", "connection " + str);
 		Util.log("grabber signed in from " + grabber.getRemoteAddress(), this);
-		if (playerstream) {
+		if (state.getBoolean(State.values.playerstream)) {
 			grabberPlayPlayer(1);
 			messageGrabber("playerbroadcast", "1");
 		}
@@ -211,8 +214,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		comport = discovery.getMotors(this); 
 		light = discovery.getLights(this);
 		
-		httpPort = settings.readRed5Setting("http.port");
-		muteROVonMove = settings.getBoolean(GUISettings.muteonrovmove);
+		state.set(State.values.httpPort, settings.readRed5Setting("http.port"));
+		state.set(State.values.muteROVonMove, settings.getBoolean(GUISettings.muteonrovmove));
+		initialstatuscalled = false;
+		pendingplayerisnull = true;
 		
 		if (settings.getBoolean(State.values.developer)) {
 			
@@ -231,7 +236,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 //		if ( ! settings.readSetting(ManualSettings.gmailaddress).equals(State.values.disabled))
 //			new developer.EmailAlerts(this);
 			
-		if ( ! settings.readSetting(ManualSettings.commandport).equals(State.values.disabled))
+		if ( ! settings.readSetting(ManualSettings.commandport).equals(Settings.DISABLED))
 			commandServer = new oculus.TelnetServer(this);
 		
 		if (UpdateFTP.configured()) new developer.UpdateFTP();
@@ -279,7 +284,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			public void run() {
 				try {
 					// stream = null;
-					String address = "127.0.0.1:" + httpPort;
+					String address = "127.0.0.1:" + state.get(State.values.httpPort);
 					if (Settings.os.equals("linux")) {
 						Runtime.getRuntime().exec("xdg-open http://" + address + "/oculus/initialize.html");
 					}
@@ -299,7 +304,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				try {
 
 					// stream = "stop";
-					String address = "127.0.0.1:" + httpPort;
+					String address = "127.0.0.1:" + state.get(State.values.httpPort);
 					if (Settings.os.equals("linux")) {
 						Runtime.getRuntime().exec("xdg-open http://" + address + "/oculus/server.html");
 					}
@@ -328,17 +333,17 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 			if (pendingplayer instanceof IServiceCapableConnection) {
 				IServiceCapableConnection sc = (IServiceCapableConnection) pendingplayer;
-				String str = "connection PENDING user " + pendinguserconnected;
-				if (remember != null) {
+				String str = "connection PENDING user " + state.get(State.values.pendinguserconnected);
+				if (authtoken != null) {
 					// System.out.println("sending store cookie");
-					str += " storecookie " + remember;
-					remember = null;
+					str += " storecookie " + authtoken;
+					authtoken =  null;
 				}
 				str += " someonealreadydriving " + state.get(State.values.user.name());
 
 				// this has to be last to above variables are already set in java script
 				sc.invoke("message", new Object[] { null, "green", "multiple", str });
-				str = pendinguserconnected + " pending connection from: "
+				str = state.get(State.values.pendinguserconnected) + " pending connection from: "
 						+ pendingplayer.getRemoteAddress();
 				
 				Util.log("playersignin(): " + str);
@@ -347,11 +352,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		} else {
 			player = Red5.getConnectionLocal();
-			state.set(State.values.user.name(), pendinguserconnected);
+			state.set(State.values.user.name(), state.get(State.values.pendinguserconnected));
+			state.delete(State.values.pendinguserconnected);
 			String str = "connection connected user " + state.get(State.values.user.name());
-			if (remember != null) {
-				str += " storecookie " + remember;
-				remember = null;
+			if (authtoken != null) {
+				str += " storecookie " + authtoken;
+				authtoken = null;
 			}
 			str += " streamsettings " + streamSettings();
 			messageplayer(state.get(State.values.user.name()) + " connected to OCULUS", "multiple", str);
@@ -439,7 +445,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		// must be driver/non-passenger for all commands below 
-		if( ! state.getBoolean(oculus.State.values.override.name())){
+		if(!passengerOverrideFlag){
 			if (Red5.getConnectionLocal() != player && player != null) {
 				Util.log("passenger, command dropped: " + fn.toString(), this);
 				return;
@@ -666,12 +672,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		case dockgrabbed: 
 			docker.autoDock("dockgrabbed " + str);
-			String[] arg = str.split(" ");
-			state.set(State.values.dockxpos.name(), arg[1]);
-			state.set(State.values.dockypos.name(), arg[2]);
-			state.set(State.values.dockxsize.name(), arg[3]);
-			state.set(State.values.dockysize.name(), arg[4]);
-			state.set(State.values.dockslope.name(), arg[5]);
 			state.set(State.values.dockgrabbusy.name(), false);
 			break;
 		case autodock: 
@@ -817,12 +817,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void muteROVMicOnMoveToggle() {
-		if (muteROVonMove) {
-			muteROVonMove = false;
+		if (state.getBoolean(State.values.muteROVonMove)) {
+			state.set(State.values.muteROVonMove, false);
 			settings.writeSettings("muteonrovmove", "no");
 			messageplayer("mute ROV onmove off", null, null);
 		} else {
-			muteROVonMove = true;
+			state.set(State.values.muteROVonMove, true);
 			settings.writeSettings("muteonrovmove", "yes");
 			messageplayer("mute ROV onmove on", null, null);
 		}
@@ -900,17 +900,21 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void messageplayer(String str, String status, String value) {
-		Util.debug("TO player flash: "+str+", "+status+", "+value, this);
+		Util.debug("messageplayer: "+str+", "+status+", "+value, this);
 		
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			sc.invoke("message", new Object[] { str, "green", status, value });
 		}
 		
-		if(str!=null){
-			if(! str.equals("status check received"))
-				if(commandServer!=null) 
-					commandServer.sendToGroup("[messageplayer] " + str);					
+		if(commandServer!=null) {
+			if(str!=null){
+				if(! str.equals("status check received")) // basic ping from client, ignore
+				commandServer.sendToGroup(TelnetServer.MSGPLAYERTAG + " " + str);
+			}
+			if (status !=null) {
+				commandServer.sendToGroup(TelnetServer.MSGPLAYERTAG + " <status> " + status + " " + value);
+			}
 		}
 	}
 
@@ -986,7 +990,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	public void message(String str, String status, String value) {
-		if(str!=null) if(commandServer!=null) commandServer.sendToGroup("message: " + str);
 		messageplayer(str, status, value);
 	}
 
@@ -1029,14 +1032,14 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void moveMacroCancel() {
 		if (state.getBoolean(State.values.docking.name())) {
 			String str = "";
-			if (!state.equals(State.values.dockstatus.name(), State.values.docked.name())) {
-				state.set(State.values.dockstatus, State.values.undocked);
-				str += "dock un-docked";
-			}
+            if (!state.equals(State.values.dockstatus.name(), AutoDock.DOCKED)) {
+                state.set(State.values.dockstatus, AutoDock.UNDOCKED);
+                str += "dock " + AutoDock.UNDOCKED;
+            }
 			messageplayer("docking cancelled by movement", "multiple", str);
 			state.set(State.values.docking, false);
 		}
-		if (comport.sliding == true)
+		if (state.getBoolean(State.values.sliding))
 			comport.slidecancel();
 	}
 
@@ -1068,23 +1071,23 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void statusCheck(String s) {
-		if (initialstatuscalled == false) {
-			initialstatuscalled = true;
+		if (initialstatuscalled == false || s.equals("intial")) {
+			initialstatuscalled = true; 
 			battery.battStats();
 
 			// build string
 			String str = "";
 			if (comport != null) {
 				String spd = "FAST";
-				if (comport.speed == comport.speedmed)
+				if (state.getInteger(State.values.speed) == comport.speedmed)
 					spd = "MED";
-				if (comport.speed == comport.speedslow)
+				if (state.getInteger(State.values.speed) == comport.speedslow)
 					spd = "SLOW";
 
 				String mov = "STOPPED";
 				if (!state.getBoolean(State.values.motionenabled))
 					mov = "DISABLED";
-				if (comport.moving == true)
+				if (state.getBoolean(State.values.moving))
 					mov = "MOVING";
 				str += " speed " + spd + " cameratilt " + camTiltPos()
 						+ " motion " + mov;
@@ -1096,11 +1099,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 			str += " pushtotalk " + settings.readSetting("pushtotalk");
 			if (loginRecords.isAdmin())
 				str += " admin true";
-			if (state.get(State.values.dockstatus) != null)
-				str += " dock " + state.get(State.values.dockstatus);
+			if (state.get(State.values.dockstatus) != null) {
+				str += " dock "+ state.get(State.values.dockstatus);
+			}
 			if (light.isConnected()) {
 				str += " light " + light.spotLightBrightness();
-				str += " floodlight " + state.get(State.values.floodlight).toString();
+				str += " floodlight " + state.get(State.values.floodlighton).toString();
 			}
 			if (settings.getBoolean(State.values.developer) == true) {
 				str += " developer true";
@@ -1165,6 +1169,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 		messageplayer("restarting server application", null, null);
 		messageGrabber("restarting server application", null);
+		if(commandServer!=null) { commandServer.sendToGroup(TelnetServer.TELNETTAG+" shutdown"); }
 		File f;
 //		f = new File(System.getenv("RED5_HOME") + "\\restart"); // windows
 		f = new File(Settings.redhome + Settings.sep + "restart"); // windows & linux
@@ -1183,7 +1188,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 	
 	public void quit() { 
-		Util.debug("running "+Settings.os, this);
+		messageplayer("server shutting down",null,null);
+		if(commandServer!=null) { commandServer.sendToGroup(TelnetServer.TELNETTAG+" shutdown"); }
 		try {
 			if (Settings.os.equalsIgnoreCase("linux")) {
 				Runtime.getRuntime().exec(Settings.redhome+Settings.sep+"red5-shutdown.sh");
@@ -1330,6 +1336,16 @@ public class Application extends MultiThreadedApplicationAdapter {
 			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
 			sc.invoke("message", new Object[] { str, status });
 		}
+		
+		if(commandServer!=null) {
+			if(str!=null){
+//				if(! str.equals("status check received"))
+				commandServer.sendToGroup(TelnetServer.MSGGRABBERTAG + " " + str);
+			}
+			if (status !=null) {
+				commandServer.sendToGroup(TelnetServer.MSGGRABBERTAG + " <status> " + status );
+			}
+		}
 	}
 
 	public String logintest(String user, String pass) {
@@ -1443,7 +1459,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 							e.printStackTrace();
 						}
 						grabberPlayPlayer(1);
-						playerstream = true;
+						state.set(State.values.playerstream, true);
 					}
 				}).start();
 				if (str.equals("camera") || str.equals("camandmic")) {
@@ -1454,7 +1470,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			} else {
 				sc.invoke("publish", new Object[] { "stop", null, null, null,null,null });
 				grabberPlayPlayer(0);
-				playerstream = false;
+				state.set(State.values.playerstream, false);
 				Util.log("OCULUS: player broadcast stop",this);
 			}
 		}
@@ -1667,7 +1683,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		Util.log("chat: " + str);
 		messageGrabber("<CHAT>" + str, null);
-		if(str!=null) if (commandServer != null) commandServer.sendToGroup("message: " + str);
+		if(str!=null) if (commandServer != null) { 
+			str = str.replaceAll("</?i>", "");
+			commandServer.sendToGroup(TelnetServer.TELNETTAG+" chat from "+ str);
+		}
 	}
 
 	private void showlog() {

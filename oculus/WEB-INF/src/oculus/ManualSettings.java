@@ -18,11 +18,11 @@ public enum ManualSettings {
 		config.setProperty(vself.toString(), "320_240_8_85");
 		config.setProperty(arduinoculus.name(), Discovery.params.discovery.name());
 		config.setProperty(oculed.name(), Discovery.params.discovery.name());
-		config.setProperty(email_smtp_server.name(), State.values.disabled.name());
+		config.setProperty(email_smtp_server.name(), Settings.DISABLED);
 		config.setProperty(email_smtp_port.name(), "25");
-		config.setProperty(email_username.name(), State.values.disabled.name());
-		config.setProperty(email_password.name(), State.values.disabled.name());
-		config.setProperty(email_from_address.name(), State.values.disabled.name());
+		config.setProperty(email_username.name(), Settings.DISABLED);
+		config.setProperty(email_password.name(), Settings.DISABLED);
+		config.setProperty(email_from_address.name(), Settings.DISABLED);
 		config.setProperty(commandport.name(), "4444"); // State.values.disabled.name());
 		return config;
 	}

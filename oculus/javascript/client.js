@@ -269,6 +269,7 @@ function message(message, colour, status, value) {
 	
 	if (message != null) {
 		var tempmessage = message;
+		// message += " "+status+" "+value; //DEV ONLY, breaks things
 		var d = new Date();
 		
 		if (message == "status check received") { 
@@ -1901,7 +1902,7 @@ function account(str) { // change_password, password_update  DONE
 			oktosend = false;
 			msg += "*error: no spaces allowed in password "; 
 		}
-		if (msg != "") { message(msg, sentcmdcolor); }
+		if (msg != "") { message(msg, "orange"); }
 		if (oktosend) {
 			message("sending new user info", sentcmdcolor);
 			callServer("new_user_add", user + " " + pass);

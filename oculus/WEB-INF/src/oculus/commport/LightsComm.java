@@ -26,8 +26,8 @@ public class LightsComm implements SerialPortEventListener {
 	
 	public static final byte GET_PRODUCT = 'x';
 	public static final byte GET_VERSION = 'y';
-	private static final byte DOCK_ON = 'w';
-	private static final byte DOCK_OFF = 'o';
+	private static final byte FLOOD_ON = 'w';
+	private static final byte FLOOD_OFF = 'o';
 	public static final byte SPOT_OFF = 'a';
 	public static final byte SPOT_1 = 'b';
 	public static final byte SPOT_2 = 'c';
@@ -39,6 +39,8 @@ public class LightsComm implements SerialPortEventListener {
 	public static final byte SPOT_8 = 'i';
 	public static final byte SPOT_9 = 'j';
 	public static final byte SPOT_MAX = 'k';
+	public static final String SPOTLIGHTBRIGHTNESS = State.values.spotlightbrightness.name();
+	public static final String FLOODLIGHTON = State.values.floodlighton.name();
 
 	private SerialPort serialPort = null;
 	private InputStream in = null;
@@ -71,8 +73,6 @@ public class LightsComm implements SerialPortEventListener {
 	 */
 	public LightsComm(Application app) {
 		application = app; 
-		state.set(PlayerCommands.floodlight.toString(), false);
-		state.set(PlayerCommands.spotlightsetbrightness.toString(), 0);
 		if( state.get(State.values.lightport) != null ){
 			new Thread(new Runnable() { 
 				public void run() {
@@ -112,7 +112,8 @@ public class LightsComm implements SerialPortEventListener {
 		}
 		serialPort.notifyOnDataAvailable(true);
 		isconnected = true;	
-		
+		state.set(State.values.floodlighton, false);
+		state.set(State.values.spotlightbrightness, 0);
 		Util.log("connected to the the lights on:" + state.get(State.values.lightport), this);
 	}
 
@@ -122,11 +123,11 @@ public class LightsComm implements SerialPortEventListener {
 	}
 	
 	public int spotLightBrightness() {
-		return state.getInteger(PlayerCommands.spotlightsetbrightness.toString());
+		return state.getInteger(State.values.spotlightbrightness);
 	}
 	
 	public boolean floodLightOn() {
-		return state.getBoolean(PlayerCommands.floodlight.toString());
+		return state.getBoolean(State.values.floodlighton);
 	}
 	
 	@Override
@@ -167,25 +168,24 @@ public class LightsComm implements SerialPortEventListener {
 			Util.delay(SETUP);
 			while (true) {
 				if((System.currentTimeMillis() - state.getLong(oculus.State.values.usercommand)) > USER_TIME_OUT){
-					if(state.getBoolean(PlayerCommands.floodlight.toString()) 
-							|| (state.getInteger(PlayerCommands.spotlightsetbrightness.toString())>0)){
-						
+					if(state.getBoolean(FLOODLIGHTON) 
+						|| (state.getInteger(SPOTLIGHTBRIGHTNESS) > 0)){
 							application.message("lights on too long", null, null);
 							sendCommand(SPOT_OFF);
-							sendCommand(DOCK_OFF);
+							sendCommand(FLOOD_OFF);
 							// TODO: check input and set these flags!
-							state.set(PlayerCommands.floodlight.toString(), "false"); 
-							state.set(PlayerCommands.spotlightsetbrightness.toString(), 0);
+							state.set(FLOODLIGHTON, false); 
+							state.set(SPOTLIGHTBRIGHTNESS, 0);
 						}
 				}
 				
 				// refresh values
 				if(getReadDelta() > (DEAD_MAN_TIME_OUT/3)){
 										
-					if(state.getBoolean(PlayerCommands.floodlight.toString())) sendCommand(DOCK_ON);
-					else sendCommand(DOCK_OFF);
+					if(state.getBoolean(FLOODLIGHTON)) sendCommand(FLOOD_ON);
+					else sendCommand(FLOOD_OFF);
 					
-					int spot = state.getInteger(PlayerCommands.spotlightsetbrightness.toString());
+					int spot = state.getInteger(SPOTLIGHTBRIGHTNESS.toString());
 					if(spot==0) sendCommand((byte) SPOT_OFF);
 					else if(spot==10)sendCommand((byte) SPOT_1);
 					else if(spot==20) sendCommand((byte) SPOT_2);
@@ -310,7 +310,7 @@ public class LightsComm implements SerialPortEventListener {
 		else if(target==90) sendCommand((byte) SPOT_9);
 		else if(target==100) sendCommand((byte) SPOT_MAX);
 		
-		state.set(PlayerCommands.spotlightsetbrightness.toString(), target);
+		state.set(SPOTLIGHTBRIGHTNESS, target);
 		application.message("spotlight brightness set to "+target+"%", "light", Integer.toString(target));
 	}
 	
@@ -321,13 +321,13 @@ public class LightsComm implements SerialPortEventListener {
 			return;
 		}
 		if (str.equals("on")) { 
-			sendCommand(DOCK_ON);
-			state.set(PlayerCommands.floodlight.toString(), true);
+			sendCommand(FLOOD_ON);
+			state.set(State.values.floodlighton, true);
 		} else { 
-			sendCommand(DOCK_OFF);
-			state.set(PlayerCommands.floodlight.toString(), false);
+			sendCommand(FLOOD_OFF);
+			state.set(State.values.floodlighton, false);
 		}
 		
-		application.message("floodlight "+str, null, null);
+		application.message("floodlight "+str, "floodlight", state.get(State.values.floodlighton));
 	}
 }

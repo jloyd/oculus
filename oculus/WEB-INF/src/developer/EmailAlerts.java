@@ -26,7 +26,7 @@ public class EmailAlerts implements Observer {
 		if(settings.readSetting(ManualSettings.email_smtp_server) != null){
 			
 			// not disabled
-			if( ! settings.readSetting(ManualSettings.email_smtp_server).equals(State.values.disabled.name())){
+			if( ! settings.readSetting(ManualSettings.email_smtp_server).equals(Settings.DISABLED)){
 		
 				state.addObserver(this);
 				oculus.Util.debug("starting email alerts for battery life", this);

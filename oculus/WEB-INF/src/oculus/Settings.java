@@ -18,6 +18,7 @@ public class Settings {
 	
 	private static boolean configuredUsers = false;
 	public static String os = "windows" ; 
+	public final static String DISABLED= "disabled";
 	
 	/** reference to this singleton class */
 	private static Settings singleton = null;

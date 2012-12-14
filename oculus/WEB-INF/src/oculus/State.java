@@ -8,20 +8,21 @@ import java.util.Vector;
 
 public class State {
 	
-	public enum values{user, logintime, usercommand, userisconnected, reboot, developer, serialport, lightport, target, boottime, batterylife, 
-		motionenabled, externaladdress, autodocktimeout, autodocking, timeout, losttarget, firmware, unknown, override, commwatchdog,
-		framegrabbusy, sonarback, sonarright, sonarleft, dockgrabbusy, docking, dockxsize, dockysize, dockstatus, dockgrabtime, dockslope, dockxpos,
-		docked, undocked, disabled, floodlight, dockypos, undock, batterystatus, localaddress, centerpoint, motioncommand, 
-		streamActivityThresholdEnabled, streamActivityThreshold, videosoundmode, stream
+	public enum values{user, logintime, usercommand, userisconnected, developer, 
+		boottime, batterylife, externaladdress, framegrabbusy,
+		firmware, serialport, commwatchdog, motionenabled, motioncommand, // motors
+		speed, tempdirection, moving, sliding, movingforward, camservopos,
+		dockgrabbusy, docking, dockstatus, dockgrabtime, autodocktimeout, autodocking, losttarget, // dock 
+		dockxsize, dockysize, dockslope, dockxpos, dockypos,  // dock 
+		sonarback, sonarright, sonarleft, centerpoint, // experimental
+		floodlighton, lightport, spotlightbrightness, // lifhts
+		batterystatus, localaddress,   
+		streamActivityThresholdEnabled, streamActivityThreshold, videosoundmode, stream, playerstream, 
+		pendinguserconnected, httpPort, muteROVonMove
 	};
 
-	public static final String SEPERATOR = " : ";
-	
-	public static final long ONE_DAY = 86400000;
-	public static final long ONE_MINUTE = 60000;
-	public static final long TWO_MINUTES = 60000;
-	public static final long FIVE_MINUTES = 300000;
-	public static final long TEN_MINUTES = 600000;
+//	public static final String SEPERATOR = " : ";
+
 	public static final int ERROR = -1;
 
 	/** notify these on change events */
@@ -76,23 +77,24 @@ public class State {
 		return aa.equalsIgnoreCase(b);
 	}
 	
+	
 	/** */
-	public void dump(){
-		System.out.println("state number of listeners: " + observers.size());
-		for(int i = 0 ; i < observers.size() ; i++) 
-			System.out.println(i + " " + observers.get(i).getClass().getName() + "\n");
-		
-		try {
-			Set<String> keys = props.keySet();
-			for(Iterator<String> i = keys.iterator(); i.hasNext(); ){
-				String key = i.next();
-				System.out.println( key + " " + props.get(key));
-			}
-			
-		} catch (Exception e) {
-			Util.log(e.getLocalizedMessage(), this);
-		}
-	}
+//	public void dump(){
+//		System.out.println("state number of listeners: " + observers.size());
+//		for(int i = 0 ; i < observers.size() ; i++) 
+//			System.out.println(i + " " + observers.get(i).getClass().getName() + "\n");
+//		
+//		try {
+//			Set<String> keys = props.keySet();
+//			for(Iterator<String> i = keys.iterator(); i.hasNext(); ){
+//				String key = i.next();
+//				System.out.println( key + "<> " + props.get(key));
+//			}
+//			
+//		} catch (Exception e) {
+//			Util.log(e.getLocalizedMessage(), this);
+//		}
+//	}
 	
 	/** */
 	@Override
@@ -101,7 +103,7 @@ public class State {
 		Set<String> keys = props.keySet();
 		for(Iterator<String> i = keys.iterator(); i.hasNext(); ){
 			String key = i.next();
-			str += (key + " " + props.get(key) + "\r\n");
+			str += (key + " " + props.get(key) + "\n");
 		}
 		return str;
 	}

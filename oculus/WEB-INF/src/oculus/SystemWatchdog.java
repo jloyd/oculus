@@ -11,13 +11,13 @@ import oculus.Util;
 public class SystemWatchdog {
 	
 	private final Settings settings = Settings.getReference();
-	private final boolean reboot = settings.getBoolean(State.values.reboot);		
+	private final boolean reboot = settings.getBoolean(GUISettings.reboot);		
 	
 	// check every ten minutes
-	public static final long DELAY = State.TEN_MINUTES;
+	public static final long DELAY = Util.TEN_MINUTES;
 
 	// when is the system stale and need reboot
-	public static final long STALE = State.ONE_DAY; 
+	public static final long STALE = Util.ONE_DAY; 
 	
 	// shared state variables
 	private State state = State.getReference();
@@ -26,7 +26,7 @@ public class SystemWatchdog {
 	public SystemWatchdog(){ 
 		if (reboot){
 			Timer timer = new Timer();
-			timer.scheduleAtFixedRate(new Task(), State.TEN_MINUTES, DELAY);
+			timer.scheduleAtFixedRate(new Task(), Util.TEN_MINUTES, DELAY);
 		}	
 	}
 	

@@ -11,7 +11,8 @@ import oculus.TelnetServer;
 import oculus.Util;
 
 public class ScriptServer extends AbstractTerminal {
-	
+	public static final String SEPERATOR = " : ";
+
 	public String scriptFile = null;
 
 	public ScriptServer(String ip, String port, final String user, final String pass, String filename) 
@@ -24,7 +25,7 @@ public class ScriptServer extends AbstractTerminal {
 	
 	public void parseInput(final String str){
 		System.out.println(this.getClass().getName() + " parse: " + str);
-		String[] cmd = str.split(TelnetServer.SEPERATOR);
+		String[] cmd = str.split(SEPERATOR);
 		if(cmd.length==2) state.set(cmd[0], cmd[1]);	
 	}
 

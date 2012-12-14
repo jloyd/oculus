@@ -19,10 +19,6 @@ import oculus.Settings;
  */
 public class SendMail {
 
-	// TODO: take this from properties on startup if we want any smtp server
-	private static int SMTP_HOST_PORT = 587;
-	private static final String SMTP_HOST_NAME = "smtp.gmail.com";
-
 	private Settings settings = Settings.getReference();
 	private final String username = settings.readSetting(ManualSettings.email_username.toString()); 
 	private final String password = settings.readSetting(ManualSettings.email_password.toString()); 
@@ -35,7 +31,6 @@ public class SendMail {
 	private String fileName = null;
 	private String recipient = null;
 	
-	// if set, send error messages to user's screen 
 	private Application application = null;
 
 	/** */
@@ -99,6 +94,11 @@ public class SendMail {
 	public SendMail(final String str, Application app) {
 		// valid email = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i
 		recipient = str.substring(0, str.indexOf(" "));
+		if (!recipient.matches("(?i)^([^@\\s]+)@((?:[-a-z0-9]+\\.)+[a-z]{2,})$")) {
+			app.message("error - invalid recipient email", null, null);
+			return;
+		}
+
 		subject = str.substring(str.indexOf("[")+1, str.indexOf("]"));
 		body = str.substring(str.indexOf("]")+2);
 		application = app;
@@ -112,6 +112,10 @@ public class SendMail {
 	
 //	/** gmail */
 //	private void sendMessage() {
+//	
+//	int SMTP_HOST_PORT = 587;
+//	String SMTP_HOST_NAME = "smtp.gmail.com";
+//
 //
 //		if (user == null || pass == null) {
 //			System.out.println("no email and password found in settings");
@@ -197,7 +201,7 @@ public class SendMail {
 			// if (debug) System.out.println("sending email..");
 			
 			Properties props = new Properties();
-			props.put("mail.smtps.host", SMTP_HOST_NAME);
+			props.put("mail.smtps.host", host);
 			props.put("mail.smtps.auth", "true");
 			props.put("mail.smtp.starttls.enable", "true");
 
@@ -222,7 +226,7 @@ public class SendMail {
 			multipart.addBodyPart(messageBodyPart);
 			message.setContent(multipart);
 
-			transport.connect(SMTP_HOST_NAME, SMTP_HOST_PORT, username, password);
+			transport.connect(host, port, username, password);
 			transport.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
 			transport.close();
 

@@ -1,6 +1,7 @@
 package developer;
 
 import oculus.Application;
+import oculus.AutoDock;
 import oculus.Observer;
 import oculus.State;
 
@@ -42,7 +43,7 @@ public class DockingObserver implements Observer {
 		}
 
 		if (state.get(State.values.dockstatus.name()) != null) {
-			if (state.get(State.values.dockstatus.name()).equals(State.values.docked)) {
+			if (state.get(State.values.dockstatus).equals(AutoDock.DOCKED)) {
 				if (docking) {
 					
 					System.out.println("done docking");

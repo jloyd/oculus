@@ -23,6 +23,12 @@ public class Util {
 	private static final boolean debug = settings.getBoolean(ManualSettings.debugenabled);
 	private static final int PRECISION = 2;
 	
+	public static final long ONE_DAY = 86400000;
+	public static final long ONE_MINUTE = 60000;
+	public static final long TWO_MINUTES = 120000;
+	public static final long FIVE_MINUTES = 300000;
+	public static final long TEN_MINUTES = 600000;
+	
 	/**
 	 * Delays program execution for the specified delay.
 	 * 

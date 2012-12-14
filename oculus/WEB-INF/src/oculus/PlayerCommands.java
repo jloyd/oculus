@@ -53,7 +53,6 @@ public enum PlayerCommands {
 		dock("dock", "undock"),
 		clicksteer("{INT} {INT}"), 
 		chat("{STRING}"), 
-		statuscheck("battstats"),
 		systemcall("{STRING}"), 
 		streamsettingsset("low","med","high","full","custom"), 
 		streamsettingscustom("{STRING}"), //"{INT}_{INT}_{INT}_[0-100]"), 
