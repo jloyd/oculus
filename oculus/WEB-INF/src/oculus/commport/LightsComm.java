@@ -167,7 +167,7 @@ public class LightsComm implements SerialPortEventListener {
 		public void run() {
 			Util.delay(SETUP);
 			while (true) {
-				if((System.currentTimeMillis() - state.getLong(oculus.State.values.usercommand)) > USER_TIME_OUT){
+				if((System.currentTimeMillis() - application.lastcommandtime) > USER_TIME_OUT){
 					if(state.getBoolean(FLOODLIGHTON) 
 						|| (state.getInteger(SPOTLIGHTBRIGHTNESS) > 0)){
 							application.message("lights on too long", null, null);

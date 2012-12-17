@@ -20,7 +20,7 @@ public enum PlayerCommands {
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown,
     setstreamactivitythreshold, getlightlevel, email, state, uptime, help, framegrabtofile, memory, who, 
-    loginrecords, settings;
+    loginrecords, settings, messageclients;
 	
 	/** get text for any player command */
 	public String getHelp(){
@@ -32,7 +32,7 @@ public enum PlayerCommands {
 	public enum AdminCommands {
 		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
 		showlog, softwareupdate, relaunchgrabber, systemcall, shutdown, email, state, uptime, framegrabtofile,
-		memory, loginrecord, settings;
+		memory, loginrecord, settings, messageclients;
 	}
 	
 	// sub-set that are require parameters 

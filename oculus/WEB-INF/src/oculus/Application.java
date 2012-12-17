@@ -46,6 +46,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public Speech speech = new Speech();
 	public static byte[] framegrabimg  = null;
 	public Boolean passengerOverride = false;
+	public long lastcommandtime = 0;
 	
 	public Application() {
 		super();
@@ -431,7 +432,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		if(fn != PlayerCommands.statuscheck) 
-			state.set(State.values.usercommand.name(), System.currentTimeMillis());
+			lastcommandtime = System.currentTimeMillis();
+//			state.set(State.values.usercommand.name(), System.currentTimeMillis());
 
 		String[] cmd = null;
 		if(str!=null) cmd = str.split(" ");
@@ -622,7 +624,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			break;
 		case who: messageplayer(loginRecords.who(), null, null); break;
 		case loginrecords: messageplayer(loginRecords.toString(), null, null); break;
-		case settings: messageplayer(settings.toString(), null, null);
+		case settings: messageplayer(settings.toString(), null, null); break;
+		case messageclients: messageplayer(str, null,null);
 
 		}
 	}

@@ -8,7 +8,7 @@ import java.util.Vector;
 
 public class State {
 	
-	public enum values{driver, logintime, usercommand, developer, 
+	public enum values{driver, logintime, usercommandasdf, developer, 
 		boottime, batterylife, externaladdress, framegrabbusy,
 		firmware, serialport, commwatchdog, motionenabled, motioncommand, // motors
 		speed, tempdirection, moving, sliding, movingforward, camservopos, // motors
