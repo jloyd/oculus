@@ -8,17 +8,17 @@ import java.util.Vector;
 
 public class State {
 	
-	public enum values{user, logintime, usercommand, userisconnected, developer, 
+	public enum values{driver, logintime, usercommand, developer, 
 		boottime, batterylife, externaladdress, framegrabbusy,
 		firmware, serialport, commwatchdog, motionenabled, motioncommand, // motors
-		speed, tempdirection, moving, sliding, movingforward, camservopos,
+		speed, tempdirection, moving, sliding, movingforward, camservopos, // motors
 		dockgrabbusy, docking, dockstatus, dockgrabtime, autodocktimeout, autodocking, losttarget, // dock 
 		dockxsize, dockysize, dockslope, dockxpos, dockypos,  // dock 
 		sonarback, sonarright, sonarleft, centerpoint, // experimental
-		floodlighton, lightport, spotlightbrightness, // lifhts
+		floodlighton, lightport, spotlightbrightness, // lights
 		batterystatus, localaddress,   
 		streamActivityThresholdEnabled, streamActivityThreshold, videosoundmode, stream, playerstream, 
-		pendinguserconnected, httpPort, muteROVonMove
+		pendinguserconnected, httpPort, muteROVonMove, volume
 	};
 
 //	public static final String SEPERATOR = " : ";
@@ -79,21 +79,22 @@ public class State {
 	
 	
 	/** */
-//	public void dump(){
-//		System.out.println("state number of listeners: " + observers.size());
-//		for(int i = 0 ; i < observers.size() ; i++) 
-//			System.out.println(i + " " + observers.get(i).getClass().getName() + "\n");
-//		
-//		try {
-//			Set<String> keys = props.keySet();
-//			for(Iterator<String> i = keys.iterator(); i.hasNext(); ){
-//				String key = i.next();
-//				System.out.println( key + "<> " + props.get(key));
-//			}
-//			
-//		} catch (Exception e) {
-//			Util.log(e.getLocalizedMessage(), this);
-//		}
+//	public String dump(){
+////		System.out.println("state number of listeners: " + observers.size());
+////		for(int i = 0 ; i < observers.size() ; i++) 
+////			System.out.println(i + " " + observers.get(i).getClass().getName() + "\n");
+////		
+////		try {
+////			Set<String> keys = props.keySet();
+////			for(Iterator<String> i = keys.iterator(); i.hasNext(); ){
+////				String key = i.next();
+////				System.out.println( key + "<> " + props.get(key));
+////			}
+////			
+////		} catch (Exception e) {
+////			Util.log(e.getLocalizedMessage(), this);
+////		}
+//		return
 //	}
 	
 	/** */
@@ -103,7 +104,7 @@ public class State {
 		Set<String> keys = props.keySet();
 		for(Iterator<String> i = keys.iterator(); i.hasNext(); ){
 			String key = i.next();
-			str += (key + " " + props.get(key) + "\n");
+			str += (key + " " + props.get(key) + "<br>");
 		}
 		return str;
 	}

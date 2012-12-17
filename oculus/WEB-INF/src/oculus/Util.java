@@ -14,7 +14,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 public class Util {
@@ -367,79 +369,31 @@ public class Util {
 		// TODO: linux beep
 	}
 	
-	public static String[] tail ( File file, String match ){
-		
-		// store all lines, then filter 
-		Vector<String> lines = new Vector<String>();
-				
-		String info = tail(file, 500);
-		String[] capture = info.split("\n");
-		for(int i=0 ; i < capture.length ; i++)
-			if(capture[i].startsWith(match))
-				lines.add(capture[i]);
-					
-		String[] result = new String[lines.size()];
-		for (int c = 0 ; c < lines.size() ; c++) 
-			result[c] = lines.get(c);
-			
-		return result;
-	}
-	
-	public static String tail(){
-		String info = tail(new File(Settings.stdout), 1000);
-		String[] capture = info.split("\n");
-		String result = null;
-		for(int i=0 ; i < capture.length ; i++)
-			if(capture[i].startsWith("OCULUS:"))
-				result += (capture[i]) + " \n";
-			
-		return result;
-	}
-	
-	/** */ 
-	public static String tail( File file, int lines) {  
-		try {
-	        java.io.RandomAccessFile fileHandler = new java.io.RandomAccessFile( file, "r" );
-	        long fileLength = file.length() - 1;
-	        StringBuilder sb = new StringBuilder();
-	        int line = 0;
-
-	        for( long filePointer = fileLength; filePointer != -1; filePointer-- ) {
-	            fileHandler.seek( filePointer );
-	            int readByte = fileHandler.readByte();
-
-	            if( readByte == 0xA ) {
-	                if (line == lines) {
-	                    if (filePointer == fileLength) {
-	                        continue;
-	                    } else {
-	                        break;
-	                    }
-	                }
-	            } else if( readByte == 0xD ) {
-	                line = line + 1;
-	                if (line == lines) {
-	                    if (filePointer == fileLength - 1) {
-	                        continue;
-	                    } else {
-	                        break;
-	                    }
-	                }
+	public static String tail(int lines) {
+		Vector<String> alllines = new Vector<String>();
+		File file =new File(Settings.stdout);
+	    FileInputStream filein;
+	    try {
+	            filein = new FileInputStream(file.getAbsolutePath());
+	            BufferedReader reader = new BufferedReader(
+	                            new InputStreamReader(filein));
+	            String line = "";
+	            while ((line = reader.readLine()) != null) {
+                    alllines.add(line);
 	            }
-	           sb.append( ( char ) readByte );
-	        }
-
-	        sb.deleteCharAt(sb.length()-1);
-	        String lastLine = sb.reverse().toString();
-	        return lastLine;
-	    } catch( java.io.FileNotFoundException e ) {
-	        e.printStackTrace();
-	        return null;
-	    } catch( java.io.IOException e ) {
-	        e.printStackTrace();
-	        return null;
+	            filein.close();
+           
+	            
+	    } catch (Exception e) {
+	            e.printStackTrace();
 	    }
-	 }
+	    String result="";
+	    for(int i=alllines.size()-lines ; i < alllines.size() ; i++) {
+	    	result += alllines.elementAt(i).trim()+"<br>";
+	    }
+	    
+		return result;
+	}
 	
 	public static void saveUrl(String filename, String urlString) throws MalformedURLException, IOException {
         BufferedInputStream in = null;
@@ -469,4 +423,26 @@ public class Util {
 	public static void log(String str) {
 		System.out.println("OCULUS: " + getTime() + ", " + str);
 	}
+	
+	
+    public static String memory() {
+    	String str = "";
+		str += "memory : " +
+				((double)Runtime.getRuntime().freeMemory()
+						/ (double)Runtime.getRuntime().totalMemory()) + " %<br>";
+		
+		str += "memorytotal : "+Runtime.getRuntime().totalMemory()+"<br>";    
+	    str += "memoryfree : "+Runtime.getRuntime().freeMemory()+"<br>";
+		return str;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Hello, World");
+        String s="";
+        String[] z = s.split(" ");
+        System.out.println(Integer.toString(z.length));
+    }
+    
+
+
 }

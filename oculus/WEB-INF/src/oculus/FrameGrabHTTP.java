@@ -7,6 +7,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 //import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 //import java.util.Random;
@@ -30,7 +31,7 @@ public class FrameGrabHTTP extends HttpServlet {
 	private static int var;
 	private static BufferedImage radarImage = null;
 	private static boolean radarImageGenerating = false;
-	//	FrameGrabHTTP servletRunning;
+	private static Settings settings = Settings.getReference();
 	
 	MotionTracker tracker = MotionTracker.getReference();
 	
@@ -269,16 +270,29 @@ public class FrameGrabHTTP extends HttpServlet {
 //		} }).start();
 
 	}
-	
-	/*
-	private class KillIfStillRunning extends TimerTask {
-		@Override
-		public void run() {
-			servletRunning.destroy();
-			Util.log("servlet destroyed",this);
-		}
-	}
-	*/
 
+	public static void saveToFile(final String str) {
+		
+		final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {			
+					int i = 1;
+					if (!str.equals("")) { i = Integer.parseInt(str); }
+					Downloader dl = new Downloader();
+					String sep = settings.sep;
+					for(; i > 0 ; i--) {
+						Util.debug(i + " framegrab save: " + urlString, this);
+						dl.FileDownload(urlString, System.currentTimeMillis() + ".jpg", "webapps"+sep+"oculus"+sep+"framegrabs");
+//						Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
+					}
+				} catch (Exception e) {
+					Util.log("can't get image: " + e.getLocalizedMessage(), this);
+				}
+			}
+		}).start();
+	}
+	
 
 }

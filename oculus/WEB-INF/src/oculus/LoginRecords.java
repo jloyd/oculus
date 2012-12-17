@@ -7,7 +7,7 @@ public class LoginRecords {
 
 	public static final String PASSENGER = "passenger";
 	public static final String DRIVER = "driver";
-	public static final int MAX_RECORDS = 50;
+//	public static final int MAX_RECORDS = 50;
 	
 	public static Vector<Record> list = new Vector<Record>();
 	public static State state = State.getReference();
@@ -22,28 +22,24 @@ public class LoginRecords {
 	
 	public void beDriver() { 
 		
-		list.add(new Record(state.get(State.values.user), DRIVER)); 
-		state.set(State.values.userisconnected, true);
+		list.add(new Record(state.get(State.values.driver), DRIVER)); 
 		state.set(State.values.logintime, System.currentTimeMillis());
 
-		Util.debug("beDriver(): " + state.get(State.values.user), this);
+		Util.debug("beDriver(): " + state.get(State.values.driver), this);
 		
-		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
+//		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
 	}
 	
-	public void bePassenger() {		
+	public void bePassenger(String user) {		
 	
-		list.add(new Record(state.get(State.values.user), PASSENGER)); 
-		state.set(State.values.userisconnected, true);
-		
-		Util.debug("bePassenger(): " + state.get(State.values.user), this);
-		
-		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest 
+		list.add(new Record(user, PASSENGER)); 
+//		if(list.size()>MAX_RECORDS) list.remove(0); // push out oldest
+		Util.debug("bePassenger(): " + user, this);
 	}
 	
-	/** is the current user the admin? */
+	/** is the driver the admin user? */
 	public boolean isAdmin() {
-		String user = state.get(State.values.user);
+		String user = state.get(State.values.driver);
 		if (user == null) return false;
 		if (user.equals("")) return false;
 		Settings settings = Settings.getReference();
@@ -52,46 +48,32 @@ public class LoginRecords {
 	}
 	
 	
-	public void signout() {
-		
-		if(state.getBoolean(State.values.developer)){
-			System.out.println("+_logging out: " + state.get(State.values.user));
-			System.out.println("+_waiting now:" + getPassengers());
-			System.out.println(toString());
-		}
+	public void signoutDriver() {
 		
 		// try all instances
-		// int active = 0;
 		for (int i = 0; i < list.size(); i++){
 			Record rec = list.get(i);
-			if (rec.isActive()){
-				if (rec.getUser().equals(state.get(State.values.user))){
-					list.get(i).logout();
-				}
+			if (rec.isActive() && rec.getRole().equals(DRIVER)){
+				list.get(i).logout();
 			}
 		}
 		
-		// assume this gets reset as new user logs in 
-		state.set(State.values.userisconnected, false);
-		state.delete(State.values.user);
+		state.delete(State.values.driver);
 		
 		// maintain size limit 
-		if(list.size() > MAX_RECORDS) list.remove(0);
+//		if(list.size() > MAX_RECORDS) list.remove(0);
 		
-		if(state.getBoolean(State.values.developer)){
-			System.out.println("OCULUS: -_logging out: " + state.get(State.values.user));
-			System.out.println("OCULUS: _waiting now:" + getPassengers());
-			System.out.println(toString());
-		}
-	
+		Util.debug("OCULUS: -_logging out: " + state.get(State.values.driver), this);
+		Util.debug("OCULUS: _waiting now:" + getNumPassengers(), this);
+		Util.debug(toString(), this);
 	}
-
+	
 	/** @return the number of users waiting in line */
-	public int getPassengers() {
+	private int getNumPassengers() {
 		int passengers = 0;
 		for (int i = 0; i < list.size(); i++){
 			Record rec = list.get(i);
-			if(rec.isActive() && rec.isPassenger())
+			if(rec.getRole().equals(PASSENGER))
 				passengers++;
 		}
 
@@ -110,43 +92,62 @@ public class LoginRecords {
 		return active;
 	}
 	
-	/** @return a list of user names waiting in line */
-	public String[] getPassengerList() {
-		String[] passengers = new String[getPassengers()];
-		for (int i = 0; i < list.size(); i++){
-			Record rec = list.get(i);
-			if(rec.isActive() && rec.isPassenger())
-				passengers[i] = rec.getUser();
-		}
-
-		return passengers;
-	}
+//	/** @return a list of user names waiting in line */
+//	public String[] getPassengerList() {
+//		String[] passengers = new String[getPassengers()];
+//		for (int i = 0; i < list.size(); i++){
+//			Record rec = list.get(i);
+//			if(rec.isActive() && rec.getRole().equals(PASSENGER))
+//				passengers[i] = rec.getUser();
+//		}
+//
+//		return passengers;
+//	}
 	
-	/** @return a list of user names */
-	public String[] getActiveList() {
-		String[] passengers = new String[getActive()];
-		for (int i = 0; i < list.size(); i++){
-			Record rec = list.get(i);
-			if(rec.isActive())
-				passengers[i] = rec.getUser();
-		}
+//	/** @return a list of user names */
+//	public String[] getActiveList() {
+//		String[] passengers = new String[getActive()];
+//		for (int i = 0; i < list.size(); i++){
+//			Record rec = list.get(i);
+//			if(rec.isActive())
+//				passengers[i] = rec.getUser();
+//		}
+//
+//		return passengers;
+//	}
 
-		return passengers;
-	}
-
-	public int size() {
-		return list.size();
-	}
+//	public int size() {
+//		return list.size();
+//	}
 
 	public String toString() {
 
+		String str = "RTMP users login records:<br>";
 		if (list.isEmpty()) return null;
-
-		String str = "current users:\r\n";
 		for (int i = 0; i < list.size(); i++)
-			str += i + " " + list.get(i).toString() + "\r\n";
+			str += i + " " + list.get(i).toString() + "<br>";
 
 		return str;
+	}
+	
+	/** 
+	 * @return list of connected users 
+	 */
+	public String who() {
+		String result = "";
+		result += "active RTMP users : " + getActive()+"<br>" ;
+		if (!list.isEmpty()) {
+			for (int i = 0; i < list.size(); i++) {
+				if (list.get(i).toString().matches(".*ACTIVE$")) {
+					result += list.get(i).toString() + "<br>";
+				}
+			}
+		}
+		if (app.commandServer!=null) {
+			result+="telnet connections: "+app.commandServer.printers.size(); 
+		}
+
+		return result;
 	}
 
 	/**
@@ -167,20 +168,21 @@ public class LoginRecords {
 		public String getUser() {
 			return user;
 		}
+		
+		public String getRole() {
+			return role;
+		}
 
 		public boolean isActive(){
-			return (timeout==0);
-		}
-		
-		public boolean isPassenger(){
-			return (role.equals(PASSENGER));
+			if (getRole().equals(DRIVER)) { return (timeout==0); }
+			else { return false; }
 		}
 		
 		@Override
 		public String toString() {
 			String str = user + " " + role.toUpperCase(); 
 			str += " login: " + new Date(timein).toString();
-			if(isActive()) str += " is ACTIVE";
+			if(isActive() && getRole().equals(DRIVER)) str += " is ACTIVE";
 			else str += " logout: " + new Date(timeout).toString();
 			
 			return str;

@@ -192,7 +192,7 @@ public class AutoDock {
 									if (state.getBoolean(State.values.autodocking)) {
 										state.set(State.values.autodocking, "false");
 										str += " cameratilt "+app.camTiltPos()+" autodockcancelled blank";
-										if (!state.get(State.values.stream).equals("stop") && state.get(State.values.user)==null) { 
+										if (!state.get(State.values.stream).equals("stop") && state.get(State.values.driver)==null) { 
 											app.publish("stop"); 
 										}
 										
@@ -206,7 +206,7 @@ public class AutoDock {
 										
 									}
 									app.message("docked successfully", "multiple", "motion disabled dock docked battery charging"+str);
-									System.out.println("OCULUS: " + state.get(State.values.user) +" docked successfully");
+									System.out.println("OCULUS: " + state.get(State.values.driver) +" docked successfully");
 									state.set(State.values.motionenabled, false);
 									state.set(State.values.dockstatus, DOCKED);
 									// needs to be before battStats()
@@ -230,7 +230,7 @@ public class AutoDock {
 										s += " motion stopped";
 									} 
 									app.message("docking timed out", "multiple", s);
-									System.out.println("OCULUS: " + state.get(State.values.user) +" docking timed out");
+									System.out.println("OCULUS: " + state.get(State.values.driver) +" docking timed out");
 									state.set(State.values.dockstatus, UNDOCKED);
 									if (state.getBoolean(State.values.autodocking)) {
 										new Thread(new Runnable() { public void run() { try {
@@ -267,7 +267,7 @@ public class AutoDock {
 					Util.delay(2000);
 					comport.stopGoing();
 					app.message("disengaged from dock", "motion", "stopped");
-					System.out.println("OCULUS: " + state.get(State.values.user) + " un-docked");
+					System.out.println("OCULUS: " + state.get(State.values.driver) + " un-docked");
 					life.battStats();
 				}
 			}).start();

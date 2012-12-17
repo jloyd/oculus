@@ -16,18 +16,17 @@ public class TelnetServer implements Observer {
 	
 	//TODO: add junit test to check that all commands below are PlayerCommands duplicated
 	// OR just move these all to playercommands?
-	public static enum Commands {txt, users, tcp, beep, tail, image, memory, state, settings, help, bye, uptime, quit};
+	public static enum Commands {chat, bye, quit};
 	public static final boolean ADMIN_ONLY = true;
-	public static final int MIN_LENGTH = 2; //TODO: why 2? Why not 1?
+//	public static final int MIN_LENGTH = 1; //TODO: why 2? Why not 1?
 	public static final String MSGPLAYERTAG = "<messageclient>";
 	public static final String MSGGRABBERTAG = "<messageserverhtml>";
 	public static final String TELNETTAG = "<telnet>";
-	public static final String STATETAG = "<state>";
+	public static final String STATETAG = "<state>";		
+	public static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	
-	
-	private static Vector<PrintWriter> printers = new Vector<PrintWriter>();
 	private static oculus.State state = oculus.State.getReference();
-	private static LoginRecords records = new LoginRecords();
+//	private static LoginRecords records = new LoginRecords();
 	private static oculus.Settings settings =Settings.getReference();
 	private static ServerSocket serverSocket = null;  	
 	private static Application app = null;
@@ -87,8 +86,7 @@ public class TelnetServer implements Observer {
 				shutDown("command server connection fail: " + ex.getMessage());
 			}
 	
-			// TODO: log in 
-			state.set(oculus.State.values.user, user);
+//			state.set(oculus.State.values.user, user);
 			// new LoginRecords().beDriver();
 			
 			// keep track of all other user sockets output streams			
@@ -102,8 +100,8 @@ public class TelnetServer implements Observer {
 		@Override
 		public void run() {
 			
-			if(state.get(oculus.State.values.user.name())==null) state.set(oculus.State.values.user.name(), user);
-			if(settings.getBoolean(GUISettings.loginnotify)) Util.beep();
+//			if(state.get(oculus.State.values.user.name())==null) state.set(oculus.State.values.user.name(), user);
+			if(settings.getBoolean(GUISettings.loginnotify)) app.saySpeech("lawg inn telnet");
 			sendToGroup(TELNETTAG+" "+printers.size() + " tcp connections active");
 			
 			// loop on input from the client
@@ -124,7 +122,7 @@ public class TelnetServer implements Observer {
 						
 				// parse and run it 
 				str = str.trim();
-				if(str.length()>=MIN_LENGTH){
+				if(str.length()>=1){
 					
 					Util.debug("socket user '"+user+"' sending from "+clientSocket.getInetAddress().toString() + " : " + str, this);	
 					if( ! manageCommand(str)) {			
@@ -153,7 +151,7 @@ public class TelnetServer implements Observer {
 			try { // create command from input 
 				player = PlayerCommands.valueOf(cmd[0]);
 			} catch (Exception e) {
-				sendToSocket("error: bad command, " + cmd[0]);
+				sendToSocket("error: unknown command, " + cmd[0]);
 				return;
 			}
 			
@@ -194,15 +192,7 @@ public class TelnetServer implements Observer {
 						return;
 					}
 				}
-				
-				//TODO: returns error if more than one parameter
-//				if(req.usesRange()){
-//					if( ! req.vaildRange(cmd[1])){
-//						sendToSocket("error: not in range " + req.getArguments());
-//						return;
-//					}
-//				}
-				
+	
 				if(req.requiresParse()){
 					
 					// do min test, check for the same number of arguments 
@@ -216,12 +206,12 @@ public class TelnetServer implements Observer {
 		
 			// check for null vs string("")
 			args = args.trim();
-			if(args.length()==0) args = null;
+			if(args.length()==0) args = "";
 			
 			// now send it, assign driver status 1st 
-			app.passengerOverrideFlag = true;	
+			app.passengerOverride = true;	
 			app.playerCallServer(player, args);
-			app.passengerOverrideFlag = false;		
+			app.passengerOverride = false;		
 		}
 		
 		// close resources
@@ -258,137 +248,45 @@ public class TelnetServer implements Observer {
 			
 			switch (telnet) {
 			
-			case uptime:
-				
-				sendToSocket(state.getUpTime() + " ms");
-				
-				return true;
-			
-			
-			case txt: // cmdmgr users should use this instead of 'chat' so username is auto-included
+			case chat: // overrides playercommands chat
 				String args = new String(); 		
 				for(int i = 1 ; i < cmd.length ; i++) args += " " + cmd[i].trim();
 				if(args.length()>1)
 					app.playerCallServer(PlayerCommands.chat, 
 							"<i>" + user.toUpperCase() + "</i>:" + args);
 				return true;
+					
+//			case tcp: 
+//				sendToSocket("tcp connections : " + printers.size());
+//				return true;
+//				
+//			case users: 
+//				sendToSocket("active users : " + records.getActive());
+//				if(records.toString()!=null) sendToSocket(records.toString());
+//				return true;
+				
+//			case state:
+//				if(cmd.length==3) state.set(cmd[1], cmd[2]);
+//				else {
+//					sendToSocket(state.toString());
+//					// state.dump();
+//				}
+//				return true;
 
-				
-			case help: 
-				
-				if(cmd.length==2){ // look something up
-					
-						if(PlayerCommands.requiresArgument(cmd[1])){
-							
-							sendToSocket("requires argument: " + PlayerCommands.RequiresArguments.valueOf(cmd[1]).getValues().toString().replace(",", " | "));
-							
-						}else{
-							
-							String help = null;
-							try {
-								help = PlayerCommands.HelpText.valueOf(cmd[1]).getText();
-							} catch (Exception e) {}
-							
-							if(help==null) {
-								sendToSocket("no match for: " + (cmd[1]));
-								return true;
-							}
-							
-							sendToSocket("requires no argument(s)");
-						}
-						
-						// give help, they are doing something wrong 
-						sendToSocket("description: " + PlayerCommands.HelpText.valueOf(cmd[1]).getText());
-						
-				} else { // just puke the list
-				
-					// print all commands 
-					sendToSocket(PlayerCommands.getCommands());
-					
-					for (TelnetServer.Commands commands : TelnetServer.Commands.values()) 
-						sendToSocket(commands + " (telnet only)");
-					
-				}
-				return true;
+//			case settings: 
+//				if(cmd.length==3) { 
+//					if(settings.readSetting(cmd[1]) == null) settings.newSetting(cmd[1], cmd[2]);
+//					else settings.writeSettings(cmd[1], cmd[2]);
+//				
+//					// clean file afterwards 
+//					settings.writeFile();
+//					return true;
+//					
+//				} else{
+//					sendToSocket(settings.toString());
+//					return true;
+//				}
 			
-				
-			case tail:
-				int lines = 30; // default amount to return if not set 
-				if(cmd.length==2) lines = Integer.parseInt(cmd[1]);
-				String log = Util.tail(new File(oculus.Settings.stdout), lines);
-				if(log!=null)
-					if(log.length() > 1)
-						sendToSocket(log);
-				return true;
-		
-				
-			case image:
-				final String urlString = "http://127.0.0.1:" + settings.readRed5Setting("http.port") + "/oculus/frameGrabHTTP";
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {			
-							int i = 1;
-							if(cmd.length==2) i = Integer.parseInt(cmd[1]);
-							new File("capture").mkdir();
-							for(; i > 0 ; i--) {
-								Util.debug(i + " save: " + urlString, this);
-								Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
-							}
-						} catch (Exception e) {
-							Util.log("can't get image: " + e.getLocalizedMessage(), this);
-						}
-					}
-				}).start();	
-				return true;
-				
-				
-					
-			case memory:
-				sendToSocket("memory : " +
-						((double)Runtime.getRuntime().freeMemory()
-								/ (double)Runtime.getRuntime().totalMemory()) + " %");
-				
-				sendToSocket("memorytotal : "+Runtime.getRuntime().totalMemory());    
-			    sendToSocket("memoryfree : "+Runtime.getRuntime().freeMemory());
-				return true;
-
-			    
-			case tcp: 
-				sendToSocket("tcp connections : " + printers.size());
-				return true;
-				
-				
-			case users: 
-				sendToSocket("active users : " + records.getActive());
-				if(records.toString()!=null) sendToSocket(records.toString());
-				return true;
-		
-				
-			case state:
-				if(cmd.length==3) state.set(cmd[1], cmd[2]);
-				else {
-					sendToSocket(state.toString());
-					// state.dump();
-				}
-				return true;
-				
-
-			case settings: 
-				if(cmd.length==3) { 
-					if(settings.readSetting(cmd[1]) == null) settings.newSetting(cmd[1], cmd[2]);
-					else settings.writeSettings(cmd[1], cmd[2]);
-				
-					// clean file afterwards 
-					settings.writeFile();
-					return true;
-					
-				} else{
-					sendToSocket(settings.toString());
-					return true;
-				}
-			
-			case beep: Util.beep(); return true;
 			case bye: 
 			case quit: shutDown("user quit");
 			}
@@ -397,8 +295,15 @@ public class TelnetServer implements Observer {
 			return false;	
 		}
 		
-		private void sendToSocket(final String str) {
+		private void sendToSocket(String str) {
+			Boolean multiline = false;
+			if (str.matches(".*<br>.*")) { 
+				multiline = true;
+				str = (str.replaceAll("<br>", "\r\n")).trim();
+			}
+			if (multiline) { out.print("<multiline> "); }
 			out.println("<telnet> " + str);
+			if (multiline) { out.println("</multiline>"); }
 		}
 		
 	} // end inner class
@@ -412,16 +317,25 @@ public class TelnetServer implements Observer {
 	}
 	
 	/** send input back to all the clients currently connected */
-	public void sendToGroup(final String str) {
-		
+	public void sendToGroup(String str) {
+		Boolean multiline = false;
+		if (str.contains("<br>")) {
+			multiline = true;
+			str = (str.replaceAll("<br>", "\r\n")).trim();
+		}
 		PrintWriter pw = null;
 		for (int c = 0; c < printers.size(); c++) {
 			pw = printers.get(c);
 			if (pw.checkError()) {	
 				printers.remove(pw);
 				pw.close();
-			} else pw.println(str);
+			} else {
+				if (multiline) { pw.print("<multiline> "); }
+				pw.println(str);
+				if (multiline) { pw.println("</multiline>"); }
+			}
 		}
+
 	}
 
 	/** constructor */

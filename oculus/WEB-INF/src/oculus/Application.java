@@ -37,15 +37,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private AutoDock docker = null;
 	private State state = State.getReference();
 	private LoginRecords loginRecords = new LoginRecords();
-	private oculus.TelnetServer commandServer = null;
 	private boolean pendingplayerisnull = true;
 	private String authtoken = null;
 	private boolean initialstatuscalled = false; 
-	
+
+	public TelnetServer commandServer = null;
 	public developer.OpenNIRead openNIRead = null;
 	public Speech speech = new Speech();
 	public static byte[] framegrabimg  = null;
-	public Boolean passengerOverrideFlag = false;
+	public Boolean passengerOverride = false;
 	
 	public Application() {
 		super();
@@ -91,17 +91,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	@Override
 	public void appDisconnect(IConnection connection) {
-		if(connection==null)return;
+		if(connection==null) return;
 		if (connection.equals(player)) {
-			String str = state.get(State.values.user.name()) + " disconnected";
+			String str = state.get(State.values.driver.name()) + " disconnected";
 			Util.log("appDisconnect(): " + str); 
 
 			messageGrabber(str, "connection awaiting&nbsp;connection");
-			loginRecords.signout();
-			
-			if(settings.getBoolean(ManualSettings.developer))
-				if(state.get(State.values.user.name()) != null)
-					Util.log("user was NOT logged out correctly!");
+			loginRecords.signoutDriver();
 
 			if (!state.getBoolean(State.values.autodocking)) { //if autodocking, keep autodocking
 				if (state.get(State.values.stream) != null) {
@@ -137,7 +133,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			
 			player = null;
-
 		}
 		
 		if (connection.equals(grabber)) {
@@ -156,7 +151,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 					}
 				}
 			}).start();
+			return;
 		}
+
+		//TODO: extend IConnection class, associate loginRecord  (to get passenger info)
+		// currently no username info when passenger disconnects
 	}
 
 	public void grabbersignin(String mode) {
@@ -167,8 +166,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		grabber = Red5.getConnectionLocal();
 		String str = "awaiting&nbsp;connection";
-		if (state.get(State.values.user.name()) != null) {
-			str = state.get(State.values.user.name()) + "&nbsp;connected";
+		if (state.get(State.values.driver.name()) != null) {
+			str = state.get(State.values.driver.name()) + "&nbsp;connected";
 		}
 		str += " stream " + state.get(State.values.stream);
 		messageGrabber("connected to subsystem", "connection " + str);
@@ -242,6 +241,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (UpdateFTP.configured()) new developer.UpdateFTP();
 
 		Util.setSystemVolume(settings.getInteger(GUISettings.volume), this);
+		state.set(State.values.volume, settings.getInteger(GUISettings.volume));
+
 		grabberInitialize();
 		battery = BatteryLife.getReference();
 		new SystemWatchdog();
@@ -339,7 +340,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					str += " storecookie " + authtoken;
 					authtoken =  null;
 				}
-				str += " someonealreadydriving " + state.get(State.values.user.name());
+				str += " someonealreadydriving " + state.get(State.values.driver.name());
 
 				// this has to be last to above variables are already set in java script
 				sc.invoke("message", new Object[] { null, "green", "multiple", str });
@@ -352,24 +353,24 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		} else {
 			player = Red5.getConnectionLocal();
-			state.set(State.values.user.name(), state.get(State.values.pendinguserconnected));
+			state.set(State.values.driver.name(), state.get(State.values.pendinguserconnected));
 			state.delete(State.values.pendinguserconnected);
-			String str = "connection connected user " + state.get(State.values.user.name());
+			String str = "connection connected user " + state.get(State.values.driver.name());
 			if (authtoken != null) {
 				str += " storecookie " + authtoken;
 				authtoken = null;
 			}
 			str += " streamsettings " + streamSettings();
-			messageplayer(state.get(State.values.user.name()) + " connected to OCULUS", "multiple", str);
+			messageplayer(state.get(State.values.driver.name()) + " connected to OCULUS", "multiple", str);
 			initialstatuscalled = false;
 			
-			str = state.get(State.values.user.name()) + " connected from: " + player.getRemoteAddress();
-			messageGrabber(str, "connection " + state.get(State.values.user.name()) + "&nbsp;connected");
+			str = state.get(State.values.driver.name()) + " connected from: " + player.getRemoteAddress();
+			messageGrabber(str, "connection " + state.get(State.values.driver.name()) + "&nbsp;connected");
 			Util.log("playersignin(), " + str, this);
 			loginRecords.beDriver();
 			
 			if (settings.getBoolean(GUISettings.loginnotify)) {
-				saySpeech("lawg inn " + state.get(State.values.user));
+				saySpeech("lawg inn " + state.get(State.values.driver));
 			}
 			
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
@@ -407,6 +408,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			cmd = PlayerCommands.valueOf(fn);
 		} catch (Exception e) {
 			Util.debug("playerCallServer() command not found:" + fn, this);
+			messageplayer("error: unknown command, "+fn,null,null);
 			return;
 		}
 		if (cmd != null) playerCallServer(cmd, str);	
@@ -421,9 +423,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the argument string to pass along
 	 */
 	public void playerCallServer(final PlayerCommands fn, final String str) {
-		if (PlayerCommands.requiresAdmin(fn.name())){
+		if (PlayerCommands.requiresAdmin(fn.name()) && !passengerOverride){
 			if ( ! loginRecords.isAdmin()){ 
-				Util.debug("playerCallServer(), must be an admin to do: " + fn.name() + " curent user: " + state.get(State.values.user), this);
+				Util.debug("playerCallServer(), must be an admin to do: " + fn.name() + " curent driver: " + state.get(State.values.driver), this);
 				return;
 			}
 		}
@@ -445,7 +447,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		// must be driver/non-passenger for all commands below 
-		if(!passengerOverrideFlag){
+		if(!passengerOverride){
 			if (Red5.getConnectionLocal() != player && player != null) {
 				Util.log("passenger, command dropped: " + fn.toString(), this);
 				return;
@@ -562,7 +564,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 //			}
 			monitor(str);
 			break;
-		case showlog: showlog(); break;
+		case showlog: showlog(str); break;
 		case dockgrab:dockGrab(); break;
 		case publish: publish(str); break;
 		case autodock: docker.autoDock(str); break;
@@ -577,8 +579,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 //			if (Settings.os.equals("linux")) { messageplayer("unsupported in linux",null,null); }
 //			else { 
 			messageplayer("ROV volume set to "+str+"%", null, null); 
-			break;
-		
+			state.set(State.values.volume, str);
+			break;		
 		case holdservo:
 			Util.debug("holdservo: " + str,this);
 			if (str.equalsIgnoreCase("true")) {
@@ -604,12 +606,24 @@ public class Application extends MultiThreadedApplicationAdapter {
 			settings.writeSettings("pushtotalk", str);
 			messageplayer("self mic push T to talk "+str, null, null);
 			break;
-		case shutdown:
-			quit();
-			break;
+		case shutdown: quit(); break;
 		case setstreamactivitythreshold: setStreamActivityThreshold(str); break;
 		case getlightlevel: docker.getLightLevel(); break;
-		case email: new SendMail(str, this);
+		case email: new SendMail(str, this); break;
+		case uptime: messageplayer(state.getUpTime() + " ms", null, null); break;
+		case help: messageplayer(PlayerCommands.help(str),null,null); break;
+		case framegrabtofile: FrameGrabHTTP.saveToFile(str); break;
+		case memory: messageplayer(Util.memory(), null, null); break;
+		case state: 
+			String s[] = str.split(" ");
+			if (s.length == 2) { state.set(s[0], s[1]); }
+			else {  if (s[0].matches("\\S+")) { messageplayer(state.get(s[0]),null,null); }
+				else { messageplayer(state.toString(), null, null); } }
+			break;
+		case who: messageplayer(loginRecords.who(), null, null); break;
+		case loginrecords: messageplayer(loginRecords.toString(), null, null); break;
+		case settings: messageplayer(settings.toString(), null, null);
+
 		}
 	}
 
@@ -922,6 +936,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
 			sc.invoke("playerfunction", new Object[] { fn, params });
+		}
+		if(commandServer!=null) {
+			commandServer.sendToGroup(TelnetServer.MSGPLAYERTAG + " javascript function: " + fn + " "+ params);
 		}
 	}
 
@@ -1391,14 +1408,15 @@ public class Application extends MultiThreadedApplicationAdapter {
 		messageplayer("controls hijacked", "hijacked", user);
 		// TODO: BRAD... telnet calls this and pukes ..
 		if(player==null) return;
+		if(pendingplayer==null) { pendingplayerisnull = true; return; }
 			
 		IConnection tmp = player;
 		player = pendingplayer;
 		pendingplayer = tmp;
-		state.set(State.values.user, user);
+		state.set(State.values.driver, user);
 		String str = "connection connected streamsettings " + streamSettings();
-		messageplayer(state.get(State.values.user) + " connected to OCULUS", "multiple", str);
-		str = state.get(State.values.user) + " connected from: " + player.getRemoteAddress();
+		messageplayer(state.get(State.values.driver) + " connected to OCULUS", "multiple", str);
+		str = state.get(State.values.driver) + " connected from: " + player.getRemoteAddress();
 		Util.log("assumeControl(), " + str);
 		messageGrabber(str, null);
 		initialstatuscalled = false;
@@ -1406,7 +1424,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		loginRecords.beDriver();
 		
 		if (settings.getBoolean(GUISettings.loginnotify)) {
-			saySpeech("lawg inn " + state.get(State.values.user));
+			saySpeech("lawg inn " + state.get(State.values.driver));
 		}
 	}
 
@@ -1431,10 +1449,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		}
-		loginRecords.bePassenger();
+		loginRecords.bePassenger(user);
 		
 		if (settings.getBoolean(GUISettings.loginnotify)) {
-			saySpeech("passenger lawg inn " + state.get(State.values.user));
+			saySpeech("passenger lawg inn " + user);
 		}
 	}
 
@@ -1486,7 +1504,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	private void account(String fn, String str) {
 		if (fn.equals("password_update")) {
-			passwordChange(state.get(State.values.user), str);
+			passwordChange(state.get(State.values.driver), str);
 		}
 		if (loginRecords.isAdmin()){ // admin) {
 			if (fn.equals("new_user_add")) {
@@ -1606,8 +1624,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 					i++;
 				}
 				String encryptedPassword = (passwordEncryptor
-						.encryptPassword(state.get(State.values.user) + salt + u[1])).trim();
-				if (logintest(state.get(State.values.user), encryptedPassword) == null) {
+						.encryptPassword(state.get(State.values.driver) + salt + u[1])).trim();
+				if (logintest(state.get(State.values.driver), encryptedPassword) == null) {
 					message += "error: wrong password";
 					oktoadd = false;
 				}
@@ -1615,7 +1633,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					message += "username changed to: " + u[0];
 					messageplayer("username changed to: " + u[0], "user", u[0]);
 					settings.writeSettings("user0", u[0]);
-					state.set(State.values.user, u[0]);
+					state.set(State.values.driver, u[0]);
 					String p = u[0] + salt + u[1];
 					encryptedPassword = passwordEncryptor.encryptPassword(p);
 					settings.writeSettings("pass0", encryptedPassword);
@@ -1689,23 +1707,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 	}
 
-	private void showlog() {
-	
-		String[] tail = Util.tail(new File(Settings.stdout), "OCULUS");
-		String str = null;
-		if(tail!=null){
-			
-			str = "&bull; returned: " + tail.length + "lines from: " + 
-				Settings.stdout + "<br>";
-			
-			for(int i = 0 ; i < tail.length ; i++)
-				str += "&bull; " + tail[i].substring(
-						"OCULUS:".length(), tail[i].length()) + "<br>";
-			
-			sendplayerfunction("showserverlog", str);
-
-		}
-	
+	private void showlog(String str) {
+		int lines = 100; //default	
+		if (!str.equals("")) { lines = Integer.parseInt(str); }
+		String header = "latest "+ Integer.toString(lines)  +" line(s) from "+settings.stdout+" :<br>";
+		sendplayerfunction("showserverlog", header + Util.tail(lines));
 	}
 
 	private void saveAndLaunch(String str) {

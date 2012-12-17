@@ -19,7 +19,8 @@ public enum PlayerCommands {
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown,
-    setstreamactivitythreshold, getlightlevel, email;
+    setstreamactivitythreshold, getlightlevel, email, state, uptime, help, framegrabtofile, memory, who, 
+    loginrecords, settings;
 	
 	/** get text for any player command */
 	public String getHelp(){
@@ -30,7 +31,8 @@ public enum PlayerCommands {
 	// TODO: add junit test to check that these all below are PlayerCommands 
 	public enum AdminCommands {
 		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
-		showlog, softwareupdate, relaunchgrabber, systemcall, shutdown
+		showlog, softwareupdate, relaunchgrabber, systemcall, shutdown, email, state, uptime, framegrabtofile,
+		memory, loginrecord, settings;
 	}
 	
 	// sub-set that are require parameters 
@@ -303,7 +305,10 @@ public enum PlayerCommands {
 		shutdown("Quit server application on robot"),
 		streamactivityevent("Set video motion, audio volume detection threshold, 0-100 (0=off)"),
 		getlightlevel("Returns average pixel greyscale value (0-255) of frame from current stream"),
-		email("Send email with params: emailto [subject] body");
+		email("Send email with params: emailto [subject] body"),
+		state("With 1 or 0 args, returns list of one or all non null state key/value pairs, 2 args sets key to value"),
+		uptime("Returns server uptime, in milliseconds"),
+		help("Returns complete descriptions of available commands. Add COMMAND as argument for specifc command info");
 
         private final String message;
 
@@ -403,9 +408,48 @@ public enum PlayerCommands {
 			} else help += (" (no arguments)");
 				
 			if(PlayerCommands.requiresAdmin(factory)) help +=(" (admin only)");
-			help += "\n\r";
+			help += "<br>";
 		}
 	
 		return help;
+	}
+		
+	public static String help(String command) {
+		String result = "";
+		if(command.matches("\\S+")){ // isn't blank
+			
+			if(PlayerCommands.requiresArgument(command)){
+				
+				result += "requires argument: " + 
+					PlayerCommands.RequiresArguments.valueOf(command).getValues().toString().replace(",", " | ")
+					+ "<br>";
+				
+			}else{
+				String helptxt = null;
+				try {
+					helptxt = PlayerCommands.HelpText.valueOf(command).getText();
+				} catch (Exception e) {}
+				
+				if(helptxt==null) {
+					result += "no match for: " + (command);
+					return result;
+				}
+				
+				result +="requires no argument(s)<br>";
+			}
+			
+			// give help, they are doing something wrong 
+			result += "description: " + PlayerCommands.HelpText.valueOf(command).getText();
+			
+	} else { // just puke the list
+	
+		// print all commands 
+		result += PlayerCommands.getCommands();
+		
+		for (TelnetServer.Commands commands : TelnetServer.Commands.values()) 
+			result += commands + " (telnet only)<br>";
+		
+	}	
+		return result;
 	}
 }
