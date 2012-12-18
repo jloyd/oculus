@@ -116,6 +116,7 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 		}
 
 		public void run() {
+			// Util.debug("sending: " + command[0], this);
 			sendCommand(command);
 		}
 	}
@@ -649,6 +650,20 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	public void updateSteeringComp() {
 		byte[] command = { COMP, (byte) steeringcomp };
 		new Sender(command);
+	}
+
+	/** */
+	public void digitRead(String pin) {
+		int line = Integer.parseInt(pin);
+		byte[] command = { DIGITAL, (byte) line};
+		new Sender(command);
+	}
+	
+	/** */
+	public void AnalogRead(String pin) {
+		int line = Integer.parseInt(pin);
+		byte[] command = { ANALOG, (byte) line};
+		new Sender(command);	
 	}
 
 }

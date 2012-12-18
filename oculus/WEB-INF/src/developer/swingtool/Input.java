@@ -57,7 +57,7 @@ public class Input extends JTextField implements KeyListener {
 				}
 
 				// send dummy
-				out.println("_\t\t\n");
+				out.println("\t\t\n");
 			}
 		}
 	}

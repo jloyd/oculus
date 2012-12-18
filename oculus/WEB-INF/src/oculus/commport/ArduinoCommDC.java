@@ -51,27 +51,33 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 	
 	@Override
 	public void execute() {
-		String response = "";
+		String reply = "";
 		for (int i = 0; i < buffSize; i++)
-			response += (char) buffer[i];
+			reply += (char) buffer[i];
 
-		// System.out.println("in: " + response);
+		// Util.debug("in: " + reply, this);
 
 		// take action as arduino has just turned on
-		if (response.equals("reset")) {
+		if (reply.equals("reset")) {
 			isconnected = true;
 			version = null;
 			new Sender(GET_VERSION);
 			updateSteeringComp();
-		} else if (response.startsWith("version:")) {
+		} else if (reply.startsWith("version:")) {
 			if (version == null) {
 				// get just the number
-				version = response.substring(response.indexOf("version:") + 8, response.length());
+				version = reply.substring(reply.indexOf("version:") + 8, reply.length());
 				application.message("oculusDC: " + version, null, null);
 			} 
-		} else if (response.charAt(0) != GET_VERSION[0]) {
+		} else if (reply.charAt(0) != GET_VERSION[0]) {
 			// don't bother showing watch dog pings to user screen
-			application.message("oculusDC: " + response, null, null);
+			application.message("oculusDC: " + reply, null, null);
+		} else if( reply.startsWith("analog")) {
+			String[] ans = reply.split(" ");
+			state.set("analog", ans[1]);
+		} else if( reply.startsWith("digital")) {
+			String[] ans = reply.split(" ");
+			state.set("digital", ans[1]);
 		}
 	}
 }

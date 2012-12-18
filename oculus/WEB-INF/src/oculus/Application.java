@@ -457,6 +457,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		
 		switch (fn) {
+		
+		case digitalread: Util.debug("digitalread: " ,this); comport.digitRead(cmd[0]); break;
+		
+		case analogread: Util.debug("analogread: " ,this); comport.AnalogRead(cmd[0]); break;
+		
 		case writesetting:
 			Util.log("setting: " + str);
 			if (settings.readSetting(cmd[0]) == null) {
@@ -1717,7 +1722,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	private void showlog(String str) {
 		int lines = 100; //default	
 		if (!str.equals("")) { lines = Integer.parseInt(str); }
-		String header = "latest "+ Integer.toString(lines)  +" line(s) from "+settings.stdout+" :<br>";
+		String header = "latest "+ Integer.toString(lines)  +" line(s) from "+Settings.stdout+" :<br>";
 		sendplayerfunction("showserverlog", header + Util.tail(lines));
 	}
 

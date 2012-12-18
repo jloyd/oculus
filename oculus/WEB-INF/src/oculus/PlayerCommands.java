@@ -20,7 +20,7 @@ public enum PlayerCommands {
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown,
     setstreamactivitythreshold, getlightlevel, email, state, uptime, help, framegrabtofile, memory, who, 
-    loginrecords, settings, messageclients;
+    loginrecords, settings, analogread, digitalread, messageclients;
 	
 	/** get text for any player command */
 	public String getHelp(){
@@ -78,7 +78,9 @@ public enum PlayerCommands {
 		videosoundmode("low", "high"), 
 		pushtotalktoggle("{BOOLEAN}"),
 		setstreamactivitythreshold("[0-100] [0-100]"),
-		email("{STRING} {STRING} {STRING}");
+		email("{STRING} {STRING} {STRING}"),
+		analogread("{INT}"),
+		digitalread("{INT}");
 			
 		private final List<String> values;
 
@@ -89,7 +91,7 @@ public enum PlayerCommands {
 		public List<String> getValues() {
 			return values;
 		}
-			
+			/*
 		public boolean vaildRange(final String target){
 			try {
 				
@@ -111,7 +113,7 @@ public enum PlayerCommands {
 			
 			return false;
 		}
-		
+		*/
 	
 		/** check if this command has complex formating */
 		public boolean requiresParse(){

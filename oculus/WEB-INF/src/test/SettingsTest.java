@@ -100,7 +100,8 @@ public class SettingsTest {
 		System.out.println("USE RANGE: " + PlayerCommands.RequiresArguments.rangeList());
 		System.out.println("NEEDS PARSE: " + PlayerCommands.RequiresArguments.parseList());
 		System.out.println("USE STRING: " + PlayerCommands.RequiresArguments.stringList());
-		
+	
+		/*
 		if(PlayerCommands.RequiresArguments.tilttest.vaildRange("100"))
 			System.out.println("tiltest is 100 in range");
 		else fail("RANGE TEST ERROR");
@@ -108,6 +109,7 @@ public class SettingsTest {
 		if( ! PlayerCommands.RequiresArguments.tilttest.vaildRange("-100"))
 			System.out.println("tilttest -100 is NOT in range");
 		else fail("RANGE TEST ERROR");
+		*/
 		
 		/*
 		if( PlayerCommands.RequiresArguments.drivingsettingsupdate.usesDouble() ){
