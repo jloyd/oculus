@@ -619,8 +619,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case state: 
 			String s[] = str.split(" ");
 			if (s.length == 2) { state.set(s[0], s[1]); }
-			else {  if (s[0].matches("\\S+")) { messageplayer(state.get(s[0]),null,null); }
-				else { messageplayer(state.toString(), null, null); } }
+			else {  
+				if (s[0].matches("\\S+")) { 
+					messageplayer("<state> "+s[0]+" "+state.get(s[0]), null, null); 
+				}
+				else { messageplayer("<state> "+state.toString(), null, null); } 
+			}
 			break;
 		case who: messageplayer(loginRecords.who(), null, null); break;
 		case loginrecords: messageplayer(loginRecords.toString(), null, null); break;
