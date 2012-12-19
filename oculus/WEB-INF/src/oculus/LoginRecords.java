@@ -60,12 +60,8 @@ public class LoginRecords {
 		
 		state.delete(State.values.driver);
 		
-		// maintain size limit 
 //		if(list.size() > MAX_RECORDS) list.remove(0);
-		
-		Util.debug("OCULUS: -_logging out: " + state.get(State.values.driver), this);
-		Util.debug("OCULUS: _waiting now:" + getNumPassengers(), this);
-		Util.debug(toString(), this);
+
 	}
 	
 	/** @return the number of users waiting in line */
@@ -174,7 +170,7 @@ public class LoginRecords {
 		}
 
 		public boolean isActive(){
-			if (getRole().equals(DRIVER)) { return (timeout==0); }
+			if (!getRole().equals(PASSENGER)) { return (timeout==0); }
 			else { return false; }
 		}
 		

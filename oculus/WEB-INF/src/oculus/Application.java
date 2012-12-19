@@ -1,5 +1,6 @@
 package oculus;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -47,6 +48,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	public static byte[] framegrabimg  = null;
 	public Boolean passengerOverride = false;
 	public long lastcommandtime = 0;
+	public static BufferedImage processedImage = null;
 	
 	public Application() {
 		super();
@@ -92,7 +94,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	@Override
 	public void appDisconnect(IConnection connection) {
-		if(connection==null) return;
+		if(connection==null) { return; }
 		if (connection.equals(player)) {
 			String str = state.get(State.values.driver.name()) + " disconnected";
 			Util.log("appDisconnect(): " + str); 
@@ -154,7 +156,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}).start();
 			return;
 		}
-
+		
+		state.delete(State.values.pendinguserconnected);
 		//TODO: extend IConnection class, associate loginRecord  (to get passenger info)
 		// currently no username info when passenger disconnects
 	}
@@ -381,13 +384,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 
-	public void dockGrab() {
-		if (grabber instanceof IServiceCapableConnection) {
-			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
-			sc.invoke("dockgrab", new Object[] { 0, 0, "find" });
-			state.set(oculus.State.values.dockgrabbusy.name(), true);
-		}
-	}
+//	public void dockGrab() {
+//		if (grabber instanceof IServiceCapableConnection) {
+//			IServiceCapableConnection sc = (IServiceCapableConnection) grabber;
+//			sc.invoke("dockgrab", new Object[] { 0, 0, "find" });
+//			state.set(oculus.State.values.dockgrabbusy.name(), true);
+//		}
+//	}
 
 	/**
 	 * distribute commands from pla
@@ -399,7 +402,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the parameter to pass onto the function
 	 */
 	public void playerCallServer(final String fn, final String str) {
-		Util.debug("from player flash: "+fn+", "+str, this); 
+//		Util.debug("from player flash: "+fn+", "+str, this); 
 		
 		if (fn == null) return;
 		if (fn.equals("")) return;
@@ -547,7 +550,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case clicksteer:clickSteer(str);break;
 		case streamsettingscustom:streamSettingsCustom(str);break;
 		case streamsettingsset:streamSettingsSet(str);break;
-		case playerexit:appDisconnect(player);break;
+		case playerexit: appDisconnect(player); break;
 		case playerbroadcast: playerBroadCast(str); break;
 		case password_update: account("password_update", str); break;
 		case new_user_add: account("new_user_add", str); break;
@@ -564,15 +567,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case extrauser_password_update: account("extrauser_password_update", str); break;
 		case username_update: account("username_update", str); break;
 		case disconnectotherconnections: disconnectOtherConnections(); break;
-		case monitor:
-//			if (Settings.os.equals("linux")){
-//				messageplayer("unsupported in linux",null,null);
-//				return;
-//			}
-			monitor(str);
-			break;
+		case monitor: monitor(str); break;
 		case showlog: showlog(str); break;
-		case dockgrab:dockGrab(); break;
+		case dockgrab: docker.dockGrab("find",0,0); break;
 		case publish: publish(str); break;
 		case autodock: docker.autoDock(str); break;
 		case autodockcalibrate: docker.autoDock("calibrate " + str); break;
@@ -583,8 +580,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case floodlight: light.floodLight(str); break;
 		case setsystemvolume:
 			Util.setSystemVolume(Integer.parseInt(str), this);
-//			if (Settings.os.equals("linux")) { messageplayer("unsupported in linux",null,null); }
-//			else { 
 			messageplayer("ROV volume set to "+str+"%", null, null); 
 			state.set(State.values.volume, str);
 			break;		
@@ -634,7 +629,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case who: messageplayer(loginRecords.who(), null, null); break;
 		case loginrecords: messageplayer(loginRecords.toString(), null, null); break;
 		case settings: messageplayer(settings.toString(), null, null); break;
-		case messageclients: messageplayer(str, null,null);
+		case messageclients: messageplayer(str, null,null); 
 
 		}
 	}
@@ -926,7 +921,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void messageplayer(String str, String status, String value) {
-		Util.debug("messageplayer: "+str+", "+status+", "+value, this);
 		
 		if (player instanceof IServiceCapableConnection) {
 			IServiceCapableConnection sc = (IServiceCapableConnection) player;
@@ -942,6 +936,12 @@ public class Application extends MultiThreadedApplicationAdapter {
 				commandServer.sendToGroup(TelnetServer.MSGPLAYERTAG + " <status> " + status + " " + value);
 			}
 		}
+		
+		if(str!=null){
+			if(! str.equals("status check received")) // basic ping from client, ignore
+				Util.debug("messageplayer: "+str+", "+status+", "+value, this);
+		}
+
 	}
 
 	public void sendplayerfunction(String fn, String params) {

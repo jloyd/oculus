@@ -30,7 +30,7 @@ public class FrameGrabHTTP extends HttpServlet {
 	
 	private static int var;
 	private static BufferedImage radarImage = null;
-	private static boolean radarImageGenerating = false;
+//	private static boolean radarImageGenerating = false;
 	private static Settings settings = Settings.getReference();
 	
 	MotionTracker tracker = MotionTracker.getReference();
@@ -58,6 +58,7 @@ public class FrameGrabHTTP extends HttpServlet {
             	histGrab(req,res);    
             }
         	
+            if(mode.equals("processedImg")) { processedImg(req,res); }
         }
 		else { frameGrab(req,res); }
         
@@ -95,62 +96,23 @@ public class FrameGrabHTTP extends HttpServlet {
 		}
 	}
 	
+	private void processedImg(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		
+		// send image
+		res.setContentType("image/gif");
+		OutputStream out = res.getOutputStream();
+		ImageIO.write(Application.processedImage, "GIF", out);
+	}
+	
 	private void radarGrab(HttpServletRequest req, HttpServletResponse res) 
 		throws ServletException, IOException {
 
-		/*
-		servletRunning = this;
-		Timer timer = new Timer();
-		timer.schedule(new KillIfStillRunning(), 3000); // timeout, otherwise if hangs blocks all subsequent requests from host?
-		//  further testing shows this doesn't help--Chrome/client problem only?
-		Random generator = new Random();
-		// Util.log("radarGrab"+Integer.toString(generator.nextInt()), this);
-		*/
-		
-		/*
-		BufferedImage image;
-		if (radarImage == null) { // on first call only 
-			generateRadarImage();
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			image = radarImage;
-		}
-		else {
-			if (!radarImageGenerating) {
-				generateRadarImage();
-				try {
-					Thread.sleep(75);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			image = radarImage; // uses new if fast enough, or last one generated
-		}
-		*/
-		
-		// res.reset(); // doesn't help
 		generateRadarImage();
-//		BufferedImage image  = radarImage;
-//		ByteArrayOutputStream tmp = new ByteArrayOutputStream();
-//	    ImageIO.write(radarImage, "GIF", tmp);
-//	    tmp.close();
-//	    Integer contentLength = tmp.size();
-//
-//		res.setContentLength(contentLength);
-//		Util.log(Integer.toString(contentLength));
 		
 		// send image
 		res.setContentType("image/gif");
 		OutputStream out = res.getOutputStream();
 		ImageIO.write(radarImage, "GIF", out);
-//		out.close();
-//		image.flush();
-//		timer.cancel();
 	}
 	
 	private void histGrab(HttpServletRequest req, HttpServletResponse res) 
@@ -183,7 +145,7 @@ public class FrameGrabHTTP extends HttpServlet {
 		
 	
 	private void generateRadarImage() {
-		radarImageGenerating = true;
+//		radarImageGenerating = true;
 //		new Thread(new Runnable() { public void run() {
 
 			int w = 240;
@@ -266,7 +228,7 @@ public class FrameGrabHTTP extends HttpServlet {
 			
 			// radarImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 			radarImage = image;
-			radarImageGenerating = false;
+//			radarImageGenerating = false;
 //		} }).start();
 
 	}

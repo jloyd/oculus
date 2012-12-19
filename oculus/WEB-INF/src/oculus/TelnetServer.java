@@ -288,7 +288,7 @@ public class TelnetServer implements Observer {
 //				}
 			
 			case bye: 
-			case quit: shutDown("user quit");
+			case quit: shutDown("user quit"); return true;
 			}
 			
 			// command was not managed 

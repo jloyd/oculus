@@ -437,10 +437,15 @@ public class Util {
     }
 
     public static void main(String[] args) {
-        System.out.println("Hello, World");
-        String s="";
-        String[] z = s.split(" ");
-        System.out.println(Integer.toString(z.length));
+        System.out.println("Testing");
+        int minx=1000;
+        int maxx=3000;
+        float f = 	1;
+        int i  = 3;
+        if (f<i) {
+		System.out.println("TRUE"+f); }
+
+
     }
     
 

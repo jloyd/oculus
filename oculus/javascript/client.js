@@ -497,7 +497,9 @@ function keyBoardPressed(event) {
 		if (keycode == 51) { speedset('fast'); } // 3
 		if (keycode == 82) { camera('upabit'); } // R
 		if (keycode == 70) { camera('horiz'); } // F
-		if (keycode == 86) { camera('downabit'); } // v
+		if (keycode == 86) { camera('downabit'); } // V
+		if (keycode == 77) { mainmenu('mainmenulink'); } // M
+
 		if (steeringmode == "forward") { document.getElementById("forward").style.backgroundImage = "none"; }
 		
 		if (keycode == 84 && broadcastmicon==false && pushtotalk==true && (broadcasting=="mic" || broadcasting=="camandmic")) { // T
@@ -1662,7 +1664,7 @@ function assumecontrol() {
 }
 
 function playerexit() {
-	callServer("playerexit","");
+	if (connected) { callServer("playerexit",""); }
 }
 
 function steeringmouseover(id, str) {
@@ -2208,6 +2210,7 @@ function displaymessages() {
 	}
 	document.write(str);
 }
+
 /* end of message recording utils */
 
 /* 
@@ -2237,7 +2240,7 @@ function radar(mode) {
 		str += "<div style='position: relative; top: -70px; left: 107px; width: 75px;'>";
 		str +="<span style='background-color: #666666; color: #000000;'>ROV</span></div>";
 		str += "</div>"
-		popupmenu('context', 'show', x, y, str, null, 1, 0);
+		popupmenu('context', 'show', x, y, str, 240, 1, 0);
 //		radarimagereload();
 	}
 	if (mode=="off") {
@@ -2251,77 +2254,38 @@ function radar(mode) {
 	}
 }
 
-/*
-var radartimer;
-var radarimage;
-//var radartimeout = null;
-
-function radarrepeat() {
-//	clearTimeout(radartimeout);
-	document.getElementById("radarimg").src = radarimage.src;
-	radartimer = setTimeout("radarimagereload();", 250);
-}
-
-function radarimagereload() {
-	clearTimeout(radartimer);
-//	clearTimeout(radartimeout);
-	radarimage = new Image(); 
-	radarimage.src = "frameGrabHTTP?mode=radar&date="+new Date().getTime();
-	radarimage.onload = function() { radarrepeat(); }
-//	radartimeout = setTimeout("radartimedout();", 3000);
-//	radartimer = null;
-}
-
-//function radartimedout() {
-//	if (radartimer == null && document.getElementById("radarimg")) {
-//		radarimagereload();  
-//		debug(Math.random());
-//	}
-//}
-*/
-
-
 var radartimer = null;
-//var radartimeout = null;
 
 function radarrepeat() {
 	clearTimeout(radartimer);
-//	clearTimeout(radartimeout);
 	radartimer = setTimeout("radarimagereload();", 250);
 }
 
 function radarimagereload() {
 	radartimer = null;
 	var img = document.getElementById('radarimg');
-//	img.src= "";
 	img.src = "frameGrabHTTP?mode=radar&date="+new Date().getTime();
-//	img.addEventListener("load", radarrepeat, false);
 	img.onload = function() { radarrepeat(); }
-	// radartimeout = setTimeout("radartimedout();", 500);
 }
 
-//function radartimedout() {
-//	if (radartimer == null) {
-//		radarimagereload();  
-//		debug(Math.random());
-//	}
-//}
+function processedImg(mode) {
+	if (mode=="load") {	
+		var v = document.getElementById("video");
+		var xy = findpos(v);
+		var x = xy[0]+v.offsetWidth;
+		var y=xy[1];
+		var str ="<div style='height: 240px; line-height: 10px;'>";
+		str +="<img src='frameGrabHTTP?mode=processedImg&date=" + new Date().getTime();
+		str +=	"' alt='' width='320' height='240'>";
+		str += "</div>"
+		popupmenu('context', 'show', x, y, str, 320, 1, 0);
+	//	radarimagereload();
+	}
+	if (mode=="close") {
+		lagtimer = new Date().getTime(); // has to be *after* message()
+		// document.getElementById("radarimg").src="";
+		popupmenu("context", "close");
+	}
 
-
-/* troubleshooting:
- * tried fixing FrameGrabHTTP.java so serves up last image if new one can't be produced in 75ms
- * tried putting image generator in separate thread in FrameGrabHTTP.java, with above fix
- * in js, tried re-initializing Image() for every img loaded
- * works OK in FF, IE, but hangs after X frames in Chrome -- seems onload() isn't called
- * works OK when server in Windows...? Haven't tried latest iteration, actually
- * could be bandwidth safeguard in Chrome? (once page reloaded, works)
- * works fine when primesense not running....?????
- * tried having servelt kill itself on timeout, never timed out though
- * if change domain, it works. After reloading once, works.
- * tried res.resetBuffer() every call, didn't help
- * do servlet tutorial? Maybe is better way -- this is Chrome/Tomcat/Servlet handshake issue or something
- * wait... res.reset() works? NO, FUCKKK!!!
- * tried explicitly setting res.setContentLength, no dice
- */
-
+}
 
