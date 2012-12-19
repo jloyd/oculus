@@ -20,7 +20,7 @@ public enum PlayerCommands {
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown,
     setstreamactivitythreshold, getlightlevel, email, state, uptime, help, framegrabtofile, memory, who, 
-    loginrecords, settings, analogread, digitalread, messageclients;
+    loginrecords, settings, analogread, digitalread, messageclients, dockgrabtest;
 	
 	/** get text for any player command */
 	public String getHelp(){

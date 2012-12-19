@@ -569,7 +569,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case disconnectotherconnections: disconnectOtherConnections(); break;
 		case monitor: monitor(str); break;
 		case showlog: showlog(str); break;
-		case dockgrab: docker.dockGrab("find",0,0); break;
+		case dockgrab: docker.dockGrab("start",0,0); break;
 		case publish: publish(str); break;
 		case autodock: docker.autoDock(str); break;
 		case autodockcalibrate: docker.autoDock("calibrate " + str); break;
@@ -629,7 +629,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case who: messageplayer(loginRecords.who(), null, null); break;
 		case loginrecords: messageplayer(loginRecords.toString(), null, null); break;
 		case settings: messageplayer(settings.toString(), null, null); break;
-		case messageclients: messageplayer(str, null,null); 
+		case messageclients: messageplayer(str, null,null); break;
+		case dockgrabtest: docker.dockGrab("test", 0, 0);
 
 		}
 	}

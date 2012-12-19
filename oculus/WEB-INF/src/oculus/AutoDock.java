@@ -119,6 +119,8 @@ public class AutoDock {
 			}
 			if (cmd[1].equals("calibrate")) { 
 				// x,y,width,height,slope,lastBlobRatio,lastTopRatio,lastMidRatio,lastBottomRatio
+				// write to:
+				// lastBlobRatio, lastTopRatio,lastMidRatio,lastBottomRatio, x,y,width,height,slope
 				docktarget = cmd[7]+"_"+cmd[8]+"_"+cmd[9]+"_"+cmd[10]+"_"+cmd[2]+"_"+cmd[3]+"_"+cmd[4]+"_"+cmd[5]+"_"+cmd[6];
 				settings.writeSettings("docktarget", docktarget); 
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
@@ -561,6 +563,16 @@ public class AutoDock {
 							String str = results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4]; 
 							// results = x,y,width,height,slope
 							autoDock("dockgrabbed find "+str);
+						}
+						
+						if (mode.equals("test")) {
+							oculusImage.lastThreshhold = -1;
+							String results[] = oculusImage.findBlobs(argb, 320, 240);
+							String str = results[0]+" "+results[1]+" "+results[2]+" "+results[3]+" "+results[4]; 
+							// results = x,y,width,height,slope
+							autoDock("dockgrabbed find "+str);
+							app.message(str, null, null);
+							app.sendplayerfunction("processedImg", "load");
 						}
 						
 			        	state.set(State.values.dockgrabbusy.name(), false);

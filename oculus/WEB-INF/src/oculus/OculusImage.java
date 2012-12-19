@@ -316,9 +316,9 @@ public class OculusImage {
 							(int) (minx+(maxx-minx)*0.666), miny, maxy) / (float) blobBox;
 					bottomRatio = (float) getPixelEqTrueCount(blobs.get(blobnum), (int) (minx+(maxx-minx)*0.666), 
 							maxx, miny, maxy) / (float) blobBox;
-//						blobRatio = (maxx-minx)/(maxy-miny);
+					float blobRatio = (float) (maxx-minx)/(float)(maxy-miny);
 					diff = Math.abs(topRatio - lastTopRatio) + Math.abs(bottomRatio- lastBottomRatio) + Math.abs(midRatio- lastMidRatio);
-					if (diff < maxdiff) { 
+					if (diff < maxdiff && blobRatio <= lastBlobRatio*1.1) { 
 						winner=blobnum;
 						maxdiff = diff;
 						winRect = r.clone();
@@ -336,14 +336,17 @@ public class OculusImage {
 				maxx = winRect[1];
 				miny = winRect[2];
 				maxy = winRect[3];
-				int x = minx+((maxx-minx)/2);
-				int y = miny+((maxy-miny)/2);
-				i = x + y*width;  // dead center of winner blob
+//				int winnerfootprint = (maxx-minx)*(maxy-miny);
+				int ctrx = minx+((maxx-minx)/2);
+				int ctry = miny+((maxy-miny)/2);
+				i = ctrx + ctry*width;  // dead center of winner blob
 				if (parrinv[i]!=1) { Util.debug("ctr blob not found",this); } 
 				if (parrinv[i]==1) { // if ctr blob start exists
 					Boolean[] ctrblob = floodFill(parrinv,i);
 					r = getRect(ctrblob,i);
-					if (minx<r[0] && maxx>r[1] && miny<r[2] && maxy>r[3] && r[4] > 1 && r[4]<winRect[4]*0.5 ) { // ctrblob completely within blob
+//					int rfootprint = (r[1]-r[0]*r[3]-r[2]);
+//					float relativesize = rfootprint
+					if (minx<r[0] && maxx>r[1] && miny<r[2] && maxy>r[3] && r[4] > 10 && r[4]<winRect[4]*0.5 && r[4]>winRect[4]*0.2 ) { // ctrblob completely within blob
 						float[] sl = getBottomSlope(blobs.get(winner),minx,maxx,miny,maxy);
 						slope = sl[0];
 						if (sl[1]<=minx || sl[2]>=maxx) { // bottom slope is widest on at least one side
