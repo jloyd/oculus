@@ -17,8 +17,8 @@
  GET_VERSION = 'y'
  CAMRELEASE = 'w'
  DIRECT DIFFERENTIAL STEERING = 'm', [0-255][0-255] (speed motor L&R, <128 is back, 128 is stop, >128 is fwd)
- ANALOG READ = 'a', [0-255] (read 1 byte from buffer, specific analog pin)
- DIGITAL READ = 'd', [0-255] (read 1 byte from buffer, specific digital pin)
+ ANALOG WRITE = 'a', [pin #] [0-255] (analogwrite to pin)
+ DIGITAL READ = 'd', [pin #] (digitalread pin, send result via serial)
 */
 
 // pins
@@ -149,7 +149,6 @@ void parseCommand()
   }
 
   if (buffer[0] == 'a'){
-    // Serial.println("<analog " + (String) analogRead(buffer[1]) + ">");
 	int n = buffer[2]&255;
 	analogWrite((int) buffer[1], n);
 	
