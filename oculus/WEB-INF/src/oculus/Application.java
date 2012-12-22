@@ -461,10 +461,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		
 		switch (fn) {
 		
-		case digitalread: Util.debug("digitalread: " ,this); comport.digitRead(cmd[0]); break;
-		
-		case analogread: Util.debug("analogread: " ,this); comport.AnalogRead(cmd[0]); break;
-		
 		case writesetting:
 			Util.log("setting: " + str);
 			if (settings.readSetting(cmd[0]) == null) {
@@ -629,8 +625,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case who: messageplayer(loginRecords.who(), null, null); break;
 		case loginrecords: messageplayer(loginRecords.toString(), null, null); break;
 		case settings: messageplayer(settings.toString(), null, null); break;
-		case messageclients: messageplayer(str, null,null); break;
-		case dockgrabtest: docker.dockGrab("test", 0, 0);
+		case messageclients: messageplayer(str, null,null); Util.log("messageclients: "+str,this); break;
+		case dockgrabtest: docker.dockGrab("test", 0, 0); break;
+		case digitalread: comport.digitalRead(str); break;
+		case analogwrite: comport.AnalogWrite(str); break;
 
 		}
 	}

@@ -255,37 +255,6 @@ public class TelnetServer implements Observer {
 					app.playerCallServer(PlayerCommands.chat, 
 							"<i>" + user.toUpperCase() + "</i>:" + args);
 				return true;
-					
-//			case tcp: 
-//				sendToSocket("tcp connections : " + printers.size());
-//				return true;
-//				
-//			case users: 
-//				sendToSocket("active users : " + records.getActive());
-//				if(records.toString()!=null) sendToSocket(records.toString());
-//				return true;
-				
-//			case state:
-//				if(cmd.length==3) state.set(cmd[1], cmd[2]);
-//				else {
-//					sendToSocket(state.toString());
-//					// state.dump();
-//				}
-//				return true;
-
-//			case settings: 
-//				if(cmd.length==3) { 
-//					if(settings.readSetting(cmd[1]) == null) settings.newSetting(cmd[1], cmd[2]);
-//					else settings.writeSettings(cmd[1], cmd[2]);
-//				
-//					// clean file afterwards 
-//					settings.writeFile();
-//					return true;
-//					
-//				} else{
-//					sendToSocket(settings.toString());
-//					return true;
-//				}
 			
 			case bye: 
 			case quit: shutDown("user quit"); return true;

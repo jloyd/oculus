@@ -156,7 +156,6 @@ public class OculusImage {
 		}
 		Boolean[] blob = floodFill(parr, start);
 		int blobSize =0;
-		if (blob.length>1) { // error, its always greater than 1!!  should be 'contains at least one TRUE'? or just remove condition
 			int r[] = getRect(blob,start);
 			int minx = r[0];
 			int maxx = r[1];
@@ -173,7 +172,6 @@ public class OculusImage {
 			result = new String[]{Integer.toString(minx), Integer.toString(miny), Integer.toString(maxx-minx),
 					Integer.toString(maxy-miny), Float.toString(slope), Float.toString(lastBlobRatio),
 					Float.toString(lastTopRatio), Float.toString(lastMidRatio), Float.toString(lastBottomRatio)}; 
-		}
 
 		if (lastThreshhold==0) {
 			int runningttl = 0;
@@ -188,8 +186,8 @@ public class OculusImage {
 	}
 	
 	public String[] findBlobs(int[] bar, int w, int h) {
-//		width = w;
-//		height = h;
+		width = w;
+		height = h;
 		int attemptnum = 0;
 		int dir = -1;
 		int inc = 10;
@@ -202,7 +200,7 @@ public class OculusImage {
 //		if (lastThreshhold == 999)  {lastThreshhold = imgaverage; } // imgaverage+45; } // TESTING
 
 		while (attemptnum < 15) { // was 15 
-			result = findBlobsSub(bar, w, h);
+			result = findBlobsSub(bar);
 			if (result[2].equals("0")) {
 				if (deleteddir != 0) {
 					n = inc;
@@ -233,13 +231,11 @@ public class OculusImage {
 		return result;
 	}
 	
-	public String[] findBlobsSub(int[] bar, int w, int h) {
-		width = w;
-		height = h;
+	public String[] findBlobsSub(int[] bar) {
 		String[] result = new String[]{"0","0","0","0","0"}; //x,y,width,height,slope
 		convertToGrey(bar);
 		parrorig = parr.clone();
-//		if (lastThreshhold == null) { lastThreshhold = imgaverage+45; } // auto contrast finding with magical constant
+
 		if (lastThreshhold == -1)  {lastThreshhold = imgaverage; } // imgaverage+45; } // TESTING
 		int threshhold = lastThreshhold;
 		
@@ -247,7 +243,7 @@ public class OculusImage {
 
 		int i;
 		int[] parrinv = new int[width*height]; // inverse, used to check for inner black blob
-		for (i=0; i<parr.length; i++){
+		for (i=0; i<parr.length; i++){ //convert to B&W
 			if (parr[i]>threshhold) { 
 				parr[i]=1;
 				parrinv[i]=0;
@@ -262,7 +258,6 @@ public class OculusImage {
 		float diff;
 		float slope = -1;
 		int winner =-1;
-		// var winnerBlobSize:int; 
 		int[] winRect = new int[]{0,0,0,0,0};
 		int minx = 0;
 		int miny = 0;
@@ -276,13 +271,10 @@ public class OculusImage {
 		int pixel;
 		ArrayList<Boolean[]> blobs = new ArrayList<Boolean[]>();
 		
-//		sendToImage(parr);
-//		return result;
-		
 		int blobBox;
 		ArrayList<Integer> blobstarts = new ArrayList<Integer>();
 		for (pixel=0; pixel<width*height; pixel++) { // zero to end, find all blobs
-			if (parr[pixel]==1) { // finds a white one >> production uses parr[pixel]
+			if (parr[pixel]==1) { // finds a white one 
 //					Util.debug("pixelnum"+pixel, this);
 					Boolean[] temp = floodFill(parr, pixel);
 					if (temp.length > 150) { // discard tiny blobs
@@ -290,14 +282,9 @@ public class OculusImage {
 						blobstarts.add(pixel);
 					}
 					
-//					Boolean[] zork= floodFill(parr, pixel);
-//					sendToImage(zork); // testing
-//					break;  
-					
 				}
 		}		
 		Util.debug("number of blobs: "+blobstarts.size(), this);
-
 		
 		ArrayList<Integer> rejectedBlobs = new ArrayList<Integer>();
 		while (rejectedBlobs.size() < blobs.size()) {
@@ -330,8 +317,6 @@ public class OculusImage {
 			}
 			if (winner == -1) { break; }
 			else { // best looking blob chosen, now check if it has ctr blob AND bottom slope extents wider than rest 
-//				sendToImage(blobs.get(winner)); // testing
-//				break;
 				minx = winRect[0];
 				maxx = winRect[1];
 				miny = winRect[2];
@@ -350,7 +335,6 @@ public class OculusImage {
 						float[] sl = getBottomSlope(blobs.get(winner),minx,maxx,miny,maxy);
 						slope = sl[0];
 						if (sl[1]<=minx || sl[2]>=maxx) { // bottom slope is widest on at least one side
-//							Util.debug("WINNER!!!!", this);
 							break;
 						} else { Util.debug("failed slope test",this); sendToImage(blobs.get(winner));  }
 					}

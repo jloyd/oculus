@@ -131,7 +131,7 @@ public class LoginRecords {
 	 */
 	public String who() {
 		String result = "";
-		result += "active RTMP users : " + getActive()+"<br>" ;
+		result += "active RTMP users: " + getActive()+"<br>" ;
 		if (!list.isEmpty()) {
 			for (int i = 0; i < list.size(); i++) {
 				if (list.get(i).toString().matches(".*ACTIVE$")) {

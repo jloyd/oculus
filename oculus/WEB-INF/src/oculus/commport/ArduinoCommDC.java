@@ -72,9 +72,9 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 		} else if (reply.charAt(0) != GET_VERSION[0]) {
 			// don't bother showing watch dog pings to user screen
 			application.message("oculusDC: " + reply, null, null);
-		} else if( reply.startsWith("analog")) {
-			String[] ans = reply.split(" ");
-			state.set("analog", ans[1]);
+//		} else if( reply.startsWith("analog")) {
+//			String[] ans = reply.split(" ");
+//			state.set("analog", ans[1]);
 		} else if( reply.startsWith("digital")) {
 			String[] ans = reply.split(" ");
 			state.set("digital", ans[1]);

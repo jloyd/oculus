@@ -653,16 +653,16 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	}
 
 	/** */
-	public void digitRead(String pin) {
+	public void digitalRead(String pin) {
 		int line = Integer.parseInt(pin);
-		byte[] command = { DIGITAL, (byte) line};
+		byte[] command = { DIGITALREAD, (byte) line};
 		new Sender(command);
 	}
 	
 	/** */
-	public void AnalogRead(String pin) {
-		int line = Integer.parseInt(pin);
-		byte[] command = { ANALOG, (byte) line};
+	public void AnalogWrite(String str) {
+		String n[] = str.split(" "); 
+		byte[] command = { ANALOGWRITE, (byte) Integer.parseInt(n[0]), (byte) Integer.parseInt(n[1])};
 		new Sender(command);	
 	}
 

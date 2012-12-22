@@ -7,8 +7,8 @@ public enum GUISettings {
 	/** these settings must be available in basic configuration */
 	skipsetup, speedslow, speedmed, steeringcomp, camservohoriz, camposmax, camposmin, nudgedelay, 
 	docktarget, vidctroffset, vlow, vmed, vhigh, vfull, vcustom, vset, maxclicknudgedelay, 
-	clicknudgedelaymomentumfactor, clicknudgemomentummult, maxclickcam, muteonrovmove, 
-	videoscale, volume, holdservo, loginnotify, reboot, selfmicpushtotalk, pushtotalk; 
+	clicknudgemomentummult, maxclickcam, muteonrovmove, 
+	videoscale, volume, holdservo, loginnotify, reboot, pushtotalk; 
 	
 	
 	/** get basic settings */
@@ -30,11 +30,9 @@ public enum GUISettings {
 		config.setProperty(vfull.name() , "640_480_8_95");
 		config.setProperty(vcustom.name() , "1024_768_8_85");
 		config.setProperty(vset.name() , "vmed");
-		config.setProperty(selfmicpushtotalk.name() , "true");
 		config.setProperty(pushtotalk.name() , "true");
 		config.setProperty(maxclicknudgedelay.name() , "580");
 		config.setProperty(clicknudgemomentummult.name() , "0.7");
-		config.setProperty(clicknudgedelaymomentumfactor.name() , "0.7");
 		config.setProperty(maxclickcam.name() , "14");
 		config.setProperty(volume.name() , "20");
 		config.setProperty(muteonrovmove.name() , "true"); 

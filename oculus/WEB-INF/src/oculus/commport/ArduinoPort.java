@@ -14,8 +14,8 @@ public interface ArduinoPort {
 	public static final byte COMP = 'c';
 	public static final byte CAM = 'v';
 	public static final byte ECHO = 'e';
-	public static final byte DIGITAL = 'd';
-	public static final byte ANALOG = 'a';
+	public static final byte DIGITALREAD = 'd';
+	public static final byte ANALOGWRITE = 'a';
 	public static final byte[] STOP = { 's' };
 	public static final byte[] GET_VERSION = { 'y' };
 	public static final byte[] CAMRELEASE = { 'w' };
