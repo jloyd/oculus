@@ -83,16 +83,18 @@ public class RssFeed {
 		try {
 			Util.log("writing "+RSSFILE, this);
 			FileWriter fw = new FileWriter(new File(RSSFILE));
-			fw.append("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?><rss version=\"2.0\">");
-			fw.append("<title>Oculus rss feed</title>");
+			fw.append("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<rss version=\"2.0\" ");
+			fw.append("xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
+			fw.append("<channel>\n<title>Oculus rss feed</title>\n");
 			fw.append("<link>http://"+state.get(State.values.externaladdress)+":"+
-					settings.readRed5Setting("http.port")+"/oculus/rss.xml</link>");
-			fw.append("<description>Oculus events</description><channel>");
+					settings.readRed5Setting("http.port")+"/oculus/rss.xml</link>\n");
+			fw.append("<description>Oculus events</description>\n");
 			for (int i=0; i<items.size(); i++) {
 				Item item = items.get(i);
-				fw.append("<item><title>"+item.title+"</title><link>"+item.link+"</link>");
-				fw.append("<description>"+item.description+"</description>");
-				fw.append("<pubDate>"+item.pubDate+"</pubDate></item>");
+				fw.append("<item>\n<title>"+item.title+"</title>\n<link>"+item.link+"</link>\n");
+				fw.append("<description>"+item.description+"</description>\n");
+				fw.append("<guid>"+item.guid+"</guid>\n");
+				fw.append("<pubDate>"+item.pubDate+"</pubDate>\n</item>\n");
 			}
 			fw.append("</channel></rss>");
 			fw.close();
@@ -110,17 +112,29 @@ public class RssFeed {
 		public String description = null;
 		public String link = null;
 		public String pubDate = null; // eg Fri, 25 May 2012 12:05:32 +0000
+		public String guid = null;
 		
 		Item(String t, String d) {
 			this.title = t;
 			this.description = d;
 			
-			DateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+			DateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z");
 			Calendar cal = Calendar.getInstance();
 			this.pubDate = dateFormat.format(cal.getTime());
 			this.link = "http://"+state.get(State.values.externaladdress)+":"+
-					settings.readRed5Setting("http.port")+"/oculus/rss.xml";
+					settings.readRed5Setting("http.port")+"/oculus/rss.xml?title="+
+					t.trim().toLowerCase().replaceAll("[^a-z0-9]+", "-");
+			this.guid = this.link;
 		}
 	}
+
+	
+	// urltitle = params[:title].strip.downcase.gsub(/[^a-z0-9]+/i, '-')
+    public static void main(String[] args) {
+        System.out.println("Testing");
+
+
+    }
+
 	
 }
