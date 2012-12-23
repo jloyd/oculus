@@ -16,7 +16,7 @@ public class TelnetServer implements Observer {
 	
 	//TODO: add junit test to check that all commands below are PlayerCommands duplicated
 	// OR just move these all to playercommands?
-	public static enum Commands {chat, bye, quit};
+	public static enum Commands {chat, exit, bye, quit};
 	public static final boolean ADMIN_ONLY = true;
 //	public static final int MIN_LENGTH = 1; //TODO: why 2? Why not 1?
 	public static final String MSGPLAYERTAG = "<messageclient>";
@@ -257,6 +257,7 @@ public class TelnetServer implements Observer {
 				return true;
 			
 			case bye: 
+			case exit:
 			case quit: shutDown("user quit"); return true;
 			}
 			

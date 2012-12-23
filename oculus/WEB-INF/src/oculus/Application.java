@@ -629,6 +629,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case dockgrabtest: docker.dockGrab("test", 0, 0); break;
 		case digitalread: comport.digitalRead(str); break;
 		case analogwrite: comport.AnalogWrite(str); break;
+		case rssadd: RssFeed feed = new RssFeed(); feed.newItem(str);
 
 		}
 	}
