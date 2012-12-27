@@ -121,8 +121,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 					comport.releaseCameraServo();
 				}
 				
-				if (state.getBoolean(State.values.playerstream)) {
-					state.set(State.values.playerstream, false);
+				if (state.getBoolean(State.values.driverstream)) {
+					state.set(State.values.driverstream, false);
 					grabberPlayPlayer(0);
 					messageGrabber("playerbroadcast", "0");
 				}
@@ -176,7 +176,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		str += " stream " + state.get(State.values.stream);
 		messageGrabber("connected to subsystem", "connection " + str);
 		Util.log("grabber signed in from " + grabber.getRemoteAddress(), this);
-		if (state.getBoolean(State.values.playerstream)) {
+		if (state.getBoolean(State.values.driverstream)) {
 			grabberPlayPlayer(1);
 			messageGrabber("playerbroadcast", "1");
 		}
@@ -222,7 +222,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		initialstatuscalled = false;
 		pendingplayerisnull = true;
 		
-		if (settings.getBoolean(State.values.developer)) {
+		if (settings.getBoolean(ManualSettings.developer.name())) {
 			
 			openNIRead = new developer.OpenNIRead(this);
 			
@@ -441,10 +441,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 		String[] cmd = null;
 		if(str!=null) cmd = str.split(" ");
 
-		if (state.getBoolean(State.values.developer.name()))
-			if (!fn.equals(PlayerCommands.statuscheck))
-				Util.debug("playerCallServer(" + fn + ", " + str + ")", this);
-		
 		switch (fn) {
 		case chat: chat(str) ;return;
 		case beapassenger: beAPassenger(str);return;
@@ -489,8 +485,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 			moveMacroCancel();
 			comport.slide(str);
-			//if (moves != null) moves.append("slide " + str);
-			state.set(State.values.motioncommand.name(), System.currentTimeMillis());
 			messageplayer("command received: " + fn + str, null, null);
 			break;
 
@@ -521,12 +515,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 			messageplayer("resetting arduinoculus", null, null);
 			break;
 
-		case move:move(str);
-			state.set(State.values.motioncommand.name(), System.currentTimeMillis());
-			break;
-		case nudge:nudge(str);
-			state.set(State.values.motioncommand.name(), System.currentTimeMillis());
-			break;
+		case move:move(str); break;
+		case nudge:nudge(str); break;
 			
 		case speech:
 			messageplayer("synth voice: " + str, null, null);
@@ -552,7 +542,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case new_user_add: account("new_user_add", str); break;
 		case user_list: account("user_list", ""); break;
 		case delete_user: account("delete_user", str); break;
-		case framegrab: frameGrab(); break;
+//		case framegrab: frameGrab(); break;
 		case statuscheck: statusCheck(str); break;
 		
 		/*case emailgrab:
@@ -572,7 +562,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case restart: restart(); break;
 		case softwareupdate: softwareUpdate(str); break;
 		case muterovmiconmovetoggle: muteROVMicOnMoveToggle(); break;
-		case spotlightsetbrightness: light.setSpotLightBrightness(Integer.parseInt(str)); break;
+		case spotlightsetbrightness: // deprecated, maintained for mobile client compatibility
+		case spotlight: light.setSpotLightBrightness(Integer.parseInt(str)); break;
 		case floodlight: light.floodLight(str); break;
 		case setsystemvolume:
 			Util.setSystemVolume(Integer.parseInt(str), this);
@@ -1135,7 +1126,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				str += " light " + light.spotLightBrightness();
 				str += " floodlight " + state.get(State.values.floodlighton).toString();
 			}
-			if (settings.getBoolean(State.values.developer) == true) {
+			if (settings.getBoolean(ManualSettings.developer.name()) == true) {
 				str += " developer true";
 			}
 
@@ -1489,7 +1480,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 							e.printStackTrace();
 						}
 						grabberPlayPlayer(1);
-						state.set(State.values.playerstream, true);
+						state.set(State.values.driverstream, true);
 					}
 				}).start();
 				if (str.equals("camera") || str.equals("camandmic")) {
@@ -1500,7 +1491,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			} else {
 				sc.invoke("publish", new Object[] { "stop", null, null, null,null,null });
 				grabberPlayPlayer(0);
-				state.set(State.values.playerstream, false);
+				state.set(State.values.driverstream, false);
 				Util.log("OCULUS: player broadcast stop",this);
 			}
 		}

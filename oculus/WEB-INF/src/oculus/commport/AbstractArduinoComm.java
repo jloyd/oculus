@@ -99,17 +99,7 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	class Sender extends Thread {
 		private byte[] command = null;
 		public Sender(final byte[] cmd) {
-			if (!isconnected){
-			
-				// TAKE IT DOWN! 
-				if(state.get(oculus.State.values.firmware) == null ){ 
-					if(state.getBoolean(oculus.State.values.developer)){
-						Util.log("arduinoculus not connected", this);		
-//						Util.systemCall("shutdown -r -f -t 01");	
-					}
-				}
-				
-			} else {
+			if (isconnected){
 				command = cmd;
 				this.start();
 			}
@@ -133,7 +123,6 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 
 				if (getReadDelta() > DEAD_TIME_OUT) {
 					Util.log("arduino watchdog time out, may be no hardware attached", this);
-					state.delete(oculus.State.values.commwatchdog);
 					return; // die, no point living?
 				}
 

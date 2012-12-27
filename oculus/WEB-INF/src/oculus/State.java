@@ -8,17 +8,20 @@ import java.util.Vector;
 
 public class State {
 	
-	public enum values{driver, logintime, usercommandasdf, developer, 
-		boottime, batterylife, externaladdress, framegrabbusy,
-		firmware, serialport, commwatchdog, motionenabled, motioncommand, // motors
+	public enum values{ 
+		firmware, serialport, motionenabled, // motors
 		speed, tempdirection, moving, sliding, movingforward, camservopos, // motors
-		dockgrabbusy, docking, dockstatus, dockgrabtime, autodocktimeout, autodocking, losttarget, // dock 
-		dockxsize, dockysize, dockslope, dockxpos, dockypos,  // dock 
-		sonarback, sonarright, sonarleft, centerpoint, // experimental
+		dockgrabbusy, docking, dockstatus, autodocking, // dock 
+		dockxsize,  dockslope, dockxpos, dockypos,  // dock 
 		floodlighton, lightport, spotlightbrightness, // lights
-		batterystatus, localaddress,   
-		streamActivityThresholdEnabled, streamActivityThreshold, videosoundmode, stream, playerstream, 
-		pendinguserconnected, httpPort, muteROVonMove, volume
+		driver, logintime, pendinguserconnected,  //rtmp users
+		batterystatus, batterylife,  boottime, // system
+		localaddress, externaladdress, httpPort, // system
+		streamActivityThresholdEnabled, streamActivityThreshold, videosoundmode, stream, driverstream, //audio video
+		muteROVonMove, volume, framegrabbusy, //audio video
+
+		sonarback, sonarright, sonarleft, centerpoint; // experimental
+		
 	};
 
 //	public static final String SEPERATOR = " : ";

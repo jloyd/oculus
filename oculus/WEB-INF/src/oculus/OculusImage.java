@@ -1,13 +1,8 @@
 package oculus;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import javax.imageio.ImageIO;
 
 public class OculusImage {	
 	
@@ -23,11 +18,7 @@ public class OculusImage {
 	private int[] parrorig;
 	private int imgaverage;
 	
-//	private Application app = null;
-	
-	public OculusImage() {
-//		app=a;
-	}
+	public OculusImage() { }
 	
 	public void dockSettings(String str) { 
 		String[] a = str.split("_");
@@ -55,7 +46,6 @@ public class OculusImage {
 		imgaverage = runningttl/n;
 		threshholdMult = (float) (0.65 - 0.2 + (0.40*( imgaverage/255)));
 		
-//		sendToImage(parr);
 	}
 	
 	private void sendToImage(int[] pixelRGB) { // dev tool
@@ -73,7 +63,7 @@ public class OculusImage {
 	
 	private void sendToImage(Boolean[] pixelRGB) { // dev tool
 		Util.debug("sendtoImageBoolean "+pixelRGB.length,this);
-		int fillsize =0; // debug log
+//		int fillsize =0; // debug log
 
 		Application.processedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		for(int y=0; y<height; y++) {
@@ -81,7 +71,7 @@ public class OculusImage {
 				int p = x + y*width;
 //				Util.log("p: "+p, this);
 				int argb;
-				if (pixelRGB[p]==true) { argb = (255<<16) + (0<<8) + 0; fillsize ++; } // red
+				if (pixelRGB[p]==true) { argb = (255<<16) + (0<<8) + 0; } // fillsize ++; } // red
 				else {  
 					int grey = parrorig[p]; 
 					argb = (grey<<16) + (grey<<8) + grey; 
@@ -90,7 +80,7 @@ public class OculusImage {
 
 			}
 		}
-		Util.debug("fillsize "+fillsize,this);
+//		Util.debug("fillsize "+fillsize,this);
 
 	}
 	
@@ -138,7 +128,7 @@ public class OculusImage {
 	private String[] findBlobStartSub(int x, int y, int w, int h, int[] bar) { // calibrate sub
 		width = w;
 		height = h;
-		convertToGrey(bar); //TODO: just do this once, use copy 
+		convertToGrey(bar); 
 		parrorig = parr.clone(); // save original image for re-threshholding after
 		int start = x + y*width; 
 		String[] result = new String[]{"0","0","0","0","0","0","0","0","0"};
@@ -194,10 +184,6 @@ public class OculusImage {
 		int n = inc;
 		int deleteddir = 0;
 		String[] result = new String[]{"0","0","0","0","0"}; //x,y,width,height,slope
-//		convertToGrey(bar);
-//		parrorig = parr.clone();
-
-//		if (lastThreshhold == 999)  {lastThreshhold = imgaverage; } // imgaverage+45; } // TESTING
 
 		while (attemptnum < 15) { // was 15 
 			result = findBlobsSub(bar);
@@ -236,11 +222,9 @@ public class OculusImage {
 		convertToGrey(bar);
 		parrorig = parr.clone();
 
-		if (lastThreshhold == -1)  {lastThreshhold = imgaverage; } // imgaverage+45; } // TESTING
+		if (lastThreshhold == -1)  {lastThreshhold = imgaverage; } 
 		int threshhold = lastThreshhold;
 		
-		Util.debug("threshold: "+threshhold, this);
-
 		int i;
 		int[] parrinv = new int[width*height]; // inverse, used to check for inner black blob
 		for (i=0; i<parr.length; i++){ //convert to B&W
@@ -275,7 +259,6 @@ public class OculusImage {
 		ArrayList<Integer> blobstarts = new ArrayList<Integer>();
 		for (pixel=0; pixel<width*height; pixel++) { // zero to end, find all blobs
 			if (parr[pixel]==1) { // finds a white one 
-//					Util.debug("pixelnum"+pixel, this);
 					Boolean[] temp = floodFill(parr, pixel);
 					if (temp.length > 150) { // discard tiny blobs
 						blobs.add(temp);
@@ -284,7 +267,6 @@ public class OculusImage {
 					
 				}
 		}		
-		Util.debug("number of blobs: "+blobstarts.size(), this);
 		
 		ArrayList<Integer> rejectedBlobs = new ArrayList<Integer>();
 		while (rejectedBlobs.size() < blobs.size()) {
@@ -309,8 +291,6 @@ public class OculusImage {
 						winner=blobnum;
 						maxdiff = diff;
 						winRect = r.clone();
-//							Util.debug("blobBox: "+blobBox+" topRatio: "+topRatio+" midRatio: "+midRatio+" bottomRatio: "+
-//									bottomRatio+" diff: "+diff+" maxdiff: "+maxdiff+" blobnum: "+blobnum, this);
 					}
 
 				}
@@ -321,22 +301,18 @@ public class OculusImage {
 				maxx = winRect[1];
 				miny = winRect[2];
 				maxy = winRect[3];
-//				int winnerfootprint = (maxx-minx)*(maxy-miny);
 				int ctrx = minx+((maxx-minx)/2);
 				int ctry = miny+((maxy-miny)/2);
 				i = ctrx + ctry*width;  // dead center of winner blob
-				if (parrinv[i]!=1) { Util.debug("ctr blob not found",this); } 
 				if (parrinv[i]==1) { // if ctr blob start exists
 					Boolean[] ctrblob = floodFill(parrinv,i);
 					r = getRect(ctrblob,i);
-//					int rfootprint = (r[1]-r[0]*r[3]-r[2]);
-//					float relativesize = rfootprint
 					if (minx<r[0] && maxx>r[1] && miny<r[2] && maxy>r[3] && r[4] > 10 && r[4]<winRect[4]*0.5 && r[4]>winRect[4]*0.2 ) { // ctrblob completely within blob
 						float[] sl = getBottomSlope(blobs.get(winner),minx,maxx,miny,maxy);
 						slope = sl[0];
 						if (sl[1]<=minx || sl[2]>=maxx) { // bottom slope is widest on at least one side
 							break;
-						} else { Util.debug("failed slope test",this); sendToImage(blobs.get(winner));  }
+						} // else { Util.debug("failed slope test",this); sendToImage(blobs.get(winner));  }
 					}
 				}
 

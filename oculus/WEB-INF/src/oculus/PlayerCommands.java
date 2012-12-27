@@ -11,13 +11,14 @@ import java.util.Vector;
 public enum PlayerCommands {
 	
 	// all valid commands
-	publish, floodlight, move, nudge, slide, dockgrab, framegrab, battstats, docklineposupdate, autodock,  autodockcalibrate, 
+	publish, floodlight, move, nudge, slide, dockgrab, battstats, docklineposupdate, autodock,  autodockcalibrate, 
 	speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate, 
 	tilttest, speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
 	streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
-	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlightsetbrightness, 
+	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlight, 
+	spotlightsetbrightness, //deprecated
     writesetting, holdservo, opennisensor, videosoundmode, pushtotalktoggle, restart, shutdown,
     setstreamactivitythreshold, getlightlevel, email, state, uptime, help, framegrabtofile, memory, who, 
     loginrecords, settings, analogwrite, digitalread, messageclients, dockgrabtest, rssadd;
@@ -38,7 +39,7 @@ public enum PlayerCommands {
 	// sub-set that are require parameters 
 	public enum RequiresArguments {
 	
-		publish("camera", "camadnmic", "mic", "stop"), 
+		publish("camera", "camandmic", "mic", "stop"), 
 		floodlight("on", "off"), 
 		move("left", "right", "forward", "backward", "stop"),
 		nudge("left", "right", "forward", "backward"),
@@ -71,7 +72,7 @@ public enum PlayerCommands {
 		arduinoecho("{BOOLEAN}"),
 		setsystemvolume("[0-100]"), 
 		beapassenger("{STRING}"), 
-		spotlightsetbrightness("0","10","20","30","40","50","60","70","80","90","100"), 
+		spotlight("0","10","20","30","40","50","60","70","80","90","100"), 
 		writesetting("{STRING} {STRING}"), 
 		holdservo ("{BOOLEAN}"), 
 		opennisensor("on", "off"), 
@@ -257,7 +258,6 @@ public enum PlayerCommands {
 		nudge("Move for amount of milliseconds specified by 'nudgedelay' setting, then stop"),
 		slide("Rearward triangular movement macro, that positions robot slightly to the left or right of starting spot"), 
 		dockgrab("Find dock target within robots camera view, returns target metrics. Robot camera must be running"),
-		framegrab("Capture jpg image of current view and write to url 'http://{host}:{http-port}/oculus/frameGrabHTTP"),
 		battstats("Returns battery charging state and charge remaining"),
 		docklineposupdate("Set manual dock line position within camera FOV in +/- pixels offset from center"),
 		autodock("Autodocking system control. Camera must be running"),
@@ -297,7 +297,7 @@ public enum PlayerCommands {
 		setsystemvolume("Set robot operating system audio volume 0-100"), 
 		beapassenger("Be passenger of current driver, specify passenger 'username'"), 
 		muterovmiconmovetoggle("Set/unset mute-rov-mic-on-move' setting "),
-		spotlightsetbrightness("Set main spotlight brightness. 0=off"), 
+		spotlight("Set main spotlight brightness. 0=off"), 
 		writesetting("Write setting to oculus_settings.txt"), 
 		holdservo ("Set/unset use of power break for persicope servo"), 
 		opennisensor("Kinect/Xtion Primesense sensor control"), 

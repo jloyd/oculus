@@ -96,7 +96,6 @@ public class AutoDock {
 			state.set(State.values.dockxpos.name(), cmd[2]);
 			state.set(State.values.dockypos.name(), cmd[3]);
 			state.set(State.values.dockxsize.name(), cmd[4]);
-			state.set(State.values.dockysize.name(), cmd[5]);
 			state.set(State.values.dockslope.name(), cmd[6]);
 			if (cmd[1].equals("find") && state.getBoolean(State.values.autodocking)) { // x,y,width,height,slope
 				String s = cmd[2]+" "+cmd[3]+" "+cmd[4]+" "+cmd[5]+" "+cmd[6];
@@ -105,7 +104,6 @@ public class AutoDock {
 					
 					state.set(State.values.autodocking, false);	
 					state.set(State.values.docking, false);	
-					state.set(State.values.losttarget, true);	
 					app.message("auto-dock target not found, try again","multiple","autodockcancelled blank");
 					System.out.println("OCULUS: target lost");
 

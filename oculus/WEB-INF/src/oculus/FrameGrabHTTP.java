@@ -10,6 +10,9 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 //import java.util.Random;
 //import java.util.Timer;
 //import java.util.TimerTask;
@@ -243,10 +246,14 @@ public class FrameGrabHTTP extends HttpServlet {
 					int i = 1;
 					if (!str.equals("")) { i = Integer.parseInt(str); }
 					Downloader dl = new Downloader();
-					String sep = settings.sep;
+					String sep = Settings.sep;
 					for(; i > 0 ; i--) {
 						Util.debug(i + " framegrab save: " + urlString, this);
-						dl.FileDownload(urlString, System.currentTimeMillis() + ".jpg", "webapps"+sep+"oculus"+sep+"framegrabs");
+						DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy_HH-mm-ss");
+						Calendar cal = Calendar.getInstance();
+						String datetime = dateFormat.format(cal.getTime());
+
+						dl.FileDownload(urlString, datetime + ".jpg", "webapps"+sep+"oculus"+sep+"framegrabs");
 //						Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
 					}
 				} catch (Exception e) {

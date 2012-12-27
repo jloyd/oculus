@@ -781,7 +781,7 @@ function lightclick(level) {
 		document.getElementById("lighttd"+parseInt(level-1)).style.borderRightColor = "#4c56fe";
 	}
 	message("sending spotlight brightness: "+ parseInt(level*10)+"%", sentcmdcolor);
-	callServer("spotlightsetbrightness", parseInt(level*10)); // parseInt(level*255/10));
+	callServer("spotlight", parseInt(level*10)); // parseInt(level*255/10));
 	lagtimer = new Date().getTime();
 	//spotlightlevel = level*10; // allow to be set by server message instead
 }
