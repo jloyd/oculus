@@ -272,7 +272,7 @@ public class TelnetServer implements Observer {
 				str = (str.replaceAll("<br>", "\r\n")).trim();
 			}
 			if (multiline) { out.print("<multiline> "); }
-			out.println("<telnet> " + str);
+			out.println("<telnet> " + str+"\r");
 			if (multiline) { out.println("</multiline>"); }
 		}
 		
