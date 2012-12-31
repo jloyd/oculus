@@ -218,7 +218,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		light = discovery.getLights(this);
 		
 		state.set(State.values.httpPort, settings.readRed5Setting("http.port"));
-		state.set(State.values.muteROVonMove, settings.getBoolean(GUISettings.muteonrovmove));
+		state.set(State.values.muteOnROVmove, settings.getBoolean(GUISettings.muteonrovmove));
 		initialstatuscalled = false;
 		pendingplayerisnull = true;
 		
@@ -829,13 +829,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 	}
 
 	private void muteROVMicOnMoveToggle() {
-		if (state.getBoolean(State.values.muteROVonMove)) {
-			state.set(State.values.muteROVonMove, false);
-			settings.writeSettings("muteonrovmove", "no");
+		if (state.getBoolean(State.values.muteOnROVmove)) {
+			state.set(State.values.muteOnROVmove, false);
+			settings.writeSettings("muteonrovmove", "false");
 			messageplayer("mute ROV onmove off", null, null);
 		} else {
-			state.set(State.values.muteROVonMove, true);
-			settings.writeSettings("muteonrovmove", "yes");
+			state.set(State.values.muteOnROVmove, true);
+			settings.writeSettings("muteonrovmove", "true");
 			messageplayer("mute ROV onmove on", null, null);
 		}
 	}

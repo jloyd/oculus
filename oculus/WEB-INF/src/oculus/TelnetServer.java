@@ -54,7 +54,7 @@ public class TelnetServer implements Observer {
 			}
 	
 			// send banner 
-			sendToSocket("Welcome to Oculus version " + new Updater().getCurrentVersion()); 
+			sendToSocket("Welcome to Oculus build " + new Updater().getCurrentVersion()); 
 			sendToSocket("LOGIN with admin user:password OR user:encrypted_password");
 			
 			try {

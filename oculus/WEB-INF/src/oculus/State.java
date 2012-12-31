@@ -18,7 +18,7 @@ public class State {
 		batterystatus, batterylife,  boottime, // system
 		localaddress, externaladdress, httpPort, // system
 		streamActivityThresholdEnabled, streamActivityThreshold, videosoundmode, stream, driverstream, //audio video
-		muteROVonMove, volume, framegrabbusy, //audio video
+		muteOnROVmove, volume, framegrabbusy, //audio video
 
 		sonarback, sonarright, sonarleft, centerpoint; // experimental
 		
@@ -184,7 +184,7 @@ public class State {
 	
 	/** */
 	public synchronized boolean getBoolean(String key) {
-		key = key.toLowerCase();
+//		key = key.toLowerCase();
 		boolean value = false;
 		try {
 

@@ -250,7 +250,7 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 	@Override
 	public void stopGoing() {
 
-		if (state.getBoolean(State.values.muteROVonMove) && state.getBoolean(State.values.moving)) {
+		if (state.getBoolean(State.values.muteOnROVmove) && state.getBoolean(State.values.moving)) {
 			application.unmuteROVMic();
 		}
 
@@ -265,7 +265,7 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 		state.set(State.values.moving, true);
 		state.set(State.values.movingforward, true);
 
-		if (state.getBoolean(State.values.muteROVonMove)) {
+		if (state.getBoolean(State.values.muteOnROVmove)) {
 			application.muteROVMic();
 		}
 	}
@@ -276,7 +276,7 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 		state.set(State.values.moving, true);
 		state.set(State.values.movingforward, false);
 
-		if (state.getBoolean(State.values.muteROVonMove)) {
+		if (state.getBoolean(State.values.muteOnROVmove)) {
 			application.muteROVMic();
 		}
 	}
@@ -291,7 +291,7 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 		new Sender(new byte[] { RIGHT, (byte) tmpspeed });
 		state.set(State.values.moving, true);
 
-		if (state.getBoolean(State.values.muteROVonMove)) {
+		if (state.getBoolean(State.values.muteOnROVmove)) {
 			application.muteROVMic();
 		}
 	}
@@ -306,7 +306,7 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 		new Sender(new byte[] { LEFT, (byte) tmpspeed });
 		state.set(State.values.moving, true);
 
-		if (state.getBoolean(State.values.muteROVonMove)) {
+		if (state.getBoolean(State.values.muteOnROVmove)) {
 			application.muteROVMic();
 		}
 	}
