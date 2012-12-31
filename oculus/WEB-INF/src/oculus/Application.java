@@ -208,7 +208,6 @@ public class Application extends MultiThreadedApplicationAdapter {
  
 	/** */
 	public void initialize() {
-		
 		settings.writeFile();
 		salt = settings.readSetting("salt");
 
@@ -1857,7 +1856,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		// rtmp port
 		result += "rtmpport " + settings.readRed5Setting("rtmp.port") + " ";
 
-		settings.writeFile();
+//		settings.writeFile(); // why is this here
 		messageGrabber(result, null);
 	}
 

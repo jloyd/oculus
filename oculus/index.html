@@ -86,8 +86,13 @@ onload="loaded();" onunload="playerexit();" onresize="browserwindowresized();">
 <table id="maintable" align="center" ><tr valign="top">
 <td style="padding-left: 5px">
 <table><tr><td id="topgap" style="height: 10px"> </td></tr></table>
-<div style="padding-left: 0px">
-<a class="dkbluelink" id="mainmenulink" href="javascript: mainmenu('mainmenulink');" >
+<div style="padding-left: 0px"
+onmouseover="document.getElementById('steering_textbox').innerHTML = 'MAIN MENU';
+document.getElementById('steeringkeytextbox').innerHTML = 'M';" 
+onmouseout="document.getElementById('steering_textbox').innerHTML = '';
+document.getElementById('steeringkeytextbox').innerHTML = '';">
+<a class="dkbluelink" id="mainmenulink" href="javascript: mainmenu('mainmenulink');"
+>
 &nbsp; <img src="images/wrench.gif" border=0 style="vertical-align: middle;"><br>
 MENU</a><br>
 </div></td>

@@ -498,8 +498,11 @@ function keyBoardPressed(event) {
 		if (keycode == 82) { camera('upabit'); } // R
 		if (keycode == 70) { camera('horiz'); } // F
 		if (keycode == 86) { camera('downabit'); } // V
-		if (keycode == 77) { mainmenu('mainmenulink'); } // M
-
+		if (keycode == 77) { // M
+			if (document.getElementById("menu_menu_over").style.display == "none") {
+				mainmenu('mainmenulink'); 
+			} else { javascript: popupmenu('menu', 'close'); }
+		}
 		if (steeringmode == "forward") { document.getElementById("forward").style.backgroundImage = "none"; }
 		
 		if (keycode == 84 && broadcastmicon==false && pushtotalk==true && (broadcasting=="mic" || broadcasting=="camandmic")) { // T

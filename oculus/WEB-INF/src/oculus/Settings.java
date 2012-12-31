@@ -16,7 +16,7 @@ public class Settings {
 	public static String stdout = redhome+sep+"log"+sep+"jvm.stdout";
 	public static String ftpconfig = redhome+sep+"conf"+sep+"ftp.properties";
 	
-	private static boolean configuredUsers = false;
+//	private static boolean configuredUsers = false;
 	public static String os = "windows" ; 
 	public final static String DISABLED= "disabled";
 	
@@ -36,9 +36,9 @@ public class Settings {
 		
 		// be sure of basic configuration 
 		if(! new File(settingsfile).exists()) { createFile(settingsfile); }
-		
-		// test if users exist 
-		if(readSetting("user0")!=null) {  configuredUsers = true; }
+
+//		if(readSetting("user0")!=null) {  configuredUsers = true; }
+
 	}
 	
 	/** ONLY USE FOR JUNIT */
@@ -48,7 +48,7 @@ public class Settings {
 		settingsfile = redhome+sep+"conf"+sep+"oculus_settings.txt";
 		
 		// test if users exist 
-		if(readSetting("user0")!=null) configuredUsers = true;
+//		if(readSetting("user0")!=null) configuredUsers = true;
 	}
 	
 	/**
@@ -237,16 +237,14 @@ public class Settings {
 			}
 
 			fw.append("# user list \r\n");
-			if(configuredUsers){
-				if(readSetting("salt") != null) { fw.append("salt " + readSetting("salt") + "\r\n"); }
+			if(readSetting("salt") != null) { fw.append("salt " + readSetting("salt") + "\r\n"); }
+			if(readSetting("user0")!=null){
 				String[][] users = getUsers();
 				for (int j = 0; j < users.length; j++) {
 					fw.append("user" + j + " " + users[j][0] + "\r\n");
 					fw.append("pass" + j + " " + users[j][1] + "\r\n");
 				}
 			} 
-			else {  fw.append("salt "+UUID.randomUUID().toString() + "\r\n"); }
- 
 			
 			fw.close();
 			
