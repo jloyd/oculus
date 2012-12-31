@@ -31,9 +31,15 @@ public enum PlayerCommands {
 	// sub-set that are restricted to "user0"
 	// TODO: add junit test to check that these all below are PlayerCommands 
 	public enum AdminCommands {
-		new_user_add, user_list, delete_user, extrauser_password_update, restart, disconnectotherconnections, 
-		showlog, softwareupdate, relaunchgrabber, systemcall, shutdown, email, state, uptime, framegrabtofile,
-		memory, loginrecords, analogwrite, digitalread, settings, messageclients, dockgrabtest, rssitem;
+		docklineposupdate, autodockcalibrate, 
+		getdrivingsettings, drivingsettingsupdate, gettiltsettings, tiltsettingsupdate, 
+		systemcall, 
+		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
+		disconnectotherconnections, showlog, softwareupdate,
+		arduinoecho, arduinoreset, muterovmiconmovetoggle, 
+	    writesetting, holdservo, opennisensor, videosoundmode, restart, shutdown,
+	    setstreamactivitythreshold, getlightlevel, email, state, uptime, help, framegrabtofile, memory, who, 
+	    loginrecords, settings, analogwrite, digitalread, messageclients, dockgrabtest, rssadd;	
 	}
 	
 	// sub-set that are require parameters 
@@ -81,7 +87,9 @@ public enum PlayerCommands {
 		setstreamactivitythreshold("[0-100] [0-100]"),
 		email("{STRING}"),
 		analogread("{INT}"),
-		digitalread("{INT}");
+		digitalread("{INT}"),
+		rssadd("{STRING}"),
+		messageclients("{STRING}");
 			
 		private final List<String> values;
 
@@ -254,7 +262,7 @@ public enum PlayerCommands {
 		
 		publish("Robot video/audio control"), 
 		floodlight("Controls wide angle light"), 
-		move("Continuous movement"),
+		move("Wheel motors, continuous movement"),
 		nudge("Move for amount of milliseconds specified by 'nudgedelay' setting, then stop"),
 		slide("Rearward triangular movement macro, that positions robot slightly to the left or right of starting spot"), 
 		dockgrab("Find dock target within robots camera view, returns target metrics. Robot camera must be running"),
@@ -305,12 +313,21 @@ public enum PlayerCommands {
 		pushtotalktoggle("When broadcasting client mic through robot speakers, always on or mute until keypress"),
 		restart("Restart server application on robot"),
 		shutdown("Quit server application on robot"),
-		streamactivityevent("Set video motion, audio volume detection threshold, 0-100 (0=off)"),
+		setstreamactivitythreshold("Set video motion, audio volume detection threshold, 0-100 (0=off)"),
 		getlightlevel("Returns average pixel greyscale value (0-255) of frame from current stream"),
 		email("Send email with params: emailto [subject] body"),
 		state("With 1 or 0 args, returns list of one or all non null state key/value pairs, 2 args sets key to value"),
 		uptime("Returns server uptime, in milliseconds"),
-		help("Returns complete descriptions of available commands. Add COMMAND as argument for specifc command info");
+		help("Returns complete list of available commands. Add COMMAND as argument for extended command info"),
+		framegrabtofile("Saves a frame from video stream to JPG in folder Oculus/webapps/oculus/framegrabs"),
+		memory("Returns memory in use by the Java Virtual Machine"),
+		who("Returns info on current connected users"),
+		loginrecords("Returns list of RTMP driver login history for current server session"),
+		settings("Returns list of all settings from oculus_settings.txt"),
+		analogwrite("Sends command ‘a’ followed by two bytes (pin #, value) to ArduinOculus microcontroller"),
+		digitalread("Sends command ‘d’ followed by byte (pin #) to ArduinOculus microcontroller"),
+		messageclients("Send text to all other connected users. Similar to ‘chat,’ but without preceding user info"),
+		rssadd("Create new rss feed item with params: [title] description");
 
         private final String message;
 

@@ -643,7 +643,6 @@ public class Application extends MultiThreadedApplicationAdapter {
 	 *            is the parameters to pass on to the function.
 	 */
 	public void grabberCallServer(String fn, String str) {
-		Util.debug("from grabber flash: "+fn+", "+str, this); // TODO: remove, testing only 
 		grabberCommands cmd = null;
 		try {
 			cmd = grabberCommands.valueOf(fn);
