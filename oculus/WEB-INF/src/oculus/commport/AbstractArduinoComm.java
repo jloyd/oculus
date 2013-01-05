@@ -82,6 +82,7 @@ public abstract class AbstractArduinoComm implements ArduinoPort {
 		if (state.get(State.values.serialport) != null) {
 			new Thread(new Runnable() {
 				public void run() {
+					Util.log("Connecting to motors",this);
 					connect();
 					Util.delay(SETUP);
 					Util.log("Connected to the motors on: " + state.get(State.values.serialport), this);

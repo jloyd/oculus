@@ -18,14 +18,16 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 		new WatchDog().start();
 	}
 
+	@Override
 	public void connect(){
 		try {
-
+			
 			serialPort = (SerialPort) CommPortIdentifier.getPortIdentifier(
 					state.get(State.values.serialport)).open(
 					AbstractArduinoComm.class.getName(), SETUP);
 			serialPort.setSerialPortParams(115200, SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
 
 			// open streams
 			out = serialPort.getOutputStream();
@@ -35,7 +37,7 @@ public class ArduinoCommDC extends AbstractArduinoComm implements SerialPortEven
 			serialPort.addEventListener(this);
 			serialPort.notifyOnDataAvailable(true);
 			
-//			if (Settings.os == "linux") { Util.delay(SETUP); }
+			isconnected = true;
 
 		} catch (Exception e) {
 			Util.log("could NOT connect to the motors on: " + state.get(State.values.serialport), this);

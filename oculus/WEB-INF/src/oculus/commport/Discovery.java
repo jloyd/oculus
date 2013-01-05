@@ -55,12 +55,12 @@ public class Discovery { // implements SerialPortEventListener {
 	
 	/* constructor makes a list of available ports */
 	public Discovery() {
-		
 		if(motors.equals(params.disabled.toString()) && lights.equals(params.disabled.toString())) {
 			Util.debug("discovery starting is disabled", this);
 			return;
 		}
 		
+		Util.log("getting available serial ports");
 		getAvailableSerialPorts();
 		if(ports.size()==0){
 			Util.log("no serial ports found on host", this);
