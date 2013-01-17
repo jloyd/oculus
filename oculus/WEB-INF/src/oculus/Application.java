@@ -225,13 +225,13 @@ public class Application extends MultiThreadedApplicationAdapter {
 			
 			openNIRead = new developer.OpenNIRead(this);
 			
-			try {
-				
-				developer.MotionTracker.getReference().setApp(this);
-			
-			} catch (Exception e) {
-				Util.log("MotionTracker: "+ e.getLocalizedMessage(), this);
-			}
+//			try {
+//				
+//				developer.MotionTracker.getReference().setApp(this);
+//			
+//			} catch (Exception e) {
+//				Util.log("MotionTracker: "+ e.getLocalizedMessage(), this);
+//			}
 		}
 		
 		

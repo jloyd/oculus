@@ -36,7 +36,7 @@ public class FrameGrabHTTP extends HttpServlet {
 //	private static boolean radarImageGenerating = false;
 	private static Settings settings = Settings.getReference();
 	
-	MotionTracker tracker = MotionTracker.getReference();
+//	MotionTracker tracker = MotionTracker.getReference();
 	
 	/** */ 
 	public static void setApp(Application a) {
@@ -57,9 +57,9 @@ public class FrameGrabHTTP extends HttpServlet {
             }
            
             // TODO: BRAD
-            if(mode.equals("hist")) {
-            	histGrab(req,res);    
-            }
+//            if(mode.equals("hist")) {
+//            	histGrab(req,res);    
+//            }
         	
             if(mode.equals("processedImg")) { processedImg(req,res); }
         }
@@ -118,6 +118,8 @@ public class FrameGrabHTTP extends HttpServlet {
 		ImageIO.write(radarImage, "GIF", out);
 	}
 	
+	
+	/*
 	private void histGrab(HttpServletRequest req, HttpServletResponse res) 
 			throws ServletException, IOException {
 	
@@ -145,6 +147,7 @@ public class FrameGrabHTTP extends HttpServlet {
 			OutputStream out = res.getOutputStream();
 			ImageIO.write(tracker.getHistogram(number), "GIF", out);
 		}
+		*/
 		
 	
 	private void generateRadarImage() {
