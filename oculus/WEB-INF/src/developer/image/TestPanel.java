@@ -1,8 +1,6 @@
 package developer.image;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.Graphics;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -10,15 +8,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.Button;
 
 public class TestPanel extends JFrame {
 
@@ -31,9 +26,12 @@ public class TestPanel extends JFrame {
 	private JButton btnFindCtr;
 	
 	private int[][] ctrMatrix;
+	ImageUtils imageUtils = new ImageUtils();
 	
 	/*
 	 * run with red5 running, and streaming camera
+	 * use 'record' to remember view
+	 * use 'find' to find offset of remembered view from previous view (previous ctr indicated by dot)
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -94,9 +92,11 @@ public class TestPanel extends JFrame {
 	
 	private void initialize() {
 		final JLabel picLabel2;
+		final String url = "http://192.168.0.182:5080/oculus/frameGrabHTTP";
 
 		try {
-			img = ImageIO.read(new URL("http://127.0.0.1:5080/oculus/frameGrabHTTP"));
+//			img = ImageIO.read(new URL("http://127.0.0.1:5080/oculus/frameGrabHTTP"));
+			img = ImageIO.read(new URL(url));
 		}  catch (IOException e2) {
 			e2.printStackTrace();
 		}
@@ -109,7 +109,7 @@ public class TestPanel extends JFrame {
 			public void run() {
 				try {
 					while(true) {
-						img = ImageIO.read(new URL("http://127.0.0.1:5080/oculus/frameGrabHTTP"));
+						img = ImageIO.read(new URL(url));
 						picLabel2.setIcon(new ImageIcon(img));
 						panel_2.repaint(); 
 					}
@@ -121,20 +121,20 @@ public class TestPanel extends JFrame {
 		}).start();		
 		
 		panel.add(picLabel);		
-		panel_1.add(picLabel1);		
+		panel_1.add(picLabel1);	
 	}
 
 	
 	
 	private void recordCtr() {
-		int[] greypxls = ImageUtils.convertToGrey(img);
-		ctrMatrix = ImageUtils.convertToMatrix(greypxls, img.getWidth(), img.getHeight());
-		BufferedImage gi = ImageUtils.intToImage(greypxls, img.getWidth(), img.getHeight());
+		int[] greypxls = imageUtils.convertToGrey(img);
+		ctrMatrix = imageUtils.convertToMatrix(greypxls, img.getWidth(), img.getHeight());
+		BufferedImage gi = imageUtils.intToImage(greypxls, img.getWidth(), img.getHeight());
 		
 		//put red dot in ctr 
 		int red = (255<<16) + (0<<8) + 0;
-		int x = img.getWidth()/2 + ImageUtils.matrixres/2;
-		int y = img.getHeight()/2 + ImageUtils.matrixres/2;
+		int x = img.getWidth()/2 + imageUtils.matrixres/2;
+		int y = img.getHeight()/2 + imageUtils.matrixres/2;
 		gi.setRGB(x,y, red);
 		gi.setRGB(x-1,y, red);
 		gi.setRGB(x+1,y, red);
@@ -146,14 +146,13 @@ public class TestPanel extends JFrame {
 	}
 	
 	private void findCtr() {
-		int[] greypxls = ImageUtils.convertToGrey(img);
-		int[][] matrix = ImageUtils.convertToMatrix(greypxls, img.getWidth(), img.getHeight());
-		int[] ctr = ImageUtils.findCenter(matrix, ctrMatrix, img.getWidth(), img.getHeight());
-		System.out.println("ctr: "+ctr[0]+","+ctr[1]);
-		BufferedImage imgwithctr = ImageUtils.intToImage(greypxls, img.getWidth(), img.getHeight());
+		int[] greypxls = imageUtils.convertToGrey(img);
+		int[][] matrix = imageUtils.convertToMatrix(greypxls, img.getWidth(), img.getHeight());
+		int[] ctr = imageUtils.findCenter(matrix, ctrMatrix, img.getWidth(), img.getHeight());
+		BufferedImage imgwithctr = imageUtils.intToImage(greypxls, img.getWidth(), img.getHeight());
 		
-		//put red dot at previous found ctr
-		if (ctr[0] != -1 && ctr[1] != -1) {
+		//put red dot at returned point
+		if (ctr[0] > 0 && ctr[0] < img.getWidth() && ctr[1] > 0 && ctr[1] < img.getHeight()) {
 			int red = (255<<16) + (0<<8) + 0;
 			imgwithctr.setRGB(ctr[0], ctr[1], red);
 			imgwithctr.setRGB(ctr[0]-1, ctr[1], red);

@@ -2,15 +2,14 @@ package developer.image;
 
 import java.awt.image.BufferedImage;
 
-import oculus.Application;
-import oculus.Util;
-
 public class ImageUtils {
 	
-	public static final int matrixres = 10;
-	private static int imgaverage;
+	public final int matrixres = 10;
+	private int imgaverage;
 	
-	public static int[] convertToGrey(BufferedImage img) { // convert image to 8bit greyscale int array
+	public ImageUtils() {}
+	
+	public int[] convertToGrey(BufferedImage img) { // convert image to 8bit greyscale int array
 		int[] pixelRGB = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
 		
 		int p; 
@@ -30,7 +29,7 @@ public class ImageUtils {
 		return greyimg;
 	}
 
-	public static BufferedImage intToImage(int[] pixelRGB, int width, int height) { // dev tool
+	public BufferedImage intToImage(int[] pixelRGB, int width, int height) { // dev tool
 		BufferedImage img  = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		for(int y=0; y<height; y++) {
 			for (int x=0; x<width; x++) {
@@ -42,7 +41,7 @@ public class ImageUtils {
 		return img;
 	}
 	
-	public static int[][] convertToMatrix(int[] greyimg, int width, int height) {
+	public int[][] convertToMatrix(int[] greyimg, int width, int height) {
 //		var result:Array = [];
 		int[][] matrix = new int[width/matrixres][height/matrixres]; //TODO: may need to add or subtract 1?
 		int n;
@@ -68,42 +67,46 @@ public class ImageUtils {
 		return matrix;
 	}
 	
-	public static int[] findCenter(int[][] matrix, int[][] ctrMatrix, int width, int height) {
+	public int[] findCenter(int[][] matrix, int[][] ctrMatrix, int width, int height) {
 		
 		int widthRes = width/matrixres;
 		int heightRes = height/matrixres;
-		int totalCompared;
-		int total;
-		int winningx = -1;
-		int winningy = -1;
+		int compared = 0;
+		int total = 0;
+		int winningx = 0;
+		int winningy = 0;
+		
+		int winningTotal = 0; // debug log only 
+		int winningCompared = 0; // debug log only
 
-		int winningTotal = 999999999; //max possible int  //(width/matrixRes)*(height/matrixRes)*255; // maximum possible
+		double winningRatio = 9999999; 
 	
 		for (int x=-(widthRes/2); x<=widthRes/2; x++) {
 			for (int y=-(heightRes/2); y<=heightRes/2; y++) {
 				total = 0;
-				totalCompared =0;
+				compared =0;
 				for (int xx=0; xx<matrix.length; xx++) {
 					for (int yy=0;yy<matrix[xx].length; yy++) {
 						if (xx+x >= 0 && xx+x < widthRes && yy+y >=0 && yy+y <heightRes) { 
 							total += Math.abs(matrix[xx+x][yy+y] - ctrMatrix[xx][yy]);
-							totalCompared++;
+							compared++;
 						}
 					}						
 				}
-				if (total/totalCompared < winningTotal) {
-					winningTotal = total/totalCompared;
+				if ( (double) total / (double) compared < winningRatio) {
+					winningRatio = (double) total/ (double) compared;
+					winningTotal = total; // debug log only 
+					winningCompared = compared; // debug log only 
 					winningx = x;
 					winningy = y;
 				}
 			}
 		}
-		if (winningx != -1 && winningy != -1) { // found valid ctr
-			winningx = width/2 + (winningx*matrixres) + (matrixres/2);
-			winningy = height/2 + (winningy*matrixres) + (matrixres/2);
-		}
-		return new int[]{winningx, winningy};
-		
+		System.out.print("ctr mxy: "+winningx+", "+winningy+", ");
+		winningx = width/2 + (winningx*matrixres) + (matrixres/2);
+		winningy = height/2 + (winningy*matrixres) + (matrixres/2);
+		System.out.println("ctr pxy: "+winningx+","+winningy+", wttl: "+winningRatio+", ttl: "+winningTotal+", comp: "+ winningCompared);
+		return new int[]{winningx, winningy};	
 	}
 	
 }
