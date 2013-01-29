@@ -1,6 +1,9 @@
 package developer.image;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 
 public class ImageUtils {
 	
@@ -67,6 +70,15 @@ public class ImageUtils {
 		return matrix;
 	}
 	
+	/**
+	 * Compare matrix with ctrmatrix, overlay one matrix on the other and find offset from center
+	 * 
+	 * @param matrix current matrix to be compared
+	 * @param ctrMatrix previously recorded center matrix
+	 * @param width
+	 * @param height
+	 * @return x,y in pixels
+	 */
 	public int[] findCenter(int[][] matrix, int[][] ctrMatrix, int width, int height) {
 		
 		int widthRes = width/matrixres;
@@ -107,6 +119,43 @@ public class ImageUtils {
 		winningy = height/2 + (winningy*matrixres) + (matrixres/2);
 		System.out.println("ctr pxy: "+winningx+","+winningy+", wttl: "+winningRatio+", ttl: "+winningTotal+", comp: "+ winningCompared);
 		return new int[]{winningx, winningy};	
+	}
+	
+	public int[] edges(int[] greypxls, int width, int height) {
+		int[] edgeimg = new int[width*height];
+		for (int n=0; n<width*height; n++) {
+			int darkest = greypxls[n];
+			int lightest = darkest;
+			int[] closest = new int[]{n-width-1, n-width, n-width+1, n-1, n+1, n+width-1, n+width, n+width+1};
+//			int[] closest = new int[]{n-width, n-1, n+1, n+width};
+			for (int i=0; i< closest.length; i++) {
+				if ( ( closest[i] >=0 && closest[i] < width*height ) && !((double) (n / width) == n/width && closest[i] == n+1)  &&  !((double) ((n-1)  / width) == n/width && closest[i] == n-1) ) {
+					if (greypxls[closest[i]] < darkest) {
+						darkest = greypxls[closest[i]];
+					}
+					if (greypxls[closest[i]] > lightest) {
+						lightest = greypxls[closest[i]];
+					}
+				} 
+			}
+			if (lightest - darkest > imgaverage/4) { //30
+				edgeimg[n] = 255;
+			}
+			else  { edgeimg[n] = 0; }
+		}
+		return edgeimg;
+	}
+	
+	public BufferedImage blur (BufferedImage img) {
+	    float[] matrix = {
+	            0.111f, 0.111f, 0.111f, 
+	            0.111f, 0.111f, 0.111f, 
+	            0.111f, 0.111f, 0.111f, 
+	        };
+
+        BufferedImageOp op = new ConvolveOp( new Kernel(3, 3, matrix) );
+        img = op.filter(img, new BufferedImage(320, 240, BufferedImage.TYPE_INT_ARGB));
+        return img;
 	}
 	
 }

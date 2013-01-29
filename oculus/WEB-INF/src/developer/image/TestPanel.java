@@ -27,9 +27,12 @@ public class TestPanel extends JFrame {
 	
 	private int[][] ctrMatrix;
 	ImageUtils imageUtils = new ImageUtils();
+//	final String url = "http://192.168.0.182:5080/oculus/frameGrabHTTP";
+	final String url = "http://127.0.0.1:5080/oculus/frameGrabHTTP";
 	
 	/*
-	 * run with red5 running, and streaming camera
+	 * INSTRUCTIONS
+	 * run with red5 running, and streaming camera at 320x480 (medium)
 	 * use 'record' to remember view
 	 * use 'find' to find offset of remembered view from previous view (previous ctr indicated by dot)
 	 */
@@ -87,15 +90,31 @@ public class TestPanel extends JFrame {
 		btnFindCtr.setBounds(340, 45, 100, 23);
 		contentPane.add(btnFindCtr);
 		
+		JButton btnNewButton = new JButton("edges");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				edges();
+			}
+		});
+		btnNewButton.setBounds(340, 79, 100, 23);
+		contentPane.add(btnNewButton);
+		
+		JButton btnEdgesBlur = new JButton("edges, blur");
+		btnEdgesBlur.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				edgeswithblur();
+			}
+		});
+		btnEdgesBlur.setBounds(340, 113, 100, 23);
+		contentPane.add(btnEdgesBlur);
+		
 		initialize();
 	}
 	
 	private void initialize() {
 		final JLabel picLabel2;
-		final String url = "http://192.168.0.182:5080/oculus/frameGrabHTTP";
 
 		try {
-//			img = ImageIO.read(new URL("http://127.0.0.1:5080/oculus/frameGrabHTTP"));
 			img = ImageIO.read(new URL(url));
 		}  catch (IOException e2) {
 			e2.printStackTrace();
@@ -162,6 +181,29 @@ public class TestPanel extends JFrame {
 		}
 		
 		picLabel1.setIcon(new ImageIcon(imgwithctr));
+		panel_1.repaint();
+	}
+	
+	private void edges() {
+		int[] greypxls = imageUtils.convertToGrey(img);
+		int[] edgepxls = imageUtils.edges(greypxls, img.getWidth(), img.getHeight());
+		BufferedImage greyimg = imageUtils.intToImage(greypxls, img.getWidth(), img.getHeight());
+		picLabel.setIcon(new ImageIcon(greyimg));
+		panel.repaint();
+		BufferedImage edgeimg = imageUtils.intToImage(edgepxls, img.getWidth(), img.getHeight());
+		picLabel1.setIcon(new ImageIcon(edgeimg));
+		panel_1.repaint();
+	}
+	
+	private void edgeswithblur() {
+		img = imageUtils.blur(img);
+		int[] greypxls = imageUtils.convertToGrey(img);
+		int[] edgepxls = imageUtils.edges(greypxls, img.getWidth(), img.getHeight());
+		BufferedImage greyimg = imageUtils.intToImage(greypxls, img.getWidth(), img.getHeight());
+		picLabel.setIcon(new ImageIcon(greyimg));
+		panel.repaint();
+		BufferedImage edgeimg = imageUtils.intToImage(edgepxls, img.getWidth(), img.getHeight());
+		picLabel1.setIcon(new ImageIcon(edgeimg));
 		panel_1.repaint();
 	}
 }
