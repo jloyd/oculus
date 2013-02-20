@@ -258,6 +258,7 @@ public class FrameGrabHTTP extends HttpServlet {
 
 						dl.FileDownload(urlString, datetime + ".jpg", "webapps"+sep+"oculus"+sep+"framegrabs");
 //						Util.saveUrl("capture/" + System.currentTimeMillis() + ".jpg", urlString );
+						app.message("frame saved as: "+datetime+".jpg", null, null);
 					}
 				} catch (Exception e) {
 					Util.log("can't get image: " + e.getLocalizedMessage(), this);
