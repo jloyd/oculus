@@ -13,8 +13,8 @@ public enum PlayerCommands {
 	// all valid commands
 	publish, floodlight, move, nudge, slide, dockgrab, battstats, docklineposupdate, autodock,  autodockcalibrate, 
 	speech, getdrivingsettings, drivingsettingsupdate, gettiltsettings, cameracommand, tiltsettingsupdate, 
-	tilttest, speedset, dock, relaunchgrabber, clicksteer, chat, statuscheck, systemcall, streamsettingsset, 
-	streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
+	tilttest, speedset, dock, relaunchgrabber, reloadserverhtml, clicksteer, chat, statuscheck, systemcall,  
+	streamsettingsset, streamsettingscustom, motionenabletoggle, playerexit, playerbroadcast, password_update, 
 	new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
 	disconnectotherconnections, showlog, monitor, assumecontrol, softwareupdate,
 	arduinoecho, arduinoreset, setsystemvolume, beapassenger, muterovmiconmovetoggle, spotlight, 
@@ -36,7 +36,7 @@ public enum PlayerCommands {
 		systemcall, 
 		new_user_add, user_list, delete_user, extrauser_password_update, username_update, 
 		disconnectotherconnections, showlog, softwareupdate,
-		arduinoecho, arduinoreset, muterovmiconmovetoggle, 
+		arduinoecho, arduinoreset, muterovmiconmovetoggle, reloadserverhtml,
 	    writesetting, holdservo, opennisensor, videosoundmode, restart, shutdown,
 	    setstreamactivitythreshold, getlightlevel, email, state, uptime, help, framegrabtofile, memory, who, 
 	    loginrecords, settings, analogwrite, digitalread, messageclients, dockgrabtest, rssadd;	
@@ -280,6 +280,7 @@ public enum PlayerCommands {
 		speedset("Set drive motor speed"), 
 		dock("Start manual dock routine"), 
 		relaunchgrabber("Launch server.html browser page on robot"), 
+		reloadserverhtml("Reload server.html browser page on robot"),
 		clicksteer("Camera tilt and drive motor movement macro to re-position center of screen by x,y pixels"), 
 		chat("Send text chat to all other connected users"), 
 		statuscheck("request current statuses for various settings/modes. Call with 'battstats' to also get battery status"),

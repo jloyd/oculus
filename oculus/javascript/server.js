@@ -98,6 +98,8 @@ function message(message,status) {
 	if (message=="shutdown") { shutdownwindow(); } 
 	if (message=="playing player stream") { screensize("full"); }
 	if (message=="player stream stopped") { screensize("reduced"); }
+	if (message=="server html reload") { stream="stop"; reload(); }
+		
 	if (status != null && !initialize) { setstatus(status); } 
 }
 
