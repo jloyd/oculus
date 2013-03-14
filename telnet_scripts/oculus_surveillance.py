@@ -19,7 +19,6 @@
 import socket, re, time, sys, os
 
 
-# USER VARIABLES - change to appropriate values
 host = "127.0.0.1" # ip address or domain/url 
 username = "admin" # username 
 password = "tEFuqZimWpXD70rHiAA7lU10JHc=" # plain text password or hashed/encrypted password from oculus_settings.txt
@@ -36,7 +35,8 @@ undockinterval = 1200 # seconds between periodic undocking and looking around. 0
 # global variables
 python = sys.executable
 oculusock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-serverflashreloadinterval = 700 
+serverflashreloadinterval = 700 # flash plugin needs reloading often, unstable otherwise
+restartdelay = 300
 
 
 #FUNCTION DEFINITIONS
@@ -66,7 +66,7 @@ def replyBufferSearch(pattern):
 				sendString("publish stop")
 				sendString("move stop")
 				sendString("exit")
-				restart("driver login, restarting in 5 min",300)
+				restart("driver login, restarting in "+str(restartdelay)+"sec",restartdelay)
 		except socket.error: # assuming EOF reached, reading buffer complete
 			break
 	oculusock.setblocking(True)
@@ -86,7 +86,7 @@ def waitForReplySearch(pattern):
 				sendString("publish stop")
 				sendString("move stop")
 				sendString("exit")
-				restart("driver login, restarting in 5 min",300)
+				restart("driver login, restarting in "+str(restartdelay)+"sec",restartdelay)
 		except socket.error: 
 			restart("socket recv error, restarting in 30 sec",30)
 	return servermsg # return the line containing pattern
@@ -183,27 +183,29 @@ s = waitForReplySearch("^<multiline> <messageclient> active RTMP users:")
 rtmpusers = int(re.findall("\d+$",s,re.IGNORECASE)[0])
 if rtmpusers > 0:
 	sendString("exit")
-	restart("driver connected, restarting in 5 min",300)
+	restart("driver connected, restarting in "+str(restartdelay)+"sec",restartdelay)
 
 # check if docked, logout and restart if not
-sendString("state dockstatus")
-s = waitForReplySearch("^<messageclient> <state> dockstatus")
-if not s.split()[3] == "docked":
+sendString("battstats")
+s = waitForReplySearch("^<state> batterystatus")
+if not s.split()[2] != "draining":
 	sendString("exit")
-	restart("not docked, restarting in 5 min",300)
+	restart("not docked, restarting in "+str(restartdelay)+"sec",restartdelay)
 
 # LISTEN
 # listen while docked, undock and look around if noise
 # stop & restart stream periodically to allow server.html/flash reload
 # undock and look around periodically if undockinterval > 0
 lastflashreload = time.time()
+logintime = time.time()
 sendString("setstreamactivitythreshold 0 "+str(soundthreshold)) # this turns mic on
 time.sleep(4)
 while True:
 	now = time.time()
 	if now - lastflashreload > serverflashreloadinterval:
 		sendString("setstreamactivitythreshold 0 0") 
-		sendString("publish stop")
+		time.sleep(1)
+		sendString("reloadserverhtml") # force server.html page reload 
 		time.sleep(10) # allow time for page reload
 		sendString("setstreamactivitythreshold 0 "+str(soundthreshold)) # this turns mic on
 		lastflashreload = time.time() 
@@ -215,7 +217,7 @@ while True:
 				t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 				sendString("email "+emailto+" [Oculus detected noise] alert alert, noise detected "+t)
 			break
-		if now - lastflashreload > undockinterval and not undockinterval == 0: # periodic undock
+		if now - logintime > undockinterval and not undockinterval == 0: # periodic undock
 			sendString("setstreamactivitythreshold 0 0")
 			time.sleep(1)
 			break
@@ -235,8 +237,7 @@ sendString("move stop")
 sendString("cameracommand upabit")
 waitForReplySearch("<status> motion stopped")
 for i in range(4):
-	motion = rotateAndCheckForMotion() 
-	if motion:
+	if rotateAndCheckForMotion():
 		sendString("speech motion detected, sending alert")
 		t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 		b = "alert alert, motion detected at " + t + ", rotation position: "+str(i)
