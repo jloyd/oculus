@@ -19,6 +19,7 @@
 import socket, re, time, sys, os
 
 
+# USER VARIABLES - change to appropriate values
 host = "127.0.0.1" # ip address or domain/url 
 username = "admin" # username 
 password = "tEFuqZimWpXD70rHiAA7lU10JHc=" # plain text password or hashed/encrypted password from oculus_settings.txt
