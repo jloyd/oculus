@@ -18,7 +18,7 @@ public class motionDetect {
 	private IConnection grabber = null;
 	private Application app = null;
 
-	private int[] lastMassCtr={-1, -1};
+	private int[] lastMassCtr=new int[2];
 	
 	public motionDetect(Application a, IConnection g) {
 		this.grabber = g;
@@ -34,7 +34,7 @@ public class motionDetect {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					
+					int frameno = 0;
 					while (state.getBoolean(State.values.motiondetectwatching)) { // TODO: time out after a while
 						
 						if(state.getBoolean(State.values.framegrabbusy.name()) || 
@@ -69,16 +69,17 @@ public class motionDetect {
 
 						int sensitivity = 4;
 						int[] ctrxy = imageUtils.middleMass(bwpxls, img.getWidth(), img.getHeight(), sensitivity);
-						if (lastMassCtr[1] != -1) { // ignore 1st frame
+						if (frameno >= 2) { // ignore frames 0-1
 							int compared = Math.abs(ctrxy[0]-lastMassCtr[0])+Math.abs(ctrxy[1]-lastMassCtr[1]);
 //							app.message("compared = "+compared, null, null); // debug
-							if (compared> 5) { //motion detected
+							if (compared> 5) { //motion detected above noise level
 								lastMassCtr[0] = -1;
 								state.set(State.values.motiondetected, compared); // System.currentTimeMillis());
 								state.set(State.values.motiondetectwatching, false);
 							}
 						}
 						lastMassCtr = ctrxy;
+						frameno ++;
 
 					}
 					
