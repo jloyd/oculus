@@ -27,7 +27,7 @@ password = "tEFuqZimWpXD70rHiAA7lU10JHc=" # plain text password or hashed/encryp
 port = 4444 # port number
 emailonsound = False # send email on sound detected when docked (True/False)
 emailto = "bob@example.com" # email-to address for notifications
-vidthreshold = 50  # (video motion sensitivity 0-100)
+soundthreshold = 50  # (sound sensitivity 0-100)
 turnseconds = 1.5 # seconds of movement between each of 4 rotations when looking around
 lightlevelminimum = 25 # (brightness 0-255) OcuLED light, if attached, will turn on below this theshold
 undockinterval = 1200 # seconds between periodic undocking and looking around. 0 to ONLY undock on loud noise
@@ -236,9 +236,9 @@ waitForReplySearch("<status> motion stopped")
 for i in range(4):
 	if rotateAndCheckForMotion():
 		sendString("speech motion detected, sending alert")
-		# t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-		# b = "alert alert, motion detected at " + t + ", rotation position: "+str(i)
-		# sendString("email "+emailto+" [oculus motion detected] " + b)
+		t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+		b = "alert alert, motion detected at " + t + ", rotation position: "+str(i)
+		sendString("email "+emailto+" [oculus motion detected] " + b)
 		break
 
 # DOCK		
