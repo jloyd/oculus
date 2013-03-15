@@ -1,5 +1,6 @@
 # oculus_surveillance.py
 # Xaxxon Oculus Telnet Interface script
+# Requires Oculus Java build 664 or higher
 #
 # run this script with Oculus positioned in charging dock
 # change 'user variables' below to appropriate values
@@ -26,18 +27,17 @@ password = "tEFuqZimWpXD70rHiAA7lU10JHc=" # plain text password or hashed/encryp
 port = 4444 # port number
 emailonsound = False # send email on sound detected when docked (True/False)
 emailto = "bob@example.com" # email-to address for notifications
-soundthreshold = 50  # (sound sensitivity 0-100)
 vidthreshold = 50  # (video motion sensitivity 0-100)
 turnseconds = 1.5 # seconds of movement between each of 4 rotations when looking around
 lightlevelminimum = 25 # (brightness 0-255) OcuLED light, if attached, will turn on below this theshold
-undockinterval = 1200 # seconds between periodic undocking and looking around. 0 to ONLY undock on loud noise 
+undockinterval = 1200 # seconds between periodic undocking and looking around. 0 to ONLY undock on loud noise
 
 
 # global variables
 python = sys.executable
 oculusock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 serverflashreloadinterval = 700 # flash plugin needs reloading often, unstable otherwise
-restartdelay = 300
+restartdelay = 200
 
 
 #FUNCTION DEFINITIONS
@@ -128,9 +128,6 @@ def rotateAndCheckForDock():
 # return True if motion detected
 def rotateAndCheckForMotion():
 	result=False
-	# startup camera
-	sendString("publish camera")
-	time.sleep(2)
 		
 	# rotate a bit
 	sendString("move right")
@@ -145,22 +142,20 @@ def rotateAndCheckForMotion():
 	if lightlevel < lightlevelminimum:
 			sendString("floodlight on")
 			sendString("spotlight 100")
+			time.sleep(1)
 
-	# reset camera
-	sendString("publish stop")
-	time.sleep(4)
-			
-	# set stream activity audio/video event handler
-	sendString("setstreamactivitythreshold "+str(vidthreshold)+" 0") # turns on camera
+	# start motion detect
+	sendString("motiondetectgo")
 	sendString("speech watching")
 	
 	# wait 10 seconds, checking for any sound/motion 
 	for i in range(10):
-		motion = replyBufferSearch("<messageclient> streamactivity: video")
+		motion = replyBufferSearch("^<state> motiondetected")
 		if not motion == "": # motion detected
 			result = True
 			break
 		time.sleep(1)
+	sendString("motiondetectcancel") # sends cancel in case no motion detected
 		
 	return result
 	
@@ -225,10 +220,11 @@ while True:
 	time.sleep(1)
 
 sendString("reloadserverhtml") # force server.html page reload now, so it doesn't do it unexpectedly
-time.sleep(3) 
+time.sleep(5) 
 
 # UNDOCK AND LOOK AROUND	
-# undock, backup, rotate and check for motion 	
+# startup camera, undock, backup, rotate and check for motion 	
+sendString("publish camera")
 sendString("dock undock")
 sendString("cameracommand horiz")  
 waitForReplySearch("<status> motion stopped")
@@ -240,9 +236,9 @@ waitForReplySearch("<status> motion stopped")
 for i in range(4):
 	if rotateAndCheckForMotion():
 		sendString("speech motion detected, sending alert")
-		t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-		b = "alert alert, motion detected at " + t + ", rotation position: "+str(i)
-		sendString("email "+emailto+" [oculus motion detected] " + b)
+		# t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+		# b = "alert alert, motion detected at " + t + ", rotation position: "+str(i)
+		# sendString("email "+emailto+" [oculus motion detected] " + b)
 		break
 
 # DOCK		
