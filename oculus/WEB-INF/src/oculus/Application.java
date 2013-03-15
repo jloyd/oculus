@@ -622,7 +622,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case analogwrite: comport.AnalogWrite(str); break;
 		case reloadgrabber: messageGrabber("server html reload",null); break;
 		case motiondetectgo: new motionDetect(this, grabber); break;
-		case motiondetectcancel: state.delete(State.values.motiondetectwatching);
+		case motiondetectcancel: state.delete(State.values.motiondetectwatching); break;
 		case rssadd: RssFeed feed = new RssFeed(); feed.newItem(str);
 
 		}
