@@ -90,6 +90,7 @@ public enum PlayerCommands {
 		analogread("{INT}"),
 		digitalread("{INT}"),
 		rssadd("{STRING}"),
+		motiondetectgo("{INT}"),
 		messageclients("{STRING}");
 			
 		private final List<String> values;
@@ -329,7 +330,7 @@ public enum PlayerCommands {
 		analogwrite("Sends command ‘a’ followed by two bytes (pin #, value) to ArduinOculus microcontroller"),
 		digitalread("Sends command ‘d’ followed by byte (pin #) to ArduinOculus microcontroller"),
 		messageclients("Send text to all other connected users. Similar to ‘chat,’ but without preceding user info"),
-		motiondetectgo("Starts motion detection routine, exits if detection occurs. Camera must be running"),
+		motiondetectgo("Starts motion detection routine with threshold, exits if detection occurs. Camera must be running"),
 		motiondetectcancel("Cancel motion detection routine"),
 		rssadd("Create new rss feed item with params: [title] description");
 
