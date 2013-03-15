@@ -18,7 +18,7 @@ public class State {
 		batterystatus, batterylife,  boottime, // system
 		localaddress, externaladdress, httpPort, // system
 		streamActivityThresholdEnabled, streamActivityThreshold, videosoundmode, stream, driverstream, //audio video
-		muteOnROVmove, volume, framegrabbusy, //audio video
+		muteOnROVmove, volume, framegrabbusy, motiondetectwatching, motiondetected,//audio video
 
 		sonarback, sonarright, sonarleft, centerpoint; // experimental
 		

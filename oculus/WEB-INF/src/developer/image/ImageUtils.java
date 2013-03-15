@@ -52,7 +52,6 @@ public class ImageUtils {
 		int yy;
 		int runningttl;
 		for (int x = 0; x < width; x += matrixres) {			
-			//TODO: finished to here
 			for (int y=0; y<height; y+=matrixres) {
 				
 				runningttl = 0;
@@ -157,5 +156,64 @@ public class ImageUtils {
         img = op.filter(img, new BufferedImage(320, 240, BufferedImage.TYPE_INT_ARGB));
         return img;
 	}
+	
+	public int[] convertToBW(int[] greypxls) {
+		int[] bwpxls = new int[greypxls.length];
+		int threshold = imgaverage;
+		for (int i=0; i<greypxls.length; i++) {
+			if (greypxls[i] < threshold) { bwpxls[i] = 0; }
+			else { bwpxls[i] = 255; }
+		}
+		return bwpxls;
+	}
+	
+//	public int[] middleMass(int[] bwpxls, int width, int height) {
+//		int[] ctrxy = new int[2];
+//		int xavg = (width/2)*width*height; // ctr
+//		int yavg = (height/2)*width*height; // ctr
+//
+//		for(int y=0; y<height; y++) {
+//			for (int x=0; x<width; x++) {
+//				if (bwpxls[x + y*width] != 0) { 
+//					xavg += x;
+//					yavg += y;
+//				}
+//				else { xavg -= x; yavg -= y; } 
+//			}
+//		}
+//		
+//		ctrxy[0]= xavg/(width*height);
+//		ctrxy[1]= yavg/(width*height);
+//		return ctrxy;
+//	}
+	
+	public int[] middleMass(int[] bwpxls, int width, int height, int sensitivty) {
+		int[] ctrxy = new int[2];
+		int xavg = (width/2) * width*height; // ctr
+		int yavg = (height/2) * width*height; // ctr
+
+		for(int y=0; y<height; y++) {
+			for (int x=0; x<width; x++) {
+				if (bwpxls[x + y*width] != 0) { 
+					xavg += (x-(width/2))*sensitivty;
+					yavg += (y-(height/2))*sensitivty;
+				}
+
+			}
+		}
+		
+		ctrxy[0]= xavg /(width*height);
+		ctrxy[1]= yavg /(width*height);
+		return ctrxy;
+	}
+	
+	
+    public static void main(String[] args) {
+        System.out.println("Testing");
+        String s = Integer.toString(12288000/(320*240));
+		System.out.println(s);
+
+
+    }
 	
 }

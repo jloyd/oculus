@@ -14,20 +14,23 @@ import java.net.URL;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JTextField;
 
 public class TestPanel extends JFrame {
 
 	private JPanel panel_2;
 	private JPanel panel;
 	private JPanel panel_1;
-	private BufferedImage img;
+	private BufferedImage img; // constantly refreshed from framegrab at start, available for general use
 	JLabel picLabel = new JLabel();
 	JLabel picLabel1 = new JLabel();
 	private JButton btnFindCtr;
 	
 	private int[][] ctrMatrix;
 	ImageUtils imageUtils = new ImageUtils();
-	final String url = "http://127.0.0.1:5080/oculus/frameGrabHTTP";
+//	final String url = "http://127.0.0.1:5080/oculus/frameGrabHTTP";
+	final String url = "http://192.168.0.182:5080/oculus/frameGrabHTTP";
+	private JTextField textField;
 	
 	/*
 	 * INSTRUCTIONS
@@ -106,6 +109,20 @@ public class TestPanel extends JFrame {
 		});
 		btnEdgesBlur.setBounds(340, 113, 100, 23);
 		contentPane.add(btnEdgesBlur);
+		
+		JButton btnNewButton_1 = new JButton("Middle Mass");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				middleMass();
+			}
+		});
+		btnNewButton_1.setBounds(340, 147, 100, 23);
+		contentPane.add(btnNewButton_1);
+		
+		textField = new JTextField();
+		textField.setBounds(450, 11, 210, 20);
+		contentPane.add(textField);
+		textField.setColumns(10);
 		
 		initialize();
 	}
@@ -204,5 +221,28 @@ public class TestPanel extends JFrame {
 		BufferedImage edgeimg = imageUtils.intToImage(edgepxls, img.getWidth(), img.getHeight());
 		picLabel1.setIcon(new ImageIcon(edgeimg));
 		panel_1.repaint();
+	}
+	
+	private int[] lastMassCtr={160,120};
+	private void middleMass() {
+//		img = imageUtils.blur(img);
+		int[] greypxls = imageUtils.convertToGrey(img);
+		BufferedImage greyimg = imageUtils.intToImage(greypxls, img.getWidth(), img.getHeight());
+		picLabel.setIcon(new ImageIcon(greyimg));
+		panel.repaint();
+		
+		int[] bwpxls = imageUtils.convertToBW(greypxls);
+		BufferedImage bwimg = imageUtils.intToImage(bwpxls, img.getWidth(), img.getHeight());
+		picLabel1.setIcon(new ImageIcon(bwimg));
+		panel_1.repaint();
+		
+		int sensitivity = 4;
+		int[] ctrxy = imageUtils.middleMass(bwpxls, img.getWidth(), img.getHeight(), sensitivity);	
+		int compared = Math.abs(ctrxy[0]-lastMassCtr[0])+Math.abs(ctrxy[1]-lastMassCtr[1]);
+		lastMassCtr = ctrxy;
+		String motion = "no motion";
+		if (compared> 5) { motion="MOTION"; }
+		textField.setText("x="+Integer.toString(ctrxy[0])+", y="+Integer.toString(ctrxy[1])+ 
+				", diff="+compared+", "+motion);
 	}
 }

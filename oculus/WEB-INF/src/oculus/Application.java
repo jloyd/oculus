@@ -19,6 +19,7 @@ import org.red5.io.amf3.ByteArray;
 
 import developer.SendMail;
 import developer.UpdateFTP;
+import developer.image.motionDetect;
 
 
 /** red5 application */
@@ -619,7 +620,9 @@ public class Application extends MultiThreadedApplicationAdapter {
 		case dockgrabtest: docker.dockGrab("test", 0, 0); break;
 		case digitalread: comport.digitalRead(str); break;
 		case analogwrite: comport.AnalogWrite(str); break;
-		case reloadserverhtml: messageGrabber("server html reload",null); break;
+		case reloadgrabber: messageGrabber("server html reload",null); break;
+		case motiondetectgo: new motionDetect(this, grabber); break;
+		case motiondetectcancel: state.delete(State.values.motiondetectwatching);
 		case rssadd: RssFeed feed = new RssFeed(); feed.newItem(str);
 
 		}
