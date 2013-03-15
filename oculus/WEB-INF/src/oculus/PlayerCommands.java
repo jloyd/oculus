@@ -329,6 +329,8 @@ public enum PlayerCommands {
 		analogwrite("Sends command ‘a’ followed by two bytes (pin #, value) to ArduinOculus microcontroller"),
 		digitalread("Sends command ‘d’ followed by byte (pin #) to ArduinOculus microcontroller"),
 		messageclients("Send text to all other connected users. Similar to ‘chat,’ but without preceding user info"),
+		motiondetectgo("Starts motion detection routine, exits if detection occurs. Camera must be running"),
+		motiondetectcancel("Cancel motion detection routine"),
 		rssadd("Create new rss feed item with params: [title] description");
 
         private final String message;
