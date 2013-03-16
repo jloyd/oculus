@@ -1,6 +1,5 @@
 # oculus_surveillance.py
 # Xaxxon Oculus Telnet Interface script
-# Requires Oculus Java build 664 or higher
 #
 # run this script with Oculus positioned in charging dock
 # change 'user variables' below to appropriate values
@@ -27,10 +26,11 @@ password = "tEFuqZimWpXD70rHiAA7lU10JHc=" # plain text password or hashed/encryp
 port = 4444 # port number
 emailonsound = False # send email on sound detected when docked (True/False)
 emailto = "bob@example.com" # email-to address for notifications
-soundthreshold = 50  # (sound sensitivity 0-100)
+motionthreshold = 22 # motion sensitivty (5 or higher)
+soundthreshold = 30  # (sound sensitivity 0-100)
 turnseconds = 1.5 # seconds of movement between each of 4 rotations when looking around
 lightlevelminimum = 25 # (brightness 0-255) OcuLED light, if attached, will turn on below this theshold
-undockinterval = 1200 # seconds between periodic undocking and looking around. 0 to ONLY undock on loud noise
+undockinterval = 1200 # seconds between periodic undocking and looking around. 0 to ONLY undock on loud noise 
 
 
 # global variables
@@ -145,11 +145,11 @@ def rotateAndCheckForMotion():
 			time.sleep(1)
 
 	# start motion detect
-	sendString("motiondetectgo")
+	sendString("motiondetectgo "+str(motionthreshold))
 	sendString("speech watching")
 	
 	# wait 10 seconds, checking for any sound/motion 
-	for i in range(10):
+	for i in range(12):
 		motion = replyBufferSearch("^<state> motiondetected")
 		if not motion == "": # motion detected
 			result = True
@@ -187,6 +187,15 @@ s = waitForReplySearch("^<state> batterystatus")
 if not s.split()[2] != "draining":
 	sendString("exit")
 	restart("not docked, restarting in "+str(restartdelay)+"sec",restartdelay)
+
+# prepare framegrab URL
+sendString("state externaladdress")
+s = waitForReplySearch("^<messageclient> <state> externaladdress")
+ip = s.split()[3]
+sendString("state httpPort")
+s = waitForReplySearch("^<messageclient> <state> httpPort")
+httpport = s.split()[3]
+fgurl = "http://"+ip+":"+httpport+"/oculus/framegrabs/"
 
 # LISTEN
 # listen while docked, undock and look around if noise
@@ -237,8 +246,13 @@ for i in range(4):
 	if rotateAndCheckForMotion():
 		sendString("speech motion detected, sending alert")
 		t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-		b = "alert alert, motion detected at " + t + ", rotation position: "+str(i)
-		sendString("email "+emailto+" [oculus motion detected] " + b)
+		sendString("framegrabtofile")
+		s = waitForReplySearch("^<messageclient> frame saved as:")
+		ss = s.split()
+		s = "email "+emailto+" [oculus motion detected] "
+		s += "alert alert, motion detected at " + t + ", rotation position: "+str(i)
+		s += " "+ fgurl + ss[len(ss)-1]
+		sendString(s)
 		break
 
 # DOCK		
