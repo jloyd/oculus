@@ -127,7 +127,7 @@ def rotateAndCheckForDock():
 # start camera, rotate, turn light on if necessary, wait a few seconds to see if motion	
 # return True if motion detected
 def rotateAndCheckForMotion():
-	result=False
+	result=""
 		
 	# rotate a bit
 	sendString("move right")
@@ -152,7 +152,7 @@ def rotateAndCheckForMotion():
 	for i in range(12):
 		motion = replyBufferSearch("^<state> motiondetected")
 		if not motion == "": # motion detected
-			result = True
+			result = motion.split()[2]
 			break
 		time.sleep(1)
 	sendString("motiondetectcancel") # sends cancel in case no motion detected
@@ -234,16 +234,18 @@ time.sleep(5)
 # UNDOCK AND LOOK AROUND	
 # startup camera, undock, backup, rotate and check for motion 	
 sendString("publish camera")
+time.sleep(5) # let video brightness settle after camera startup
 sendString("dock undock")
 sendString("cameracommand horiz")  
 waitForReplySearch("<status> motion stopped")
 sendString("move backward") 
 time.sleep(1.5)
 sendString("move stop")
-sendString("cameracommand upabit")
+# sendString("cameracommand upabit")
 waitForReplySearch("<status> motion stopped")
 for i in range(4):
-	if rotateAndCheckForMotion():
+	motion = rotateAndCheckForMotion()
+	if not motion == "":
 		sendString("speech motion detected, sending alert")
 		t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 		sendString("framegrabtofile")
@@ -251,7 +253,8 @@ for i in range(4):
 		ss = s.split()
 		s = "email "+emailto+" [oculus motion detected] "
 		s += "alert alert, motion detected at " + t + ", rotation position: "+str(i)
-		s += " "+ fgurl + ss[len(ss)-1]
+		s += ", motion level: "+motion
+		s += ", image link: "+ fgurl + ss[len(ss)-1]
 		sendString(s)
 		break
 
