@@ -225,20 +225,11 @@ public class Application extends MultiThreadedApplicationAdapter {
 		if (settings.getBoolean(ManualSettings.developer.name())) {
 			
 			openNIRead = new developer.OpenNIRead(this);
-			
-//			try {
-//				
-//				developer.MotionTracker.getReference().setApp(this);
-//			
-//			} catch (Exception e) {
-//				Util.log("MotionTracker: "+ e.getLocalizedMessage(), this);
-//			}
+
 		}
 		
 		
-//		if ( ! settings.readSetting(ManualSettings.gmailaddress).equals(State.values.disabled))
-//			new developer.EmailAlerts(this);
-			
+	
 		if ( ! settings.readSetting(ManualSettings.commandport).equals(Settings.DISABLED))
 			commandServer = new oculus.TelnetServer(this);
 		
