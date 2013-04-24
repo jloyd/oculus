@@ -110,7 +110,7 @@ public class TestPanel extends JFrame {
 		btnEdgesBlur.setBounds(340, 113, 100, 23);
 		contentPane.add(btnEdgesBlur);
 		
-		JButton btnNewButton_1 = new JButton("Middle Mass");
+		JButton btnNewButton_1 = new JButton("midlmass BW");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				middleMass();
@@ -123,6 +123,15 @@ public class TestPanel extends JFrame {
 		textField.setBounds(450, 11, 210, 20);
 		contentPane.add(textField);
 		textField.setColumns(10);
+		
+		JButton btnNewButton_2 = new JButton("middle mass G");
+		btnNewButton_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				middleMassGrey();
+			}
+		});
+		btnNewButton_2.setBounds(340, 181, 100, 23);
+		contentPane.add(btnNewButton_2);
 		
 		initialize();
 	}
@@ -243,6 +252,20 @@ public class TestPanel extends JFrame {
 		String motion = "no motion";
 		if (compared> 5) { motion="MOTION"; }
 		textField.setText("x="+Integer.toString(ctrxy[0])+", y="+Integer.toString(ctrxy[1])+ 
-				", diff="+compared+", "+motion);
+				", diff="+compared+", "+motion+", "+imageUtils.imgaverage);
+	}
+	
+	private void middleMassGrey() {
+//		img = imageUtils.blur(img);
+		int[] greypxls = imageUtils.convertToGrey(img);
+		BufferedImage greyimg = imageUtils.intToImage(greypxls, img.getWidth(), img.getHeight());
+		picLabel.setIcon(new ImageIcon(greyimg));
+		panel.repaint();
+		
+		int[] ctrxy = imageUtils.middleMassGrey(greypxls, img.getWidth(), img.getHeight());	
+		int compared = Math.abs(ctrxy[0]-lastMassCtr[0])+Math.abs(ctrxy[1]-lastMassCtr[1]);
+		lastMassCtr = ctrxy;
+		textField.setText("x="+Integer.toString(ctrxy[0])+", y="+Integer.toString(ctrxy[1])+ 
+				", diff="+compared+", imgavg= "+imageUtils.imgaverage);
 	}
 }

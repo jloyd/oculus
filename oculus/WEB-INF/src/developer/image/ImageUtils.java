@@ -8,7 +8,7 @@ import java.awt.image.Kernel;
 public class ImageUtils {
 	
 	public final int matrixres = 10;
-	private int imgaverage;
+	public int imgaverage;
 	
 	public ImageUtils() {}
 	
@@ -207,8 +207,44 @@ public class ImageUtils {
 		return ctrxy;
 	}
 	
+	/* find ctr of overall average brightest, xy point
+	 * any frame of all single level would be width/2, height/2
+	 * for x: 
+	 * find intensity ctr for each row, average all (weighted by each average) to arrive at single x
+	 * 
+	 */
+	public int[] middleMassGrey(int[] greypxls, int width, int height) {
+		int[] restultxy = new int[2];
+		
+		// find intensity ctr and average for each row
+		int[] rowavg = new int[height];
+		int[] rowxpos = new int[height];
+		for(int y=0; y<height; y++) {
+			int avg = 0;
+			int max = 0;
+			int offset = 0;
+			for (int x=0; x<width; x++) {
+				int p = greypxls[x + y*width];
+				offset += (x-(width/2))*p;
+				if (p>max) { max = p; }
+				avg += p;
+			}
+			rowavg[y] = avg/width;
+			rowxpos[y] = (width/2)+(offset/max);
+		}
+		
+		// find weighted average of all rows for single x
+		int xavg=0;
+		for(int y=0; y<height; y++) {
+			
+		}
+		
+		restultxy[0]= 0;
+		restultxy[1]= 0;
+		return restultxy;
+	}
 	
-    public static void main(String[] args) {
+    public static void main(String[] args) { // scratch
         System.out.println("Testing");
         String s = Integer.toString(12288000/(320*240));
 		System.out.println(s);
