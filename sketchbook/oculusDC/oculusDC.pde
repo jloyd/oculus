@@ -3,7 +3,7 @@
 /*
  oculusDC version 0.5.5
  ASCII Serial Commands
- All 2 byte pairs, except for STOP, GET_VERSION, and CAMRELEASE
+ All 2 byte pairs, except for STOP, GET_VERSION, GET_ID, and CAMRELEASE
 
  FORWARD = 'f', [0-255] (speed)
  BACKWARD = 'b', [0-255] (speed)
